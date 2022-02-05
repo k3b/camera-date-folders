@@ -13,13 +13,13 @@
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="de.kromke.andreas.cameradatefolders.ui.dashboard.DashboardFragment"
+        android:name="de.kromke.andreas.cameradatefolders.ui.dashboard.PreferencesFragment"
         android:label="@string/title_dashboard"
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
         android:id="@+id/navigation_settings"
-        android:name="de.kromke.andreas.cameradatefolders.ui.notifications.NotificationsFragment"
+        android:name="de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment"
         android:label="@string/title_preferences"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_preferences" />
 </navigation>

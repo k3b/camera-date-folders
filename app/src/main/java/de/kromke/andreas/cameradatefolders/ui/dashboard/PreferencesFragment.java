@@ -11,26 +11,25 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import de.kromke.andreas.cameradatefolders.R;
 import de.kromke.andreas.cameradatefolders.databinding.FragmentDashboardBinding;
 
-public class DashboardFragment extends Fragment
+public class PreferencesFragment extends Fragment
 {
 
-    private DashboardViewModel dashboardViewModel;
+    private PreferencesViewModel preferencesViewModel;
     private FragmentDashboardBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState)
     {
-        dashboardViewModel =
-                new ViewModelProvider(this).get(DashboardViewModel.class);
+        preferencesViewModel =
+                new ViewModelProvider(this).get(PreferencesViewModel.class);
 
         binding = FragmentDashboardBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         final TextView textView = binding.textDashboard;
-        dashboardViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
+        preferencesViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
         {
             @Override
             public void onChanged(@Nullable String s)

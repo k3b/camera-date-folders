@@ -1,15 +1,15 @@
-package de.kromke.andreas.cameradatefolders.ui.notifications;
+package de.kromke.andreas.cameradatefolders.ui.preferences;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class NotificationsViewModel extends ViewModel
+public class PreferencesViewModel extends ViewModel
 {
 
     private MutableLiveData<String> mText;
 
-    public NotificationsViewModel()
+    public PreferencesViewModel()
     {
         mText = new MutableLiveData<>();
         mText.setValue("This is notifications fragment");

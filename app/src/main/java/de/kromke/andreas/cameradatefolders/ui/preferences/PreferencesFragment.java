@@ -1,32 +1,28 @@
-package de.kromke.andreas.cameradatefolders.ui.notifications;
+package de.kromke.andreas.cameradatefolders.ui.preferences;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import de.kromke.andreas.cameradatefolders.R;
-import de.kromke.andreas.cameradatefolders.databinding.FragmentNotificationsBinding;
+import de.kromke.andreas.cameradatefolders.databinding.FragmentPreferencesBinding;
 
-public class NotificationsFragment extends Fragment
+public class PreferencesFragment extends Fragment
 {
 
-    private NotificationsViewModel notificationsViewModel;
-    private FragmentNotificationsBinding binding;
+    private PreferencesViewModel preferencesViewModel;
+    private FragmentPreferencesBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState)
     {
-        notificationsViewModel =
-                new ViewModelProvider(this).get(NotificationsViewModel.class);
+        preferencesViewModel =
+                new ViewModelProvider(this).get(PreferencesViewModel.class);
 
-        binding = FragmentNotificationsBinding.inflate(inflater, container, false);
+        binding = FragmentPreferencesBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         /*
