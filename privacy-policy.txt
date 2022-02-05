@@ -1,0 +1,38 @@
+Privacy Policy
+==============
+
+2020-07-20
+
+
+General
+-------
+
+SAF Media Scanner ("SMS") is developed and maintained by one developer. As the developer of SMS, I do care about and respect your privacy.
+
+This Privacy Policy ("Policy") aims to describe how information obtained from users is collected, used and disclosed.
+
+By using SMS, you agree that your personal information will be handled as described in this Policy.
+
+
+Information being collected
+---------------------------
+
+SMS does not collect or store any personal information. Currently SMS does not have network access, thus it would not even be technically possible to share any data.
+
+
+Crash Reports
+-------------
+
+SMS does not contain any crash report software. However, if you are using Google Play and agreed accordingly, Google will share anonymised information about the crash location, device type and Android version.
+
+
+Changes to the Policy
+---------------------
+
+If the Policy changes, the modification date above will be updated. The Policy may change from time to time, so please be sure to check back periodically.
+
+
+Contact
+-------
+
+If you have any questions about the Policy, please contact the developer via e-mail.
