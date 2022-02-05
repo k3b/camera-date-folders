@@ -1,29 +1,29 @@
 Privacy Policy
 ==============
 
-2020-07-20
+2022-02-05
 
 
 General
 -------
 
-SAF Media Scanner ("SMS") is developed and maintained by one developer. As the developer of SMS, I do care about and respect your privacy.
+Camera Date Folders ("CDS") is developed and maintained by one developer. As the developer of CDS, I do care about and respect your privacy.
 
 This Privacy Policy ("Policy") aims to describe how information obtained from users is collected, used and disclosed.
 
-By using SMS, you agree that your personal information will be handled as described in this Policy.
+By using CDS, you agree that your personal information will be handled as described in this Policy.
 
 
 Information being collected
 ---------------------------
 
-SMS does not collect or store any personal information. Currently SMS does not have network access, thus it would not even be technically possible to share any data.
+CDS does not collect or store any personal information. Currently CDS does not have network access, thus it would not even be technically possible to share any data.
 
 
 Crash Reports
 -------------
 
-SMS does not contain any crash report software. However, if you are using Google Play and agreed accordingly, Google will share anonymised information about the crash location, device type and Android version.
+CDS does not contain any crash report software. However, if you are using Google Play and agreed accordingly, Google will share anonymised information about the crash location, device type and Android version.
 
 
 Changes to the Policy
