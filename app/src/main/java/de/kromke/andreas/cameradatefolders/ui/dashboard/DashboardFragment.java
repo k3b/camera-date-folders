@@ -13,23 +13,23 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import de.kromke.andreas.cameradatefolders.databinding.FragmentDashboardBinding;
 
-public class PreferencesFragment extends Fragment
+public class DashboardFragment extends Fragment
 {
 
-    private PreferencesViewModel preferencesViewModel;
+    private DashboardViewModel dashboardViewModel;
     private FragmentDashboardBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState)
     {
-        preferencesViewModel =
-                new ViewModelProvider(this).get(PreferencesViewModel.class);
+        dashboardViewModel =
+                new ViewModelProvider(this).get(DashboardViewModel.class);
 
         binding = FragmentDashboardBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         final TextView textView = binding.textDashboard;
-        preferencesViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
+        dashboardViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
         {
             @Override
             public void onChanged(@Nullable String s)
