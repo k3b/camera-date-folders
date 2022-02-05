@@ -29,6 +29,7 @@ public class NotificationsFragment extends Fragment
         binding = FragmentNotificationsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        /*
         final TextView textView = binding.textNotifications;
         notificationsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
         {
@@ -38,6 +39,7 @@ public class NotificationsFragment extends Fragment
                 textView.setText(s);
             }
         });
+        */
         return root;
     }
 
