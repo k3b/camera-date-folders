@@ -15,7 +15,6 @@ import de.kromke.andreas.cameradatefolders.databinding.FragmentDashboardBinding;
 
 public class DashboardFragment extends Fragment
 {
-
     private DashboardViewModel dashboardViewModel;
     private FragmentDashboardBinding binding;
 
@@ -45,5 +44,15 @@ public class DashboardFragment extends Fragment
     {
         super.onDestroyView();
         binding = null;
+    }
+
+    public void onPathChanged(String uri)
+    {
+        dashboardViewModel.setText(uri);
+    }
+
+    public void cbSelectCameraFolder(View v)
+    {
+
     }
 }

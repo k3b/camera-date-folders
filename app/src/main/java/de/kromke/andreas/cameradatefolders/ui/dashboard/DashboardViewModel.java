@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel;
 
 public class DashboardViewModel extends ViewModel
 {
-
     private MutableLiveData<String> mText;
 
     public DashboardViewModel()
@@ -18,5 +17,10 @@ public class DashboardViewModel extends ViewModel
     public LiveData<String> getText()
     {
         return mText;
+    }
+
+    public void setText(final String text)
+    {
+        mText.setValue(text);
     }
 }
