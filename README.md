@@ -8,7 +8,7 @@ While standalone cameras usually sort photos taken to specific folders on the SD
 
 ## The Solution
 
-This program creates a folder tree structure and sorts the photos into these folders. As a result, no more than photos taken on one day or month shall be stored in the same directory. As a consequence it it will be come trivial to copy a day or month folder from the device to the computer.
+This program creates a folder tree structure and sorts the photos into these folders. As a result, no more than photos taken on one day or month shall be stored in the same directory. As a consequence it it will become trivial to copy a day or month folder from the device to the computer.
 
 # Supported
 
