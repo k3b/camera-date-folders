@@ -86,7 +86,32 @@ public class MainActivity extends AppCompatActivity
      * onClick callback
      *
      *************************************************************************/
-    public void cbSelectCameraFolder(View view)
+    public void onClickButtonStart(View view)
+    {
+        if (mDcimTreeUri != null)
+        {
+            Utils utils = new Utils(this);
+            utils.gatherFiles(mDcimTreeUri);
+        }
+    }
+
+
+    /**************************************************************************
+     *
+     * onClick callback
+     *
+     *************************************************************************/
+    public void onClickButtonRevert(View view)
+    {
+    }
+
+
+    /**************************************************************************
+     *
+     * onClick callback
+     *
+     *************************************************************************/
+    public void onClickSelectCameraFolder(View view)
     {
         Intent intent = createSafPickerIntent();
         mRequestDirectorySelectActivityLauncher.launch(intent);
