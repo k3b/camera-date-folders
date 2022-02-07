@@ -2,6 +2,7 @@ package de.kromke.andreas.cameradatefolders;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -90,14 +91,34 @@ public class MainActivity extends AppCompatActivity
     {
         if (mDcimTreeUri != null)
         {
-            Utils utils = new Utils(this, true, true, true);
-            int ret = utils.gatherFiles(mDcimTreeUri);
+            Utils utils = new Utils(this, mDcimTreeUri,true, true, true);
+            int ret = utils.gatherFiles();
             if (ret > 0)
             {
+                int nSuccess = 0;
+                int nFailure = 0;
                 for (Utils.mvOp op: utils.mOps)
                 {
-                    Log.d(LOG_TAG, " mv " + op.srcPath + " ==> " + op.dstPath);
+                    Log.d(LOG_TAG, " mv " + op.srcPath + op.srcFile.getName() + " ==> " + op.dstPath);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                    {
+                        boolean retm = utils.mvFile(op);
+                        if (retm)
+                        {
+                            nSuccess++;
+                        }
+                        else
+                        {
+                            nFailure++;
+                        }
+                    }
+                    else
+                    {
+                        nFailure++;
+                        Log.d(LOG_TAG, " not supported, needs API level 24");
+                    }
                 }
+                Log.d(LOG_TAG, "files moved: " + nSuccess + ", failures: " + nFailure);
             }
         }
     }

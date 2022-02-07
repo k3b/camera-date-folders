@@ -1,17 +1,22 @@
 package de.kromke.andreas.cameradatefolders;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
+import android.provider.DocumentsContract;
 import android.util.Log;
 
 import java.util.ArrayList;
 
+import androidx.annotation.RequiresApi;
 import androidx.documentfile.provider.DocumentFile;
 
 public class Utils
 {
     private static final String LOG_TAG = "CDF : Utils";
     Context mContext;
+    DocumentFile mRootDir;
     int directoryLevel;
     boolean m_SortYear;
     boolean m_SortMonth;
@@ -27,28 +32,81 @@ public class Utils
 
     public static class mvOp
     {
-        public String srcPath;
+        public String srcPath;              // debug helper
+        public DocumentFile srcFile;
+        public DocumentFile srcDirectory;
         public String dstPath;
     }
 
-    Utils(Context context, boolean sortYear, boolean sortMonth, boolean sortDay)
+    Utils(Context context, Uri treeUri, boolean sortYear, boolean sortMonth, boolean sortDay)
     {
         mContext = context;
+        mRootDir = DocumentFile.fromTreeUri(mContext, treeUri);
         m_SortYear = sortYear;
         m_SortMonth = sortMonth;
         m_SortDay = sortDay;
     }
 
-    public int gatherFiles(Uri treeUri)
+    public int gatherFiles()
     {
         mOps = new ArrayList<>();
         directoryLevel = 8;             // limit
-        DocumentFile df = DocumentFile.fromTreeUri(mContext, treeUri);
-        if (df != null)
+        if (mRootDir != null)
         {
-            gatherDirectory(df, "");
+            gatherDirectory(mRootDir, "");
         }
         return mOps.size();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public boolean mvFile(mvOp op)
+    {
+        ContentResolver content = mContext.getContentResolver();
+        DocumentFile dstDirectory = mRootDir;
+        String[] pathFrags = op.dstPath.split("/");
+        for (String frag: pathFrags)
+        {
+            if (!frag.isEmpty())
+            {
+                DocumentFile nextDirectory = dstDirectory.findFile(frag);
+                if (nextDirectory != null)
+                {
+                    if (nextDirectory.isDirectory())
+                    {
+                        dstDirectory = nextDirectory;
+                    }
+                    else
+                    {
+                        Log.e(LOG_TAG, "mvFile() -- is no directory: " + frag);
+                        return false;
+                    }
+                }
+                else
+                {
+                    nextDirectory = dstDirectory.createDirectory(frag);
+                    if (nextDirectory != null)
+                    {
+                        dstDirectory = nextDirectory;
+                    }
+                    else
+                    {
+                        Log.e(LOG_TAG, "mvFile() -- cannot create directory: " + frag);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        try
+        {
+            Uri newUri = DocumentsContract.moveDocument(content, op.srcFile.getUri(), op.srcDirectory.getUri(), dstDirectory.getUri());
+            return newUri != null;
+        }
+        catch (Exception e)
+        {
+            Log.e(LOG_TAG, "mvFile() -- exception " + e);
+        }
+        return false;
     }
 
     private int getNumber(final String str)
@@ -214,14 +272,16 @@ public class Utils
                     {
                         Log.d(LOG_TAG, "gatherDirectory() -- camera file found: " + path + "/" + name);
                         mvOp op = new mvOp();
-                        op.srcPath = path + "/" + name;
-                        op.dstPath = getDestPath(date)  + name;
+                        op.srcPath = path + "/";
+                        op.dstPath = getDestPath(date);
                         if (op.srcPath.equals(op.dstPath))
                         {
                             Log.d(LOG_TAG, "   already sorted to its date directory");
                         }
                         else
                         {
+                            op.srcDirectory = dd;
+                            op.srcFile = df;
                             mOps.add(op);
                         }
                     }
