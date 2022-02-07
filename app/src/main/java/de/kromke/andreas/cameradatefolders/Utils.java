@@ -13,13 +13,16 @@ public class Utils
     private static final String LOG_TAG = "CDF : Utils";
     Context mContext;
     int directoryLevel;
-    ArrayList<mvOp> mOps = null;
+    boolean m_SortYear;
+    boolean m_SortMonth;
+    boolean m_SortDay;
+    public ArrayList<mvOp> mOps = null;
 
     public static class camFileDate
     {
-        public int year;        // 1999 .. 2999
-        public int month;       // 1 .. 12
-        public int day;         // 1 .. 31
+        public String year;        // 1999 .. 2999
+        public String month;       // 1 .. 12
+        public String day;         // 1 .. 31
     }
 
     public static class mvOp
@@ -28,9 +31,12 @@ public class Utils
         public String dstPath;
     }
 
-    Utils(Context context)
+    Utils(Context context, boolean sortYear, boolean sortMonth, boolean sortDay)
     {
         mContext = context;
+        m_SortYear = sortYear;
+        m_SortMonth = sortMonth;
+        m_SortDay = sortDay;
     }
 
     public int gatherFiles(Uri treeUri)
@@ -40,7 +46,7 @@ public class Utils
         DocumentFile df = DocumentFile.fromTreeUri(mContext, treeUri);
         if (df != null)
         {
-            gatherDirectory(df);
+            gatherDirectory(df, "");
         }
         return mOps.size();
     }
@@ -118,7 +124,9 @@ public class Utils
         // get year
         //
 
-        int year = getNumber(name.substring(i, i + 4));
+        camFileDate ret = new camFileDate();
+        ret.year = name.substring(i, i + 4);
+        int year = getNumber(ret.year);
         if ((year < 1999) || (year > 2999))
         {
             return null;
@@ -128,7 +136,8 @@ public class Utils
         // get month
         //
 
-        int month = getNumber(name.substring(i + 4, i + 6));
+        ret.month = name.substring(i + 4, i + 6);
+        int month = getNumber(ret.month);
         if ((month < 1) || (month > 12))
         {
             return null;
@@ -138,20 +147,35 @@ public class Utils
         // get year
         //
 
-        int day = getNumber(name.substring(i + 6, i + 8));
+        ret.day = name.substring(i + 6, i + 8);
+        int day = getNumber(ret.day);
         if ((day < 1) || (day > 31))
         {
             return null;
         }
 
-        camFileDate ret = new camFileDate();
-        ret.year = year;
-        ret.month = month;
-        ret.day = day;
         return ret;
     }
 
-    private void gatherDirectory(DocumentFile dd)
+    private String getDestPath(camFileDate date)
+    {
+        String ret = "";
+        if (m_SortYear)
+        {
+            ret = date.year + "/";
+        }
+        if (m_SortMonth)
+        {
+            ret += date.year + "-" + date.month + "/";
+        }
+        if (m_SortDay)
+        {
+            ret += date.year + "-" + date.month + "-" + date.day + "/";
+        }
+        return ret;
+    }
+
+    private void gatherDirectory(DocumentFile dd, String path)
     {
         directoryLevel--;
         if (directoryLevel < 0)
@@ -179,7 +203,7 @@ public class Utils
             else
             if (df.isDirectory())
             {
-                gatherDirectory(df);
+                gatherDirectory(df, path + "/" + name);
             }
             else
             {
@@ -188,7 +212,18 @@ public class Utils
                     camFileDate date = isCameraFile(name);
                     if (date != null)
                     {
-                        Log.d(LOG_TAG, "gatherDirectory() -- camera file found: " + name);
+                        Log.d(LOG_TAG, "gatherDirectory() -- camera file found: " + path + "/" + name);
+                        mvOp op = new mvOp();
+                        op.srcPath = path + "/" + name;
+                        op.dstPath = getDestPath(date)  + name;
+                        if (op.srcPath.equals(op.dstPath))
+                        {
+                            Log.d(LOG_TAG, "   already sorted to its date directory");
+                        }
+                        else
+                        {
+                            mOps.add(op);
+                        }
                     }
                     else
                     {

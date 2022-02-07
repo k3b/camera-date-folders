@@ -90,8 +90,15 @@ public class MainActivity extends AppCompatActivity
     {
         if (mDcimTreeUri != null)
         {
-            Utils utils = new Utils(this);
-            utils.gatherFiles(mDcimTreeUri);
+            Utils utils = new Utils(this, true, true, true);
+            int ret = utils.gatherFiles(mDcimTreeUri);
+            if (ret > 0)
+            {
+                for (Utils.mvOp op: utils.mOps)
+                {
+                    Log.d(LOG_TAG, " mv " + op.srcPath + " ==> " + op.dstPath);
+                }
+            }
         }
     }
 
