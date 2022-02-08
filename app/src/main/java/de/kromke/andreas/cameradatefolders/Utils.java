@@ -23,6 +23,7 @@ public class Utils
     boolean m_SortDay;
     public ArrayList<mvOp> mOps = null;
 
+    // file name holds year, month and day
     public static class camFileDate
     {
         public String year;        // 1999 .. 2999
@@ -30,6 +31,7 @@ public class Utils
         public String day;         // 1 .. 31
     }
 
+    // a single move operation
     public static class mvOp
     {
         public String srcPath;              // debug helper
@@ -38,6 +40,12 @@ public class Utils
         public String dstPath;
     }
 
+
+    /**************************************************************************
+     *
+     * constructor
+     *
+     *************************************************************************/
     Utils(Context context, Uri treeUri, boolean sortYear, boolean sortMonth, boolean sortDay)
     {
         mContext = context;
@@ -47,6 +55,12 @@ public class Utils
         m_SortDay = sortDay;
     }
 
+
+    /**************************************************************************
+     *
+     * Phase 1: gather move operations
+     *
+     *************************************************************************/
     public int gatherFiles()
     {
         mOps = new ArrayList<>();
@@ -58,6 +72,12 @@ public class Utils
         return mOps.size();
     }
 
+
+    /**************************************************************************
+     *
+     * Phase 2: execute a single move operation
+     *
+     *************************************************************************/
     @RequiresApi(api = Build.VERSION_CODES.N)
     public boolean mvFile(mvOp op)
     {
@@ -109,6 +129,12 @@ public class Utils
         return false;
     }
 
+
+    /**************************************************************************
+     *
+     * exception safe string-to-number conversion, returns -1 on failure
+     *
+     *************************************************************************/
     private int getNumber(final String str)
     {
         try
@@ -121,6 +147,12 @@ public class Utils
         }
     }
 
+
+    /**************************************************************************
+     *
+     * checks for image and movie file types, might be incomplete
+     *
+     *************************************************************************/
     private boolean isCameraFileType(final String name)
     {
         //
@@ -133,6 +165,13 @@ public class Utils
                 name.endsWith(".jpeg"));
     }
 
+
+    /**************************************************************************
+     *
+     * heuristic method to decide if a file is a photo or a movie taken with
+     * the camera
+     *
+     *************************************************************************/
     private camFileDate isCameraFile(final String name)
     {
         //
@@ -215,6 +254,12 @@ public class Utils
         return ret;
     }
 
+
+    /**************************************************************************
+     *
+     * calculate destination path, depending on tree sort configuration
+     *
+     *************************************************************************/
     private String getDestPath(camFileDate date)
     {
         String ret = "";
@@ -233,6 +278,12 @@ public class Utils
         return ret;
     }
 
+
+    /**************************************************************************
+     *
+     * recursively walk through tree and gather mv operations to mOps
+     *
+     *************************************************************************/
     private void gatherDirectory(DocumentFile dd, String path)
     {
         directoryLevel--;
