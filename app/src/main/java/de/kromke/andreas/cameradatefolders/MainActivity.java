@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2022 Andreas Kromke, andreas.kromke@gmail.com
+ *
+ * This program is free software; you can redistribute it or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 package de.kromke.andreas.cameradatefolders;
 
 import android.content.Intent;
@@ -6,8 +24,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -22,6 +45,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import de.kromke.andreas.cameradatefolders.databinding.ActivityMainBinding;
 import de.kromke.andreas.cameradatefolders.ui.dashboard.DashboardFragment;
+import de.kromke.andreas.cameradatefolders.ui.home.HomeFragment;
 
 // https://stackoverflow.com/questions/63548323/how-to-use-viewmodel-in-a-fragment
 // https://stackoverflow.com/questions/6091194/how-to-handle-button-clicks-using-the-xml-onclick-within-fragments
@@ -34,6 +58,110 @@ public class MainActivity extends AppCompatActivity
     private ActivityMainBinding binding;
     ActivityResultLauncher<Intent> mRequestDirectorySelectActivityLauncher;
     Uri mDcimTreeUri = null;
+    Timer mTimer;
+    MyTimerTask mTimerTask;
+    private static final int timerFrequency = 500;         // milliseconds
+    String mCurrHomeText = "Welcome to Camera Date Folders";
+    String mNewHomeText = "";     // set from worker thread, but in UI thread context
+    final static String sNoCamPath = "No camera folder selected.";
+    final static String sHasCamPath = "Press START to sort your photos.";
+
+
+
+    /**************************************************************************
+     *
+     * called in worker thread context
+     *
+     *************************************************************************/
+    public void messageFromThread(int result, int result2, int result3, final String text, boolean threadEnded)
+    {
+        runOnUiThread(new Thread(new Runnable()
+        {
+            public void run()
+            {
+                Log.d(LOG_TAG, "called from thread");
+                if (threadEnded)
+                {
+                    if (result >= 0)
+                    {
+                        mNewHomeText += "success:" + result + ", failure: " + result2 + ", unchanged:" + result3 +"\n";
+                    }
+                    else
+                    {
+                        mNewHomeText += "ERROR" + "\n";
+                    }
+                }
+                else
+                if ((text != null) && !text.isEmpty())
+                {
+                    mNewHomeText += text + "\n";
+                }
+            }
+        }));
+    }
+
+
+    /**************************************************************************
+     *
+     * GUI update timer callback, shows deferred messages from worker thread
+     *
+     *************************************************************************/
+    public void TimerCallback()
+    {
+        //Log.d(LOG_TAG, "TimerCallback()");
+
+        Fragment f = getCurrFragment();
+        if (f instanceof HomeFragment)
+        {
+            boolean bUpdate = false;
+
+            if (!mNewHomeText.isEmpty())
+            {
+                mCurrHomeText += mNewHomeText;
+                mNewHomeText = "";
+                bUpdate = true;
+            }
+            else
+            if (mDcimTreeUri == null)
+            {
+                if (!mCurrHomeText.equals(sNoCamPath))
+                {
+                    mCurrHomeText = sNoCamPath;
+                    bUpdate = true;
+                }
+            }
+            else
+            {
+                if (mCurrHomeText.equals(sNoCamPath))
+                {
+                    mCurrHomeText = sHasCamPath;
+                    bUpdate = true;
+                }
+            }
+
+            if (bUpdate)
+            {
+                HomeFragment fd = (HomeFragment) f;
+                fd.onTextChanged(mCurrHomeText);
+            }
+        }
+
+    }
+
+
+    /**************************************************************************
+     *
+     * GUI update timer, shows deferred messages from worker thread
+     *
+     *************************************************************************/
+    class MyTimerTask extends TimerTask
+    {
+        @Override
+        public void run()
+        {
+            runOnUiThread(MainActivity.this::TimerCallback);
+        }
+    }
 
 
     /**************************************************************************
@@ -63,6 +191,39 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    /************************************************************************************
+     *
+     * Activity method
+     *
+     ***********************************************************************************/
+    @Override
+    protected void onStart()
+    {
+        mTimerTask = new MyTimerTask();
+        //delay 1000ms, repeat in <timerFrequency>ms
+        mTimer = new Timer();
+        mTimer.schedule(mTimerTask, 1000, timerFrequency);
+        super.onStart();
+    }
+
+
+    /************************************************************************************
+     *
+     * Activity method
+     *
+     ***********************************************************************************/
+    @Override
+    protected void onStop()
+    {
+        // stop timer
+        mTimer.cancel();    // note that a cancelled timer cannot be re-scheduled. Why not?
+        mTimer = null;
+        mTimerTask = null;
+
+        super.onStop();
+    }
+
+
     /**************************************************************************
      *
      * helper to start SAF file selector
@@ -89,37 +250,15 @@ public class MainActivity extends AppCompatActivity
      *************************************************************************/
     public void onClickButtonStart(View view)
     {
-        if (mDcimTreeUri != null)
+        MyApplication app = (MyApplication) getApplication();
+        int result = app.runWorkerThread(this, mDcimTreeUri);
+        if (result == 0)
         {
-            Utils utils = new Utils(this, mDcimTreeUri,true, true, true);
-            int ret = utils.gatherFiles();
-            if (ret > 0)
-            {
-                int nSuccess = 0;
-                int nFailure = 0;
-                for (Utils.mvOp op: utils.mOps)
-                {
-                    Log.d(LOG_TAG, " mv " + op.srcPath + op.srcFile.getName() + " ==> " + op.dstPath);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                    {
-                        boolean retm = utils.mvFile(op);
-                        if (retm)
-                        {
-                            nSuccess++;
-                        }
-                        else
-                        {
-                            nFailure++;
-                        }
-                    }
-                    else
-                    {
-                        nFailure++;
-                        Log.d(LOG_TAG, " not supported, needs API level 24");
-                    }
-                }
-                Log.d(LOG_TAG, "files moved: " + nSuccess + ", failures: " + nFailure);
-            }
+            mCurrHomeText = "in progress...\n\n";
+        }
+        else
+        {
+            Log.e(LOG_TAG, "cannot run worker thread");
         }
     }
 
@@ -131,6 +270,7 @@ public class MainActivity extends AppCompatActivity
      *************************************************************************/
     public void onClickButtonRevert(View view)
     {
+        Toast.makeText(this, "not implemented, yet", Toast.LENGTH_LONG).show();
     }
 
 
@@ -164,9 +304,29 @@ public class MainActivity extends AppCompatActivity
             if (f instanceof DashboardFragment)
             {
                 DashboardFragment fd = (DashboardFragment) f;
-                fd.onPathChanged(mDcimTreeUri.toString());
+                fd.onPathChanged(mDcimTreeUri.getPath());
             }
         }
+    }
+
+
+    /**************************************************************************
+     *
+     * https://stackoverflow.com/questions/51385067/android-navigation-architecture-component-get-current-visible-fragment
+     *
+     *************************************************************************/
+    private Fragment getCurrFragment()
+    {
+        FragmentManager fm = getSupportFragmentManager();
+        // Fragment f = fm.findFragmentById(R.id.navigation_dashboard);     DOES not work, because of navigation bar
+        Fragment f = fm.findFragmentById(R.id.nav_host_fragment_activity_main);
+        if (f != null)
+        {
+            List<Fragment> fragmentList = f.getChildFragmentManager().getFragments();
+            f = f.getChildFragmentManager().getFragments().get(0);
+        }
+
+        return f;
     }
 
 

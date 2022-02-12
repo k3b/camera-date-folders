@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2022 Andreas Kromke, andreas.kromke@gmail.com
+ *
+ * This program is free software; you can redistribute it or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 3
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 package de.kromke.andreas.cameradatefolders;
 
 import android.content.ContentResolver;
@@ -12,6 +30,7 @@ import java.util.ArrayList;
 import androidx.annotation.RequiresApi;
 import androidx.documentfile.provider.DocumentFile;
 
+// the actual work is done here
 public class Utils
 {
     private static final String LOG_TAG = "CDF : Utils";
@@ -22,6 +41,7 @@ public class Utils
     boolean m_SortMonth;
     boolean m_SortDay;
     public ArrayList<mvOp> mOps = null;
+    public int mUnchangedFiles;
 
     // file name holds year, month and day
     public static class camFileDate
@@ -64,6 +84,7 @@ public class Utils
     public int gatherFiles()
     {
         mOps = new ArrayList<>();
+        mUnchangedFiles = 0;
         directoryLevel = 8;             // limit
         if (mRootDir != null)
         {
@@ -262,10 +283,10 @@ public class Utils
      *************************************************************************/
     private String getDestPath(camFileDate date)
     {
-        String ret = "";
+        String ret = "/";
         if (m_SortYear)
         {
-            ret = date.year + "/";
+            ret += date.year + "/";
         }
         if (m_SortMonth)
         {
@@ -328,6 +349,7 @@ public class Utils
                         if (op.srcPath.equals(op.dstPath))
                         {
                             Log.d(LOG_TAG, "   already sorted to its date directory");
+                            mUnchangedFiles++;
                         }
                         else
                         {
