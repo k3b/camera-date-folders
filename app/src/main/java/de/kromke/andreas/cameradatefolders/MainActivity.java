@@ -43,7 +43,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import de.kromke.andreas.cameradatefolders.databinding.ActivityMainBinding;
-import de.kromke.andreas.cameradatefolders.ui.dashboard.PathsFragment;
+import de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment;
 import de.kromke.andreas.cameradatefolders.ui.home.HomeFragment;
 
 // https://stackoverflow.com/questions/63548323/how-to-use-viewmodel-in-a-fragment

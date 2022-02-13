@@ -1,4 +1,4 @@
-package de.kromke.andreas.cameradatefolders.ui.dashboard;
+package de.kromke.andreas.cameradatefolders.ui.paths;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

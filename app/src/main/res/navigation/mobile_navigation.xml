@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="de.kromke.andreas.cameradatefolders.ui.dashboard.PathsFragment"
+        android:name="de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment"
         android:label="@string/title_dashboard"
         tools:layout="@layout/fragment_paths" />
 
