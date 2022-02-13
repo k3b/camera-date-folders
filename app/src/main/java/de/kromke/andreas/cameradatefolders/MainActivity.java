@@ -20,7 +20,6 @@ package de.kromke.andreas.cameradatefolders;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -44,7 +43,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import de.kromke.andreas.cameradatefolders.databinding.ActivityMainBinding;
-import de.kromke.andreas.cameradatefolders.ui.dashboard.DashboardFragment;
+import de.kromke.andreas.cameradatefolders.ui.dashboard.PathsFragment;
 import de.kromke.andreas.cameradatefolders.ui.home.HomeFragment;
 
 // https://stackoverflow.com/questions/63548323/how-to-use-viewmodel-in-a-fragment
@@ -288,7 +287,7 @@ public class MainActivity extends AppCompatActivity
 
     /**************************************************************************
      *
-     * call DashboardFragment() due to configuration change
+     * call PathsFragment() due to configuration change
      *
      * https://stackoverflow.com/questions/51385067/android-navigation-architecture-component-get-current-visible-fragment
      *
@@ -301,9 +300,9 @@ public class MainActivity extends AppCompatActivity
         if (f != null)
         {
             f = f.getChildFragmentManager().getFragments().get(0);
-            if (f instanceof DashboardFragment)
+            if (f instanceof PathsFragment)
             {
-                DashboardFragment fd = (DashboardFragment) f;
+                PathsFragment fd = (PathsFragment) f;
                 fd.onPathChanged(mDcimTreeUri.getPath());
             }
         }

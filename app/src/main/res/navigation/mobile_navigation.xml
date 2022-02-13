@@ -13,9 +13,9 @@
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="de.kromke.andreas.cameradatefolders.ui.dashboard.DashboardFragment"
+        android:name="de.kromke.andreas.cameradatefolders.ui.dashboard.PathsFragment"
         android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_paths" />
 
     <fragment
         android:id="@+id/navigation_settings"

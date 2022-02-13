@@ -11,24 +11,24 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import de.kromke.andreas.cameradatefolders.databinding.FragmentDashboardBinding;
+import de.kromke.andreas.cameradatefolders.databinding.FragmentPathsBinding;
 
-public class DashboardFragment extends Fragment
+public class PathsFragment extends Fragment
 {
-    private DashboardViewModel dashboardViewModel;
-    private FragmentDashboardBinding binding;
+    private PathsViewModel pathsViewModel;
+    private FragmentPathsBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState)
     {
-        dashboardViewModel =
-                new ViewModelProvider(this).get(DashboardViewModel.class);
+        pathsViewModel =
+                new ViewModelProvider(this).get(PathsViewModel.class);
 
-        binding = FragmentDashboardBinding.inflate(inflater, container, false);
+        binding = FragmentPathsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textDashboard;
-        dashboardViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
+        final TextView textView = binding.textPaths;
+        pathsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
         {
             @Override
             public void onChanged(@Nullable String s)
@@ -48,7 +48,7 @@ public class DashboardFragment extends Fragment
 
     public void onPathChanged(String uri)
     {
-        dashboardViewModel.setText(uri);
+        pathsViewModel.setText(uri);
     }
 
     public void cbSelectCameraFolder(View v)
