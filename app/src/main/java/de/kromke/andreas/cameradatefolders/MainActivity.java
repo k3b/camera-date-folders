@@ -19,15 +19,16 @@
 package de.kromke.andreas.cameradatefolders;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -46,6 +47,10 @@ import de.kromke.andreas.cameradatefolders.databinding.ActivityMainBinding;
 import de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment;
 import de.kromke.andreas.cameradatefolders.ui.home.HomeFragment;
 
+import static de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment.PREF_CAM_FOLDER_URI;
+import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_DRY_RUN;
+import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_FOLDER_SCHEME;
+
 // https://stackoverflow.com/questions/63548323/how-to-use-viewmodel-in-a-fragment
 // https://stackoverflow.com/questions/6091194/how-to-handle-button-clicks-using-the-xml-onclick-within-fragments
 // activityViewModel ???
@@ -60,7 +65,7 @@ public class MainActivity extends AppCompatActivity
     Timer mTimer;
     MyTimerTask mTimerTask;
     private static final int timerFrequency = 500;         // milliseconds
-    String mCurrHomeText = "Welcome to Camera Date Folders";
+    String mCurrHomeText = sNoCamPath;
     String mNewHomeText = "";     // set from worker thread, but in UI thread context
     final static String sNoCamPath = "No camera folder selected.";
     final static String sHasCamPath = "Press START to sort your photos.";
@@ -173,6 +178,13 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String val = prefs.getString(PREF_CAM_FOLDER_URI, null);
+        if (val != null)
+        {
+            mDcimTreeUri = Uri.parse(val);
+        }
+
         registerDirectorySelectCallback();
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -244,13 +256,19 @@ public class MainActivity extends AppCompatActivity
 
     /**************************************************************************
      *
-     * onClick callback
+     * helper to run thread
      *
      *************************************************************************/
-    public void onClickButtonStart(View view)
+    private void runThread(boolean bFlatten)
     {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        String scheme = (bFlatten) ? "flat" :  prefs.getString(PREF_FOLDER_SCHEME, "ymd");
+        boolean dryRun = prefs.getBoolean(PREF_DRY_RUN, false);
+        Toast.makeText(this, "Dry Run!", Toast.LENGTH_LONG).show();
+
         MyApplication app = (MyApplication) getApplication();
-        int result = app.runWorkerThread(this, mDcimTreeUri);
+        int result = app.runWorkerThread(this, mDcimTreeUri, scheme, dryRun);
         if (result == 0)
         {
             mCurrHomeText = "in progress...\n\n";
@@ -267,9 +285,20 @@ public class MainActivity extends AppCompatActivity
      * onClick callback
      *
      *************************************************************************/
+    public void onClickButtonStart(View view)
+    {
+        runThread(false);
+    }
+
+
+    /**************************************************************************
+     *
+     * onClick callback
+     *
+     *************************************************************************/
     public void onClickButtonRevert(View view)
     {
-        Toast.makeText(this, "not implemented, yet", Toast.LENGTH_LONG).show();
+        runThread(true);
     }
 
 
@@ -321,7 +350,7 @@ public class MainActivity extends AppCompatActivity
         Fragment f = fm.findFragmentById(R.id.nav_host_fragment_activity_main);
         if (f != null)
         {
-            List<Fragment> fragmentList = f.getChildFragmentManager().getFragments();
+            //List<Fragment> fragmentList = f.getChildFragmentManager().getFragments();
             f = f.getChildFragmentManager().getFragments().get(0);
         }
 
@@ -356,6 +385,12 @@ public class MainActivity extends AppCompatActivity
                                 grantUriPermission(getPackageName(), treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                                 getContentResolver().takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                                 mDcimTreeUri = treeUri;
+
+                                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                                SharedPreferences.Editor prefEditor = prefs.edit();
+                                prefEditor.putString(PREF_CAM_FOLDER_URI, treeUri.toString());
+                                prefEditor.apply();
+
                                 onDcimPathChanged();
                             }
                         }

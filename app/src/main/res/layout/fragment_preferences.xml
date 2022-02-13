@@ -7,7 +7,7 @@
     tools:context=".ui.preferences.PreferencesFragment">
 
     <RadioGroup
-        android:id="@+id/radioGroup"
+        android:id="@+id/schemeRadioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -67,13 +67,13 @@
     </RadioGroup>
 
     <com.google.android.material.switchmaterial.SwitchMaterial
-        android:id="@+id/button_dry_run"
+        android:id="@+id/switchDryRun"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
         android:text="Dry Run (debug mode):   "
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
+        app:layout_constraintTop_toBottomOf="@+id/schemeRadioGroup" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

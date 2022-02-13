@@ -11,26 +11,23 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import de.kromke.andreas.cameradatefolders.R;
 import de.kromke.andreas.cameradatefolders.databinding.FragmentHomeBinding;
 
 public class HomeFragment extends Fragment
 {
-
-    private HomeViewModel homeViewModel;
+    private HomeViewModel viewModel;
     private FragmentHomeBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState)
     {
-        homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
+        viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         final TextView textView = binding.textHome;
-        homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
+        viewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
         {
             @Override
             public void onChanged(@Nullable String s)
@@ -50,6 +47,6 @@ public class HomeFragment extends Fragment
 
     public void onTextChanged(String text)
     {
-        homeViewModel.setText(text);
+        viewModel.setText(text);
     }
 }

@@ -30,6 +30,10 @@ class WorkerThread implements Runnable
     // parameters
     private Context mContext = null;
     private Uri mTreeUri = null;
+    boolean mbSortYear = true;
+    boolean mbSortMonth = true;
+    boolean mbSortDay = true;
+    private boolean mbDryRun = false;
     // result
     private int nSuccess = 0;
     private int nFailure = 0;
@@ -40,9 +44,54 @@ class WorkerThread implements Runnable
         mApplication = application;
     }
 
-    public void setParameters(Context context, Uri uri)
+    public void setParameters(Context context, Uri uri, String scheme, boolean bDryRun)
     {
         mTreeUri = uri;
+        switch (scheme)
+        {
+            default:
+            case "ymd":
+                mbSortYear = true;
+                mbSortMonth = true;
+                mbSortDay = true;
+                break;
+            case "md":
+                mbSortYear = false;
+                mbSortMonth = true;
+                mbSortDay = true;
+                break;
+            case "yd":
+                mbSortYear = true;
+                mbSortMonth = false;
+                mbSortDay = true;
+                break;
+            case "ym":
+                mbSortYear = true;
+                mbSortMonth = true;
+                mbSortDay = false;
+                break;
+            case "d":
+                mbSortYear = false;
+                mbSortMonth = false;
+                mbSortDay = true;
+                break;
+            case "m":
+                mbSortYear = false;
+                mbSortMonth = true;
+                mbSortDay = false;
+                break;
+            case "y":
+                mbSortYear = true;
+                mbSortMonth = false;
+                mbSortDay = false;
+                break;
+            case "flat":
+                mbSortYear = false;
+                mbSortMonth = false;
+                mbSortDay = false;
+                break;
+        }
+        mbDryRun = bDryRun;
         mContext = context;
     }
 
@@ -65,12 +114,13 @@ class WorkerThread implements Runnable
     public void run()
     {
         Log.d(LOG_TAG, "run()");
+
         nSuccess = 0;
         nFailure = 0;
         nUnchanged = 0;
         if (mTreeUri != null)
         {
-            Utils utils = new Utils(mContext, mTreeUri,true, true, true);
+            Utils utils = new Utils(mContext, mTreeUri,mbSortYear, mbSortMonth, mbSortDay);
             int ret = utils.gatherFiles();
             nUnchanged = utils.mUnchangedFiles;
             if (ret > 0)
@@ -81,14 +131,20 @@ class WorkerThread implements Runnable
                     Log.d(LOG_TAG, " mv " + op.srcPath + op.srcFile.getName() + " ==> " + op.dstPath);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                     {
-                        boolean retm = utils.mvFile(op);
-                        if (retm)
+                        if (mbDryRun)
                         {
                             nSuccess++;
                         }
                         else
                         {
-                            nFailure++;
+                            boolean retm = utils.mvFile(op);
+                            if (retm)
+                            {
+                                nSuccess++;
+                            } else
+                            {
+                                nFailure++;
+                            }
                         }
                     }
                     else

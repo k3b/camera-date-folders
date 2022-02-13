@@ -1,6 +1,8 @@
 package de.kromke.andreas.cameradatefolders.ui.paths;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,22 +15,29 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import de.kromke.andreas.cameradatefolders.databinding.FragmentPathsBinding;
 
+@SuppressWarnings("Convert2Lambda")
 public class PathsFragment extends Fragment
 {
-    private PathsViewModel pathsViewModel;
+    public static final String PREF_CAM_FOLDER_URI = "prefCamFolderUri";
+
+    private PathsViewModel viewModel;
     private FragmentPathsBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState)
     {
-        pathsViewModel =
-                new ViewModelProvider(this).get(PathsViewModel.class);
+        viewModel = new ViewModelProvider(this).get(PathsViewModel.class);
 
         binding = FragmentPathsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+
         final TextView textView = binding.textPaths;
-        pathsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
+        String val = prefs.getString(PREF_CAM_FOLDER_URI, "(unset)");
+        viewModel.setText(val);
+//        textView.setText(val);
+        viewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
         {
             @Override
             public void onChanged(@Nullable String s)
@@ -48,7 +57,7 @@ public class PathsFragment extends Fragment
 
     public void onPathChanged(String uri)
     {
-        pathsViewModel.setText(uri);
+        viewModel.setText(uri);
     }
 
     public void cbSelectCameraFolder(View v)
