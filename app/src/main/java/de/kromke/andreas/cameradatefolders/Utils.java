@@ -37,11 +37,14 @@ public class Utils
     Context mContext;
     DocumentFile mRootDir;
     int directoryLevel;
+    private static final int maxDirectoryLevel = 8;
+    private static final int maxFiles = 1000000;    // TODO: remove debug code
     boolean m_SortYear;
     boolean m_SortMonth;
     boolean m_SortDay;
     public ArrayList<mvOp> mOps = null;
     public int mUnchangedFiles;
+    private int mFiles;    // TODO: remove debug code
     FindFileCache mFfCache = new FindFileCache();
 
     // file name holds year, month and day
@@ -86,7 +89,8 @@ public class Utils
     {
         mOps = new ArrayList<>();
         mUnchangedFiles = 0;
-        directoryLevel = 8;             // limit
+        mFiles = 0;     // TODO: remove debug code
+        directoryLevel = 0;
         if (mRootDir != null)
         {
             gatherDirectory(mRootDir, "");
@@ -315,13 +319,6 @@ public class Utils
      *************************************************************************/
     private void gatherDirectory(DocumentFile dd, String path)
     {
-        directoryLevel--;
-        if (directoryLevel < 0)
-        {
-            Log.w(LOG_TAG, "gatherDirectory() -- path depth overflow");
-            return;
-        }
-
         Log.d(LOG_TAG, "gatherDirectory() -- ENTER DIRECTORY " + dd.getName());
 
         DocumentFile[] entries = dd.listFiles();
@@ -341,10 +338,27 @@ public class Utils
             else
             if (df.isDirectory())
             {
-                gatherDirectory(df, path + "/" + name);
+                if (directoryLevel < maxDirectoryLevel)
+                {
+                    directoryLevel++;
+                    gatherDirectory(df, path + "/" + name);
+                    directoryLevel--;
+                }
+                else
+                {
+                    Log.w(LOG_TAG, "gatherDirectory() -- path depth overflow, ignoring " + name);
+                }
+
             }
             else
             {
+                mFiles++;
+                if (mFiles > maxFiles)
+                {
+                    Log.w(LOG_TAG, "gatherDirectory() -- DEBUG LIMIT: max number " + maxFiles + " of files exceeded");
+                    return;
+                }
+
                 if (isCameraFileType(name))
                 {
                     camFileDate date = isCameraFile(name);
