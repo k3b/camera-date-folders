@@ -84,6 +84,10 @@ public class MainActivity extends AppCompatActivity
             public void run()
             {
                 Log.d(LOG_TAG, "called from thread");
+                if (mCurrHomeText.length() > 1000)
+                {
+                    mCurrHomeText = "";      // TODO: remove hack
+                }
                 if (threadEnded)
                 {
                     if (result >= 0)
@@ -265,7 +269,10 @@ public class MainActivity extends AppCompatActivity
 
         String scheme = (bFlatten) ? "flat" :  prefs.getString(PREF_FOLDER_SCHEME, "ymd");
         boolean dryRun = prefs.getBoolean(PREF_DRY_RUN, false);
-        Toast.makeText(this, "Dry Run!", Toast.LENGTH_LONG).show();
+        if (dryRun)
+        {
+            Toast.makeText(this, "Dry Run!", Toast.LENGTH_LONG).show();
+        }
 
         MyApplication app = (MyApplication) getApplication();
         int result = app.runWorkerThread(this, mDcimTreeUri, scheme, dryRun);

@@ -42,6 +42,7 @@ public class Utils
     boolean m_SortDay;
     public ArrayList<mvOp> mOps = null;
     public int mUnchangedFiles;
+    FindFileCache mFfCache = new FindFileCache();
 
     // file name holds year, month and day
     public static class camFileDate
@@ -105,13 +106,17 @@ public class Utils
         ContentResolver content = mContext.getContentResolver();
         DocumentFile dstDirectory = mRootDir;
         String[] pathFrags = op.dstPath.split("/");
+        boolean newDirectory = false;
+
         for (String frag: pathFrags)
         {
             if (!frag.isEmpty())
             {
-                DocumentFile nextDirectory = dstDirectory.findFile(frag);
+                // findFile() is awfully slow. Use LRU cache.
+                DocumentFile nextDirectory = mFfCache.findFileCached(dstDirectory, frag);
                 if (nextDirectory != null)
                 {
+                    // Directory already exists? Hopefully it is not a file.
                     if (nextDirectory.isDirectory())
                     {
                         dstDirectory = nextDirectory;
@@ -124,10 +129,12 @@ public class Utils
                 }
                 else
                 {
+                    // Directory does not exist, yet. Create one.
                     nextDirectory = dstDirectory.createDirectory(frag);
                     if (nextDirectory != null)
                     {
                         dstDirectory = nextDirectory;
+                        newDirectory = true;
                     }
                     else
                     {
@@ -145,6 +152,7 @@ public class Utils
         }
         catch (Exception e)
         {
+            Log.e(LOG_TAG, "cannot move file to " + ((newDirectory) ? "new" : "existing") + "directory");
             Log.e(LOG_TAG, "mvFile() -- exception " + e);
         }
         return false;

@@ -120,15 +120,18 @@ class WorkerThread implements Runnable
         nUnchanged = 0;
         if (mTreeUri != null)
         {
-            Utils utils = new Utils(mContext, mTreeUri,mbSortYear, mbSortMonth, mbSortDay);
+            Utils utils = new Utils(mContext, mTreeUri, mbSortYear, mbSortMonth, mbSortDay);
+            tellProgress("gathering  photo files...");
             int ret = utils.gatherFiles();
             nUnchanged = utils.mUnchangedFiles;
             if (ret > 0)
             {
                 tellProgress("" + ret + " files collected");
+                int i = 0;
                 for (Utils.mvOp op: utils.mOps)
                 {
-                    Log.d(LOG_TAG, " mv " + op.srcPath + op.srcFile.getName() + " ==> " + op.dstPath);
+                    String fileName = op.srcFile.getName();
+                    Log.d(LOG_TAG, " mv " + op.srcPath + fileName + " ==> " + op.dstPath);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                     {
                         if (mbDryRun)
@@ -152,7 +155,8 @@ class WorkerThread implements Runnable
                         nFailure++;
                         Log.d(LOG_TAG, " not supported, needs API level 24");
                     }
-                    tellProgress(op.srcFile.getName());
+                    i++;
+                    tellProgress(fileName + " (" + i + "/" + utils.mOps.size() + ")");
                 }
                 Log.d(LOG_TAG, "files moved: " + nSuccess + ", failures: " + nFailure);
             }
