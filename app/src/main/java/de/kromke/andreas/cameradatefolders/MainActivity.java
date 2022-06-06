@@ -84,10 +84,6 @@ public class MainActivity extends AppCompatActivity
             public void run()
             {
                 Log.d(LOG_TAG, "called from thread");
-                if (mCurrHomeText.length() > 1000)
-                {
-                    mCurrHomeText = "";      // TODO: remove hack
-                }
                 if (threadEnded)
                 {
                     if (result >= 0)
@@ -125,6 +121,10 @@ public class MainActivity extends AppCompatActivity
 
             if (!mNewHomeText.isEmpty())
             {
+                if (mCurrHomeText.length() > 1000)
+                {
+                    mCurrHomeText = mCurrHomeText.substring(500);      // TODO: remove hack
+                }
                 mCurrHomeText += mNewHomeText;
                 mNewHomeText = "";
                 bUpdate = true;
@@ -278,7 +278,8 @@ public class MainActivity extends AppCompatActivity
         int result = app.runWorkerThread(this, mDcimTreeUri, scheme, dryRun);
         if (result == 0)
         {
-            mCurrHomeText = "in progress...\n\n";
+            mCurrHomeText = "";
+            mNewHomeText = "in progress...\n\n";
         }
         else
         {

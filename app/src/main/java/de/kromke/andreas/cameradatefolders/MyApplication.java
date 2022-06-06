@@ -42,9 +42,9 @@ public class MyApplication extends Application
     // called from UI thread
     int runWorkerThread(MainActivity activity, Uri uri, String scheme, boolean bDryRun)
     {
-        if (mActivityForThread != null)
+        if ((thread != null) && (thread.isBusy))
         {
-            Log.e(LOG_TAG, "runWorkerThread() -- already running");
+            Log.e(LOG_TAG, "runWorkerThread() -- busy");
             return -1;
         }
 

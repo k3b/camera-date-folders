@@ -26,6 +26,7 @@ import android.util.Log;
 class WorkerThread implements Runnable
 {
     private static final String LOG_TAG = "CDF : WT";
+    public boolean isBusy = false;
     private final MyApplication mApplication;
     // parameters
     private Context mContext = null;
@@ -101,6 +102,7 @@ class WorkerThread implements Runnable
         {
             mApplication.msgFromWorkerThread(nSuccess, nFailure, nUnchanged, null, true);
         }
+        isBusy = false;
     }
 
     private void tellProgress(final String text)
@@ -113,6 +115,7 @@ class WorkerThread implements Runnable
 
     public void run()
     {
+        isBusy = true;
         Log.d(LOG_TAG, "run()");
 
         nSuccess = 0;
@@ -121,8 +124,15 @@ class WorkerThread implements Runnable
         if (mTreeUri != null)
         {
             Utils utils = new Utils(mContext, mTreeUri, mbSortYear, mbSortMonth, mbSortDay);
-            tellProgress("gathering  photo files...");
             int ret = utils.gatherFiles();
+            /*
+            /// +test code
+            for (int i = 0; i < 100; i++)
+            {
+                tellProgress("" + i + " lines");
+            }
+            /// -test code
+            */
             nUnchanged = utils.mUnchangedFiles;
             if (ret > 0)
             {
