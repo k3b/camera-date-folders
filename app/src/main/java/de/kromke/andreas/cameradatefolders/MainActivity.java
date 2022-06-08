@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -69,6 +70,12 @@ public class MainActivity extends AppCompatActivity
     String mNewHomeText = "";     // set from worker thread, but in UI thread context
     final static String sNoCamPath = "No camera folder selected.";
     final static String sHasCamPath = "Press START to sort your photos.";
+    private Button mStartButton = null;
+    private CharSequence mStartButtonText;
+    private Button mRevertButton = null;
+    private CharSequence mRevertButtonText;
+    private boolean mbThreadRunning = false;
+    private final static int sMaxLogLen = 10000;
 
 
 
@@ -88,12 +95,27 @@ public class MainActivity extends AppCompatActivity
                 {
                     if (result >= 0)
                     {
-                        mNewHomeText += "success:" + result + ", failure: " + result2 + ", unchanged:" + result3 +"\n";
+                        mNewHomeText += "success:" + result + ", failure:" + result2 + ", unchanged:" + result3 +"\n";
                     }
                     else
                     {
                         mNewHomeText += "ERROR" + "\n";
                     }
+
+                    // restore button text, currently it is "STOP"
+                    if (mStartButton != null)
+                    {
+                        mStartButton.setText(mStartButtonText);
+                        mStartButton = null;
+                    }
+
+                    if (mRevertButton != null)
+                    {
+                        mRevertButton.setText(mRevertButtonText);
+                        mRevertButton = null;
+                    }
+
+                    mbThreadRunning = false;
                 }
                 else
                 if ((text != null) && !text.isEmpty())
@@ -121,9 +143,10 @@ public class MainActivity extends AppCompatActivity
 
             if (!mNewHomeText.isEmpty())
             {
-                if (mCurrHomeText.length() > 1000)
+                if (mCurrHomeText.length() > sMaxLogLen)
                 {
-                    mCurrHomeText = mCurrHomeText.substring(500);      // TODO: remove hack
+                    // text too long, remove ten percent
+                    mCurrHomeText = mCurrHomeText.substring(9 * (sMaxLogLen/10));
                 }
                 mCurrHomeText += mNewHomeText;
                 mNewHomeText = "";
@@ -280,6 +303,7 @@ public class MainActivity extends AppCompatActivity
         {
             mCurrHomeText = "";
             mNewHomeText = "in progress...\n\n";
+            mbThreadRunning = true;
         }
         else
         {
@@ -290,12 +314,39 @@ public class MainActivity extends AppCompatActivity
 
     /**************************************************************************
      *
+     * helper to stop thread
+     *
+     *************************************************************************/
+    private void stopThread()
+    {
+        MyApplication app = (MyApplication) getApplication();
+        app.stopWorkerThread();
+    }
+
+
+    /**************************************************************************
+     *
      * onClick callback
      *
      *************************************************************************/
     public void onClickButtonStart(View view)
     {
-        runThread(false);
+        if (mbThreadRunning)
+        {
+            mNewHomeText = "stopping...\n\n";
+            stopThread();
+        }
+        else
+        {
+            runThread(false);
+            if (mbThreadRunning)
+            {
+                mStartButton = (Button) view;
+                mStartButtonText = mStartButton.getText();
+                mStartButton.setText("STOP");
+                stopThread();
+            }
+        }
     }
 
 
@@ -306,7 +357,21 @@ public class MainActivity extends AppCompatActivity
      *************************************************************************/
     public void onClickButtonRevert(View view)
     {
-        runThread(true);
+        if (mbThreadRunning)
+        {
+            mNewHomeText = "stopping...\n\n";
+            stopThread();
+        }
+        else
+        {
+            runThread(true);
+            if (mbThreadRunning)
+            {
+                mRevertButton = (Button) view;
+                mRevertButtonText = mRevertButton.getText();
+                mRevertButton.setText("STOP");
+            }
+        }
     }
 
 

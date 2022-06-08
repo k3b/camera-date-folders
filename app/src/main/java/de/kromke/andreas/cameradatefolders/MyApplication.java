@@ -62,7 +62,16 @@ public class MyApplication extends Application
         return 0;
     }
 
-    // called from worker thread
+    // called from UI thread
+    void stopWorkerThread()
+    {
+        if (thread != null)
+        {
+            thread.stop();
+        }
+    }
+
+        // called from worker thread
     void msgFromWorkerThread(int result1, int result2, int result3, final String text, boolean threadEnded)
     {
         if (mActivityForThread != null)

@@ -2,7 +2,6 @@ package de.kromke.andreas.cameradatefolders.ui.home;
 
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 import de.kromke.andreas.cameradatefolders.R;
 import de.kromke.andreas.cameradatefolders.databinding.FragmentHomeBinding;
 
+@SuppressWarnings("Convert2Lambda")
 public class HomeFragment extends Fragment
 {
     private HomeViewModel viewModel;
@@ -57,8 +57,11 @@ public class HomeFragment extends Fragment
         binding = null;
     }
 
+    // change text and afterwards scroll to end position
     public void onTextChanged(String text)
     {
         viewModel.setText(text);
+        final int scrollAmount = mScanTextView.getLayout().getLineTop(mScanTextView.getLineCount()) - mScanTextView.getHeight();
+        mScanTextView.scrollTo(0, Math.max(scrollAmount, 0));
     }
 }

@@ -27,6 +27,7 @@ class WorkerThread implements Runnable
 {
     private static final String LOG_TAG = "CDF : WT";
     public boolean isBusy = false;
+    private boolean mustStop = false;
     private final MyApplication mApplication;
     // parameters
     private Context mContext = null;
@@ -113,9 +114,11 @@ class WorkerThread implements Runnable
         }
     }
 
+    // main thread function, runs in thread context
     public void run()
     {
         isBusy = true;
+        mustStop = false;
         Log.d(LOG_TAG, "run()");
 
         nSuccess = 0;
@@ -140,6 +143,12 @@ class WorkerThread implements Runnable
                 int i = 0;
                 for (Utils.mvOp op: utils.mOps)
                 {
+                    if (mustStop)
+                    {
+                        tellProgress("stopped on demand");
+                        break;
+                    }
+
                     String fileName = op.srcFile.getName();
                     Log.d(LOG_TAG, " mv " + op.srcPath + fileName + " ==> " + op.dstPath);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
@@ -173,5 +182,13 @@ class WorkerThread implements Runnable
         }
 
         done();
+    }
+
+    public void stop()
+    {
+        if (isBusy)
+        {
+            mustStop = true;
+        }
     }
 }
