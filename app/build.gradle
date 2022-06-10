@@ -7,6 +7,7 @@ android {
 
     defaultConfig {
         applicationId "de.kromke.andreas.cameradatefolders"
+        buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
         minSdk 23
         targetSdk 32
         versionCode 1

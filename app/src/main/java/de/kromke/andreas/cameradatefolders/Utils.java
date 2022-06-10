@@ -18,14 +18,19 @@
 
 package de.kromke.andreas.cameradatefolders;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import androidx.annotation.RequiresApi;
 import androidx.documentfile.provider.DocumentFile;
@@ -393,5 +398,51 @@ public class Utils
         }
 
         Log.d(LOG_TAG, "gatherDirectory() -- LEAVE DIRECTORY " + dd.getName());
+    }
+
+
+    public static class AppVersionInfo
+    {
+        String versionName = "";
+        int versionCode = 0;
+        String strCreationTime = "";
+        boolean isDebug;
+    }
+
+    public static AppVersionInfo getVersionInfo(Context context)
+    {
+        AppVersionInfo ret = new AppVersionInfo();
+        PackageInfo packageinfo = null;
+
+        try
+        {
+            packageinfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+        }
+        catch (PackageManager.NameNotFoundException e)
+        {
+            Log.d(LOG_TAG, "getVersionInfo() : " + e);
+        }
+
+        if (packageinfo != null)
+        {
+            ret.versionName = packageinfo.versionName;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            {
+                ret.versionCode = (int) packageinfo.getLongVersionCode();
+            }
+            else
+            {
+                // deprecated in API 29
+                ret.versionCode = packageinfo.versionCode;
+            }
+        }
+
+        // get ISO8601 date instead of dumb US format (Z = time zone) ...
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+        Date buildDate = new Date(BuildConfig.TIMESTAMP);
+        ret.strCreationTime = df.format(buildDate);
+        ret.isDebug = BuildConfig.DEBUG;
+
+        return ret;
     }
 }

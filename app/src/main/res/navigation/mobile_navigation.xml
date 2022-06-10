@@ -22,4 +22,10 @@
         android:name="de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment"
         android:label="@string/title_preferences"
         tools:layout="@layout/fragment_preferences" />
+
+    <fragment
+        android:id="@+id/navigation_info"
+        android:name="de.kromke.andreas.cameradatefolders.ui.info.InfoFragment"
+        android:label="@string/title_info"
+        tools:layout="@layout/fragment_info" />
 </navigation>
