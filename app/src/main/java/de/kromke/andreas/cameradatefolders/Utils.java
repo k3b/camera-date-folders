@@ -403,10 +403,10 @@ public class Utils
 
     public static class AppVersionInfo
     {
-        String versionName = "";
-        int versionCode = 0;
-        String strCreationTime = "";
-        boolean isDebug;
+        public String versionName = "";
+        public int versionCode = 0;
+        public String strCreationTime = "";
+        public boolean isDebug;
     }
 
     public static AppVersionInfo getVersionInfo(Context context)
