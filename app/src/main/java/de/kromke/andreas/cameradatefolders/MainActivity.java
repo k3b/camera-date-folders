@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity
             }
             else
             {
-                if (mCurrHomeText.equals(strNoCamPath))
+                if (mCurrHomeText.isEmpty() || mCurrHomeText.equals(strNoCamPath))
                 {
                     mCurrHomeText = getString(R.string.str_press_start);
                     bUpdate = true;
