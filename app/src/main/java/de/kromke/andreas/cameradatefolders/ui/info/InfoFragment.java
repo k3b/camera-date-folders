@@ -26,7 +26,8 @@ public class InfoFragment extends Fragment
         if (context != null)
         {
             Utils.AppVersionInfo info = Utils.getVersionInfo(context);
-            final String strVersion = "Version " + info.versionName + ((info.isDebug) ? " DEBUG" : "");
+            final String strVersion = "Version " + info.versionName + ((info.isDebug) ? " DEBUG" : "") +
+                                      "\n" + "(" + info.strCreationTime + ")";
             final TextView versionInfo = binding.versionInfo;
             versionInfo.setText(strVersion);
         }
