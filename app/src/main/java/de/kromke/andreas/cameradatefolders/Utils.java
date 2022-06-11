@@ -70,6 +70,12 @@ public class Utils
         public String dstPath;
     }
 
+    // progress callback
+    interface ProgressCallBack
+    {
+        void tellProgress(final String text);
+    }
+
 
     /**************************************************************************
      *
@@ -91,7 +97,7 @@ public class Utils
      * Phase 1: gather move operations
      *
      *************************************************************************/
-    public int gatherFiles()
+    public int gatherFiles(ProgressCallBack callback)
     {
         mOps = new ArrayList<>();
         mUnchangedFiles = 0;
@@ -99,7 +105,7 @@ public class Utils
         directoryLevel = 0;
         if (mRootDir != null)
         {
-            gatherDirectory(mRootDir, "");
+            gatherDirectory(mRootDir, "", callback);
         }
         return mOps.size();
     }
@@ -323,12 +329,13 @@ public class Utils
      * recursively walk through tree and gather mv operations to mOps
      *
      *************************************************************************/
-    private void gatherDirectory(DocumentFile dd, String path)
+    private void gatherDirectory(DocumentFile dd, String path, ProgressCallBack callback)
     {
         Log.d(LOG_TAG, "gatherDirectory() -- ENTER DIRECTORY " + dd.getName());
 
         if (mustStop)
         {
+            Log.d(LOG_TAG, "gatherDirectory() -- stopped");
             return;
         }
 
@@ -357,7 +364,7 @@ public class Utils
                 if (directoryLevel < maxDirectoryLevel)
                 {
                     directoryLevel++;
-                    gatherDirectory(df, path + "/" + name);
+                    gatherDirectory(df, path + "/" + name, callback);
                     directoryLevel--;
                 }
                 else
@@ -400,6 +407,7 @@ public class Utils
                     {
                         Log.w(LOG_TAG, "gatherDirectory() -- image file does not look like camera file: " + name);
                     }
+                    callback.tellProgress("" + mOps.size() + "/" + mUnchangedFiles);
                 }
                 else
                 {

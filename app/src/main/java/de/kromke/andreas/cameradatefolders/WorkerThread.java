@@ -23,7 +23,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
-class WorkerThread implements Runnable
+class WorkerThread implements Runnable, Utils.ProgressCallBack
 {
     private static final String LOG_TAG = "CDF : WT";
     public boolean isBusy = false;
@@ -107,7 +107,8 @@ class WorkerThread implements Runnable
         isBusy = false;
     }
 
-    private void tellProgress(final String text)
+    // also used as callback from Utils
+    public void tellProgress(final String text)
     {
         if (mApplication != null)
         {
@@ -128,7 +129,7 @@ class WorkerThread implements Runnable
         if (mTreeUri != null)
         {
             mUtils = new Utils(mContext, mTreeUri, mbSortYear, mbSortMonth, mbSortDay);
-            int ret = mUtils.gatherFiles();
+            int ret = mUtils.gatherFiles(this);
             if (mustStop && (ret == 0))
             {
                 tellProgress("stopped on demand");
@@ -145,7 +146,7 @@ class WorkerThread implements Runnable
             nUnchanged = mUtils.mUnchangedFiles;
             if (ret > 0)
             {
-                tellProgress("" + ret + " files collected");
+                tellProgress("" + ret + " files collected\n");
                 int i = 0;
                 for (Utils.mvOp op: mUtils.mOps)
                 {

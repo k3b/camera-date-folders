@@ -344,7 +344,6 @@ public class MainActivity extends AppCompatActivity
                 mStartButton = (Button) view;
                 mStartButtonText = mStartButton.getText();
                 mStartButton.setText("STOP");
-                stopThread();
             }
         }
     }
