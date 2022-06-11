@@ -4,4 +4,15 @@
     <string name="title_dashboard">Paths</string>
     <string name="title_preferences">Preferences</string>
     <string name="title_info">About</string>
+    <string name="str_start">START</string>
+    <string name="str_revert">REVERT</string>
+    <string name="str_stop">STOP</string>
+    <string name="str_app_name">Camera Date Folders</string>
+    <string name="str_app_description">Automatically sort your photos to date related subdirectories, based on timestamp encoded in filenames</string>
+    <string name="str_author">Andreas Kromke</string>
+    <string name="str_sel_path">Select Camera Folder Path</string>
+    <string name="str_scheme">Subfolder Scheme</string>
+    <string name="str_dry_run">Dry Run (debug mode):</string>
+    <string name="str_press_start">Press START to sort your photos or REVERT to move them back to base directory.</string>
+    <string name="str_no_cam_path">No camera folder selected. Go to Paths view!</string>
 </resources>

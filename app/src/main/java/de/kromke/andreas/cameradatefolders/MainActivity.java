@@ -28,8 +28,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -60,16 +58,15 @@ import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFrag
 public class MainActivity extends AppCompatActivity
 {
     private static final String LOG_TAG = "CDF : MainActivity";
+    @SuppressWarnings("FieldCanBeLocal")
     private ActivityMainBinding binding;
     ActivityResultLauncher<Intent> mRequestDirectorySelectActivityLauncher;
     Uri mDcimTreeUri = null;
     Timer mTimer;
     MyTimerTask mTimerTask;
     private static final int timerFrequency = 500;         // milliseconds
-    String mCurrHomeText = sNoCamPath;
+    String mCurrHomeText = "";
     String mNewHomeText = "";     // set from worker thread, but in UI thread context
-    final static String sNoCamPath = "No camera folder selected.";
-    final static String sHasCamPath = "Press START to sort your photos.";
     private Button mStartButton = null;
     private CharSequence mStartButtonText;
     private Button mRevertButton = null;
@@ -142,6 +139,7 @@ public class MainActivity extends AppCompatActivity
         {
             boolean bUpdate = false;
 
+            final String strNoCamPath = getString(R.string.str_no_cam_path);
             if (!mNewHomeText.isEmpty())
             {
                 if (mCurrHomeText.length() > sMaxLogLen)
@@ -156,17 +154,17 @@ public class MainActivity extends AppCompatActivity
             else
             if (mDcimTreeUri == null)
             {
-                if (!mCurrHomeText.equals(sNoCamPath))
+                if (!mCurrHomeText.equals(strNoCamPath))
                 {
-                    mCurrHomeText = sNoCamPath;
+                    mCurrHomeText = strNoCamPath;
                     bUpdate = true;
                 }
             }
             else
             {
-                if (mCurrHomeText.equals(sNoCamPath))
+                if (mCurrHomeText.equals(strNoCamPath))
                 {
-                    mCurrHomeText = sHasCamPath;
+                    mCurrHomeText = getString(R.string.str_press_start);
                     bUpdate = true;
                 }
             }
@@ -218,7 +216,7 @@ public class MainActivity extends AppCompatActivity
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        BottomNavigationView navView = findViewById(R.id.nav_view);
+        //BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
@@ -348,7 +346,7 @@ public class MainActivity extends AppCompatActivity
             {
                 mStartButton = (Button) view;
                 mStartButtonText = mStartButton.getText();
-                mStartButton.setText("STOP");
+                mStartButton.setText(R.string.str_stop);
             }
         }
     }
@@ -376,7 +374,7 @@ public class MainActivity extends AppCompatActivity
             {
                 mRevertButton = (Button) view;
                 mRevertButtonText = mRevertButton.getText();
-                mRevertButton.setText("STOP");
+                mRevertButton.setText(R.string.str_stop);
             }
         }
     }

@@ -20,50 +20,57 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="12dp"
-            android:text="Subfolder Scheme"
+            android:text="@string/str_scheme"
             android:textSize="20sp" />
 
         <RadioButton
             android:id="@+id/button_scheme_y_m_d"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1965/1965-07/1965-07-21" />
+            android:text="1965/1965-07/1965-07-21"
+            tools:ignore="HardcodedText" />
 
         <RadioButton
             android:id="@+id/button_scheme_m_d"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1965-07/1965-07-21" />
+            android:text="1965-07/1965-07-21"
+            tools:ignore="HardcodedText" />
 
         <RadioButton
             android:id="@+id/button_scheme_y_d"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1965/1965-07-21" />
+            android:text="1965/1965-07-21"
+            tools:ignore="HardcodedText" />
 
         <RadioButton
             android:id="@+id/button_scheme_y_m"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1965/1965-07" />
+            android:text="1965/1965-07"
+            tools:ignore="HardcodedText" />
 
         <RadioButton
             android:id="@+id/button_scheme_d"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1965-07-21" />
+            android:text="1965-07-21"
+            tools:ignore="HardcodedText" />
 
         <RadioButton
             android:id="@+id/button_scheme_m"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1965-07" />
+            android:text="1965-07"
+            tools:ignore="HardcodedText" />
 
         <RadioButton
             android:id="@+id/button_scheme_y"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1965" />
+            android:text="1965"
+            tools:ignore="HardcodedText" />
     </RadioGroup>
 
     <com.google.android.material.switchmaterial.SwitchMaterial
@@ -72,7 +79,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
-        android:text="Dry Run (debug mode):   "
+        android:text="@string/str_dry_run"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/schemeRadioGroup" />
 

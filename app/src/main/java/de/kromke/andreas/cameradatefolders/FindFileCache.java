@@ -18,8 +18,6 @@
 
 package de.kromke.andreas.cameradatefolders;
 
-import android.content.Context;
-
 import java.util.LinkedList;
 
 import androidx.documentfile.provider.DocumentFile;
@@ -27,10 +25,6 @@ import androidx.documentfile.provider.DocumentFile;
 // the actual work is done here
 public class FindFileCache
 {
-    private static final String LOG_TAG = "CDF : FFC";
-    Context mContext;
-    DocumentFile mRootDir;
-    int directoryLevel;
     private static final int cacheMaxLen = 8;
     LinkedList<findFileResult> mList;
 

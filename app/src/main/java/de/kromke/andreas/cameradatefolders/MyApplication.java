@@ -20,13 +20,10 @@ package de.kromke.andreas.cameradatefolders;
 
 import android.app.Application;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import androidx.core.os.HandlerCompat;
 
 // used for storage that survives Activity creation and deletion
 public class MyApplication extends Application
@@ -34,7 +31,7 @@ public class MyApplication extends Application
     private static final String LOG_TAG = "CDF : App";
 //    ExecutorService executorService = Executors.newFixedThreadPool(4);
     ExecutorService executor = Executors.newSingleThreadExecutor();
-    Handler mainThreadHandler = HandlerCompat.createAsync(Looper.getMainLooper());
+    //Handler mainThreadHandler = HandlerCompat.createAsync(Looper.getMainLooper());
 
     private WorkerThread thread = null;
     private MainActivity mActivityForThread = null;  // null: thread is not running

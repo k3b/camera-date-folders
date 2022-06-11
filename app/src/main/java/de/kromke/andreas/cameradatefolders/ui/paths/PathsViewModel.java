@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 public class PathsViewModel extends ViewModel
 {
-    private MutableLiveData<String> mText;
+    private final MutableLiveData<String> mText;
 
     public PathsViewModel()
     {
@@ -21,6 +21,7 @@ public class PathsViewModel extends ViewModel
 
     public void setText(final String text)
     {
-        mText.setValue(text);
+        String readable_text = text.replace("%3A", ":");
+        mText.setValue(readable_text);
     }
 }
