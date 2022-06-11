@@ -39,6 +39,7 @@ import androidx.documentfile.provider.DocumentFile;
 public class Utils
 {
     private static final String LOG_TAG = "CDF : Utils";
+    public boolean mustStop = false;
     Context mContext;
     DocumentFile mRootDir;
     int directoryLevel;
@@ -279,7 +280,7 @@ public class Utils
         }
 
         //
-        // get year
+        // get day
         //
 
         ret.day = name.substring(i + 6, i + 8);
@@ -326,10 +327,20 @@ public class Utils
     {
         Log.d(LOG_TAG, "gatherDirectory() -- ENTER DIRECTORY " + dd.getName());
 
+        if (mustStop)
+        {
+            return;
+        }
+
         DocumentFile[] entries = dd.listFiles();
         Log.d(LOG_TAG, "gatherDirectory() -- number of files found: " + entries.length);
         for (DocumentFile df: entries)
         {
+            if (mustStop)
+            {
+                return;
+            }
+
             final String name = df.getName();
             if (name == null)
             {
@@ -401,6 +412,11 @@ public class Utils
     }
 
 
+    /**************************************************************************
+     *
+     * user readable version info for the Info fragment
+     *
+     *************************************************************************/
     public static class AppVersionInfo
     {
         public String versionName = "";

@@ -36,6 +36,7 @@ class WorkerThread implements Runnable
     boolean mbSortMonth = true;
     boolean mbSortDay = true;
     private boolean mbDryRun = false;
+    private Utils mUtils = null;
     // result
     private int nSuccess = 0;
     private int nFailure = 0;
@@ -126,8 +127,13 @@ class WorkerThread implements Runnable
         nUnchanged = 0;
         if (mTreeUri != null)
         {
-            Utils utils = new Utils(mContext, mTreeUri, mbSortYear, mbSortMonth, mbSortDay);
-            int ret = utils.gatherFiles();
+            mUtils = new Utils(mContext, mTreeUri, mbSortYear, mbSortMonth, mbSortDay);
+            int ret = mUtils.gatherFiles();
+            if (mustStop && (ret == 0))
+            {
+                tellProgress("stopped on demand");
+            }
+
             /*
             /// +test code
             for (int i = 0; i < 100; i++)
@@ -136,12 +142,12 @@ class WorkerThread implements Runnable
             }
             /// -test code
             */
-            nUnchanged = utils.mUnchangedFiles;
+            nUnchanged = mUtils.mUnchangedFiles;
             if (ret > 0)
             {
                 tellProgress("" + ret + " files collected");
                 int i = 0;
-                for (Utils.mvOp op: utils.mOps)
+                for (Utils.mvOp op: mUtils.mOps)
                 {
                     if (mustStop)
                     {
@@ -159,7 +165,7 @@ class WorkerThread implements Runnable
                         }
                         else
                         {
-                            boolean retm = utils.mvFile(op);
+                            boolean retm = mUtils.mvFile(op);
                             if (retm)
                             {
                                 nSuccess++;
@@ -175,12 +181,13 @@ class WorkerThread implements Runnable
                         Log.d(LOG_TAG, " not supported, needs API level 24");
                     }
                     i++;
-                    tellProgress(fileName + " (" + i + "/" + utils.mOps.size() + ")");
+                    tellProgress(fileName + " (" + i + "/" + mUtils.mOps.size() + ")");
                 }
                 Log.d(LOG_TAG, "files moved: " + nSuccess + ", failures: " + nFailure);
             }
         }
 
+        mUtils = null;
         done();
     }
 
@@ -189,6 +196,10 @@ class WorkerThread implements Runnable
         if (isBusy)
         {
             mustStop = true;
+            if (mUtils != null)
+            {
+                mUtils.mustStop = true;
+            }
         }
     }
 }
