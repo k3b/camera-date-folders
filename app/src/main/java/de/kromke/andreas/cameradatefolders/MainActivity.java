@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity
     private Button mRevertButton = null;
     private CharSequence mRevertButtonText;
     private boolean mbThreadRunning = false;
+    private boolean mbThreadRunningRevert = false;
     private final static int sMaxLogLen = 10000;
 
 
@@ -303,6 +304,7 @@ public class MainActivity extends AppCompatActivity
         {
             mCurrHomeText = "";
             mNewHomeText = "in progress...\n\n";
+            mbThreadRunningRevert = bFlatten;
             mbThreadRunning = true;
         }
         else
@@ -333,8 +335,11 @@ public class MainActivity extends AppCompatActivity
     {
         if (mbThreadRunning)
         {
-            mNewHomeText = "stopping...\n\n";
-            stopThread();
+            if (!mbThreadRunningRevert)
+            {
+                mNewHomeText = "stopping...\n\n";
+                stopThread();
+            }
         }
         else
         {
@@ -358,8 +363,11 @@ public class MainActivity extends AppCompatActivity
     {
         if (mbThreadRunning)
         {
-            mNewHomeText = "stopping...\n\n";
-            stopThread();
+            if (mbThreadRunningRevert)
+            {
+                mNewHomeText = "stopping...\n\n";
+                stopThread();
+            }
         }
         else
         {

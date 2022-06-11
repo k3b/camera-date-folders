@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Camera Date Folders</string>
-    <string name="title_home">Home</string>
+    <string name="title_home">Action</string>
     <string name="title_dashboard">Paths</string>
     <string name="title_preferences">Preferences</string>
     <string name="title_info">About</string>
