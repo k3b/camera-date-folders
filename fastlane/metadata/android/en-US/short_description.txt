@@ -1,0 +1,1 @@
+Sort photos from camera folder into a date specific subfolder structure

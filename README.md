@@ -19,11 +19,12 @@ This program creates a folder tree structure and sorts the photos into these fol
 * File names beginning with "PXL\_yyyymmdd_" or "IMG\_yyyymmdd\_".
 * File name extensions ".jpg", ".jpeg" and ".mp4".
 
-# Not Supported (Yet)
+# Current Limitations (Yet)
 
 * Currently no EXIF metadata are extracted, instead the photo's date must be encoded in the file name.
-* More than one photo directory.
-* Moving photos to a different device, e.g. to SD card.
+* Only one photo directory is currently supported.
+* Photos currently cannot be moved to a different device, e.g. to SD card. Instead they remain in the same directory subtree.
+* Due to Google's policy, the program is forced to use Google's Storage Access Framework, which is extremely slow. A faster version is technically trivial, but that one would not be allowed to be published in Play Store.
 
 # Permissions Needed
 

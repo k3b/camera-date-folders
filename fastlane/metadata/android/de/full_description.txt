@@ -1,0 +1,7 @@
+Verschiebt alle Fotos, die auf dem Gerät im Kamera-Verzeichnis liegen, in datumspezifische Unterordner. Das erleichtert das Kopieren von Fotos vom Gerät auf einen Computer, beispielsweise über USB-Kabel (per MTP-Protokoll).
+
+Es sind bis zu drei Ebenen möglich: Jahr, Monat und Tag. Die Sortierung kann rückgängig gemacht werden, d.h. alle Dateien werden dann wieder ins selbe Verzeichnis verschoben.
+
+Das Programm liest keine Metadaten (EXIF), sondern verläßt sich auf die Datumangaben im Dateinamen.
+
+Um Googles restriktive Play-Store-Richtlinien zu erfüllen, mußte Googles proprietäres "Storage Access Framework" für alle Dateizugriffe verwendet werden. Das Programm ist deshalb beim Sortieren sehr langsam. Vielleicht wird später eine Version nachgereicht, die mit den üblichen Dateizugriffen und damit sehr viel schneller läuft; die wäre dann aber nur in F-Droid erhältlich.
