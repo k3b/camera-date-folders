@@ -461,7 +461,7 @@ public class Utils
             }
         }
 
-        // get ISO8601 date instead of dumb US format (Z = time zone) ...
+        // get ISO8601 date instead of impractical US format (Z = time zone) ...
         @SuppressLint("SimpleDateFormat") SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
         Date buildDate = new Date(BuildConfig.TIMESTAMP);
         ret.strCreationTime = df.format(buildDate);
