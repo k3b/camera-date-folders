@@ -28,6 +28,7 @@ import android.os.Build;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,13 +42,14 @@ public class Utils
     private static final String LOG_TAG = "CDF : Utils";
     public boolean mustStop = false;
     Context mContext;
-    DocumentFile mRootDir;
+    DocumentFile mRootDir;      // photo directory in proprietary SAF mode
+    File mRootDirFile;          // photo directory in traditional File mode
     int directoryLevel;
     private static final int maxDirectoryLevel = 8;
     private static final int maxFiles = 1000000;    // TODO: remove debug code
-    boolean m_SortYear;
-    boolean m_SortMonth;
-    boolean m_SortDay;
+    boolean mSortYear;
+    boolean mSortMonth;
+    boolean mSortDay;
     public ArrayList<mvOp> mOps = null;
     public int mUnchangedFiles;
     private int mFiles;    // TODO: remove debug code
@@ -61,13 +63,69 @@ public class Utils
         public String day;         // 1 .. 31
     }
 
-    // a single move operation
-    public static class mvOp
+    public interface mvOp
     {
-        public String srcPath;              // debug helper
+        String getName();
+        String getSrcPath();
+        String getDstPath();
+        boolean move();
+    }
+    // a single move operation in SAF mode
+    public class mvOpSaf implements mvOp
+    {
         public DocumentFile srcFile;
         public DocumentFile srcDirectory;
-        public String dstPath;
+        public String dstPath;              // relative to photo directory
+        public String srcPath;              // debug helper
+
+        public String getName()
+        {
+            return srcFile.getName();
+        }
+        public String getSrcPath()
+        {
+            return srcPath;
+        }
+        public String getDstPath()
+        {
+            return dstPath;
+        }
+        public boolean move()
+        {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            {
+                return mvFileSaf(this);
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+    // a single move operation in File mode
+    public class mvOpFile implements mvOp
+    {
+        public String srcPath;              // debug helper
+        public File srcFile;
+        public File srcDirectory;
+        public String dstPath;              // relative to photo directory
+
+        public String getName()
+        {
+            return srcFile.getName();
+        }
+        public String getSrcPath()
+        {
+            return srcPath;
+        }
+        public String getDstPath()
+        {
+            return dstPath;
+        }
+        public boolean move()
+        {
+            return mvFile(this);
+        }
     }
 
     // progress callback
@@ -79,16 +137,29 @@ public class Utils
 
     /**************************************************************************
      *
-     * constructor
+     * constructor, also chooses between File and SAF mode
      *
      *************************************************************************/
-    Utils(Context context, Uri treeUri, boolean sortYear, boolean sortMonth, boolean sortDay)
+    Utils(Context context, Uri treeUri, boolean sortYear, boolean sortMonth, boolean sortDay, boolean bFileMode)
     {
         mContext = context;
-        mRootDir = DocumentFile.fromTreeUri(mContext, treeUri);
-        m_SortYear = sortYear;
-        m_SortMonth = sortMonth;
-        m_SortDay = sortDay;
+        if (bFileMode)
+        {
+            mRootDir = null;
+            String p = UriToPath.getPathFromUri(context, treeUri);
+            if (p != null)
+            {
+                mRootDirFile = new File(p);
+            }
+        }
+        else
+        {
+            mRootDirFile = null;
+            mRootDir = DocumentFile.fromTreeUri(mContext, treeUri);
+        }
+        mSortYear = sortYear;
+        mSortMonth = sortMonth;
+        mSortDay = sortDay;
     }
 
 
@@ -107,7 +178,18 @@ public class Utils
         {
             gatherDirectory(mRootDir, "", callback);
         }
+        else
+        if (mRootDirFile != null)
+        {
+            gatherDirectoryFileMode(mRootDirFile, "", callback);
+        }
         return mOps.size();
+    }
+
+
+    public ArrayList<mvOp> getOps()
+    {
+        return mOps;
     }
 
 
@@ -117,7 +199,7 @@ public class Utils
      *
      *************************************************************************/
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public boolean mvFile(mvOp op)
+    private boolean mvFileSaf(mvOpSaf op)
     {
         ContentResolver content = mContext.getContentResolver();
         DocumentFile dstDirectory = mRootDir;
@@ -165,6 +247,68 @@ public class Utils
         {
             Uri newUri = DocumentsContract.moveDocument(content, op.srcFile.getUri(), op.srcDirectory.getUri(), dstDirectory.getUri());
             return newUri != null;
+        }
+        catch (Exception e)
+        {
+            Log.e(LOG_TAG, "cannot move file to " + ((newDirectory) ? "new" : "existing") + "directory");
+            Log.e(LOG_TAG, "mvFile() -- exception " + e);
+        }
+        return false;
+    }
+
+
+    /**************************************************************************
+     *
+     * Phase 2: execute a single move operation
+     *
+     *************************************************************************/
+    private boolean mvFile(mvOpFile op)
+    {
+        File dstDirectory = mRootDirFile;
+        String[] pathFrags = op.dstPath.split("/");
+        boolean newDirectory = false;
+
+        for (String frag: pathFrags)
+        {
+            if (!frag.isEmpty())
+            {
+                // findFile() is awfully slow. Use LRU cache.
+                //DocumentFile nextDirectory = mFfCache.findFileCached(dstDirectory, frag);
+                File nextDirectory = new File(dstDirectory, frag);
+                if (nextDirectory.exists())
+                {
+                    // Directory already exists? Hopefully it is not a file.
+                    if (nextDirectory.isDirectory())
+                    {
+                        dstDirectory = nextDirectory;
+                    }
+                    else
+                    {
+                        Log.e(LOG_TAG, "mvFile() -- is no directory: " + frag);
+                        return false;
+                    }
+                }
+                else
+                {
+                    // Directory does not exist, yet. Create one.
+                    if (nextDirectory.mkdir())
+                    {
+                        dstDirectory = nextDirectory;
+                        newDirectory = true;
+                    }
+                    else
+                    {
+                        Log.e(LOG_TAG, "mvFile() -- cannot create directory: " + frag);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        File dstFile = new File(dstDirectory, op.srcFile.getName());
+        try
+        {
+            return op.srcFile.renameTo(dstFile);
         }
         catch (Exception e)
         {
@@ -308,15 +452,15 @@ public class Utils
     private String getDestPath(camFileDate date)
     {
         String ret = "/";
-        if (m_SortYear)
+        if (mSortYear)
         {
             ret += date.year + "/";
         }
-        if (m_SortMonth)
+        if (mSortMonth)
         {
             ret += date.year + "-" + date.month + "/";
         }
-        if (m_SortDay)
+        if (mSortDay)
         {
             ret += date.year + "-" + date.month + "-" + date.day + "/";
         }
@@ -388,7 +532,7 @@ public class Utils
                     if (date != null)
                     {
                         Log.d(LOG_TAG, "gatherDirectory() -- camera file found: " + path + "/" + name);
-                        mvOp op = new mvOp();
+                        mvOpSaf op = new mvOpSaf();
                         op.srcPath = path + "/";
                         op.dstPath = getDestPath(date);
                         if (op.srcPath.equals(op.dstPath))
@@ -417,6 +561,102 @@ public class Utils
         }
 
         Log.d(LOG_TAG, "gatherDirectory() -- LEAVE DIRECTORY " + dd.getName());
+    }
+
+
+    /**************************************************************************
+     *
+     * recursively walk through tree and gather mv operations to mOps
+     * (similar to gatherDirectory(), but in File instead of SAF mode)
+     *
+     *************************************************************************/
+    private void gatherDirectoryFileMode(File dd, String path, ProgressCallBack callback)
+    {
+        Log.d(LOG_TAG, "gatherDirectoryFileMode() -- ENTER DIRECTORY " + dd.getName());
+
+        if (mustStop)
+        {
+            Log.d(LOG_TAG, "gatherDirectoryFileMode() -- stopped");
+            return;
+        }
+
+        File[] entries = dd.listFiles();
+        if (entries == null)
+        {
+            entries = new File[0];  // replace null ptr with empty array
+        }
+        Log.d(LOG_TAG, "gatherDirectoryFileMode() -- number of files found: " + entries.length);
+        for (File df: entries)
+        {
+            if (mustStop)
+            {
+                return;
+            }
+
+            final String name = df.getName();
+            if (name.startsWith("."))
+            {
+                Log.w(LOG_TAG, "gatherDirectoryFileMode() -- skip dot files: " + name);
+            }
+            else
+            if (df.isDirectory())
+            {
+                if (directoryLevel < maxDirectoryLevel)
+                {
+                    directoryLevel++;
+                    gatherDirectoryFileMode(df, path + "/" + name, callback);
+                    directoryLevel--;
+                }
+                else
+                {
+                    Log.w(LOG_TAG, "gatherDirectoryFileMode() -- path depth overflow, ignoring " + name);
+                }
+
+            }
+            else
+            {
+                mFiles++;
+                if (mFiles > maxFiles)
+                {
+                    Log.w(LOG_TAG, "gatherDirectoryFileMode() -- DEBUG LIMIT: max number " + maxFiles + " of files exceeded");
+                    return;
+                }
+
+                if (isCameraFileType(name))
+                {
+                    camFileDate date = isCameraFile(name);
+                    if (date != null)
+                    {
+                        Log.d(LOG_TAG, "gatherDirectoryFileMode() -- camera file found: " + path + "/" + name);
+                        mvOpFile op = new mvOpFile();
+                        op.srcPath = path + "/";
+                        op.dstPath = getDestPath(date);
+                        if (op.srcPath.equals(op.dstPath))
+                        {
+                            Log.d(LOG_TAG, "   already sorted to its date directory");
+                            mUnchangedFiles++;
+                        }
+                        else
+                        {
+                            op.srcDirectory = dd;
+                            op.srcFile = df;
+                            mOps.add(op);
+                        }
+                    }
+                    else
+                    {
+                        Log.w(LOG_TAG, "gatherDirectoryFileMode() -- image file does not look like camera file: " + name);
+                    }
+                    callback.tellProgress("" + mOps.size() + "/" + mUnchangedFiles);
+                }
+                else
+                {
+                    Log.w(LOG_TAG, "gatherDirectoryFileMode() -- non matching file type: " + name);
+                }
+            }
+        }
+
+        Log.d(LOG_TAG, "gatherDirectoryFileMode() -- LEAVE DIRECTORY " + dd.getName());
     }
 
 

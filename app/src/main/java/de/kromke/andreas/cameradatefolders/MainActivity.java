@@ -18,10 +18,14 @@
 
 package de.kromke.andreas.cameradatefolders;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
@@ -35,7 +39,11 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
@@ -46,6 +54,7 @@ import de.kromke.andreas.cameradatefolders.databinding.ActivityMainBinding;
 import de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment;
 import de.kromke.andreas.cameradatefolders.ui.home.HomeFragment;
 
+import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION;
 import static de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment.PREF_CAM_FOLDER_URI;
 import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_DRY_RUN;
 import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_FOLDER_SCHEME;
@@ -58,8 +67,10 @@ import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFrag
 public class MainActivity extends AppCompatActivity
 {
     private static final String LOG_TAG = "CDF : MainActivity";
+    private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 11;
     @SuppressWarnings("FieldCanBeLocal")
     private ActivityMainBinding binding;
+    ActivityResultLauncher<Intent> mStorageAccessPermissionActivityLauncher;
     ActivityResultLauncher<Intent> mRequestDirectorySelectActivityLauncher;
     Uri mDcimTreeUri = null;
     Timer mTimer;
@@ -88,7 +99,7 @@ public class MainActivity extends AppCompatActivity
         {
             public void run()
             {
-                Log.d(LOG_TAG, "called from thread");
+                //Log.d(LOG_TAG, "called from thread");
                 if (threadEnded)
                 {
                     if (result >= 0)
@@ -204,6 +215,8 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
 
+        registerStorageAccessPermissionCallback();
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String val = prefs.getString(PREF_CAM_FOLDER_URI, null);
         if (val != null)
@@ -225,6 +238,14 @@ public class MainActivity extends AppCompatActivity
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+        {
+            // We need the old (pre-Android-11) file read/write permissions at once, otherwise
+            // we cannot run on older Android versions. Later we may ask for full
+            // file access on Android 11 and above.
+            requestForPermissionOld();
+        }
     }
 
 
@@ -263,9 +284,130 @@ public class MainActivity extends AppCompatActivity
 
     /**************************************************************************
      *
+     * permission was granted, immediately or later
+     *
+     *************************************************************************/
+    private void onPermissionGranted()
+    {
+    }
+
+
+    /**************************************************************************
+     *
+     * Activity method
+     *
+     * File read request granted or denied, only used for Android 10 or older
+     *
+     *************************************************************************/
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode,
+            @NonNull String[] permissions,
+            @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        //noinspection SwitchStatementWithTooFewBranches
+        switch (requestCode)
+        {
+            case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE:
+            {
+                // If request is cancelled, the result arrays are empty.
+                //noinspection StatementWithEmptyBody
+                if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED))
+                {
+                    onPermissionGranted();
+                } else
+                {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+            }
+        }
+    }
+
+
+    /**************************************************************************
+     *
+     * variant for Android 4.4 .. 10
+     *
+     *************************************************************************/
+    private void requestForPermissionOld()
+    {
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED)
+        {
+            Log.d(LOG_TAG, "permission immediately granted");
+            onPermissionGranted();
+        } else
+        {
+            Log.d(LOG_TAG, "request permission");
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+        }
+    }
+
+
+    /**************************************************************************
+     *
+     * variant for Android 11 (API 30)
+     *
+     *************************************************************************/
+    @RequiresApi(api = Build.VERSION_CODES.R)
+    private void requestForPermission30()
+    {
+        if (Environment.isExternalStorageManager())
+        {
+            Log.d(LOG_TAG, "permission immediately granted");
+            onPermissionGranted();
+        }
+        else
+        {
+            Intent intent = new Intent(ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+            Uri uri = Uri.fromParts("package", this.getPackageName(), null);
+            intent.setData(uri);
+            mStorageAccessPermissionActivityLauncher.launch(intent);
+        }
+    }
+
+
+    /**************************************************************************
+     *
+     * helper for deprecated startActivityForResult()
+     *
+     *************************************************************************/
+    private void registerStorageAccessPermissionCallback()
+    {
+        mStorageAccessPermissionActivityLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>()
+                {
+                    @Override
+                    @RequiresApi(api = Build.VERSION_CODES.R)
+                    public void onActivityResult(ActivityResult result)
+                    {
+                        // Note that the resultCode is not helpful here, fwr
+                        if (Environment.isExternalStorageManager())
+                        {
+                            Log.d(LOG_TAG, "registerStorageAccessPermissionCallback(): permission granted");
+                            onPermissionGranted();
+                        }
+                        else
+                        {
+                            Log.d(LOG_TAG, "registerStorageAccessPermissionCallback(): permission denied");
+                            Toast.makeText(getApplicationContext(), R.string.str_permission_denied, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+    }
+
+
+    /**************************************************************************
+     *
      * helper to start SAF file selector
      *
      *************************************************************************/
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     protected Intent createSafPickerIntent()
     {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);

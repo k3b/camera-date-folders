@@ -123,12 +123,14 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         mustStop = false;
         Log.d(LOG_TAG, "run()");
 
+        boolean bFileMode = (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
+
         nSuccess = 0;
         nFailure = 0;
         nUnchanged = 0;
         if (mTreeUri != null)
         {
-            mUtils = new Utils(mContext, mTreeUri, mbSortYear, mbSortMonth, mbSortDay);
+            mUtils = new Utils(mContext, mTreeUri, mbSortYear, mbSortMonth, mbSortDay, bFileMode);
             int ret = mUtils.gatherFiles(this);
             if (mustStop && (ret == 0))
             {
@@ -148,7 +150,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
             {
                 tellProgress("" + ret + " files collected\n");
                 int i = 0;
-                for (Utils.mvOp op: mUtils.mOps)
+                for (Utils.mvOp op: mUtils.getOps())
                 {
                     if (mustStop)
                     {
@@ -156,30 +158,22 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
                         break;
                     }
 
-                    String fileName = op.srcFile.getName();
-                    Log.d(LOG_TAG, " mv " + op.srcPath + fileName + " ==> " + op.dstPath);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                    String fileName = op.getName();
+                    Log.d(LOG_TAG, " mv " + op.getSrcPath() + fileName + " ==> " + op.getDstPath());
+                    if (mbDryRun)
                     {
-                        if (mbDryRun)
-                        {
-                            nSuccess++;
-                        }
-                        else
-                        {
-                            boolean retm = mUtils.mvFile(op);
-                            if (retm)
-                            {
-                                nSuccess++;
-                            } else
-                            {
-                                nFailure++;
-                            }
-                        }
+                        nSuccess++;
                     }
                     else
                     {
-                        nFailure++;
-                        Log.d(LOG_TAG, " not supported, needs API level 24");
+                        boolean retm = op.move();
+                        if (retm)
+                        {
+                            nSuccess++;
+                        } else
+                        {
+                            nFailure++;
+                        }
                     }
                     i++;
                     tellProgress(fileName + " (" + i + "/" + mUtils.mOps.size() + ")");

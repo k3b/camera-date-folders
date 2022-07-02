@@ -1,3 +1,7 @@
+Version 1.1
+
+- File (non SAF) mode added for Android 5 and 6.
+
 Version 1.0
 
 - initial version

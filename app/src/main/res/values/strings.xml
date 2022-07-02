@@ -15,4 +15,5 @@
     <string name="str_dry_run">Dry Run (debug mode):</string>
     <string name="str_press_start">Press START to sort your photos or REVERT to move them back to base directory.</string>
     <string name="str_no_cam_path">No camera folder selected. Go to Paths view!</string>
+    <string name="str_permission_denied">External storage write access denied. Hence, it cannot function properly. Please consider granting this permission!</string>
 </resources>
