@@ -6,82 +6,101 @@
     android:layout_height="match_parent"
     tools:context=".ui.preferences.PreferencesFragment">
 
-    <RadioGroup
-        android:id="@+id/schemeRadioGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+    <!-- The bottom margin of the scroll view is necessary, otherwise content is hidden behind navigation bar. FWFR. -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="54dp"
+        android:fadeScrollbars="false"
+        >
 
-        <TextView
-            android:id="@+id/button_header"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="12dp"
-            android:text="@string/str_scheme"
-            android:textSize="20sp" />
+            android:orientation="vertical" >
 
-        <RadioButton
-            android:id="@+id/button_scheme_y_m_d"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="1965/1965-07/1965-07-21"
-            tools:ignore="HardcodedText" />
+            <RadioGroup
+                android:id="@+id/schemeRadioGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="16dp">
 
-        <RadioButton
-            android:id="@+id/button_scheme_m_d"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="1965-07/1965-07-21"
-            tools:ignore="HardcodedText" />
+                <TextView
+                    android:id="@+id/button_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="12dp"
+                    android:text="@string/str_scheme"
+                    android:textSize="20sp" />
 
-        <RadioButton
-            android:id="@+id/button_scheme_y_d"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="1965/1965-07-21"
-            tools:ignore="HardcodedText" />
+                <RadioButton
+                    android:id="@+id/button_scheme_y_m_d"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="1965/1965-07/1965-07-21"
+                    tools:ignore="HardcodedText" />
 
-        <RadioButton
-            android:id="@+id/button_scheme_y_m"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="1965/1965-07"
-            tools:ignore="HardcodedText" />
+                <RadioButton
+                    android:id="@+id/button_scheme_m_d"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="1965-07/1965-07-21"
+                    tools:ignore="HardcodedText" />
 
-        <RadioButton
-            android:id="@+id/button_scheme_d"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="1965-07-21"
-            tools:ignore="HardcodedText" />
+                <RadioButton
+                    android:id="@+id/button_scheme_y_d"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="1965/1965-07-21"
+                    tools:ignore="HardcodedText" />
 
-        <RadioButton
-            android:id="@+id/button_scheme_m"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="1965-07"
-            tools:ignore="HardcodedText" />
+                <RadioButton
+                    android:id="@+id/button_scheme_y_m"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="1965/1965-07"
+                    tools:ignore="HardcodedText" />
 
-        <RadioButton
-            android:id="@+id/button_scheme_y"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="1965"
-            tools:ignore="HardcodedText" />
-    </RadioGroup>
+                <RadioButton
+                    android:id="@+id/button_scheme_d"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="1965-07-21"
+                    tools:ignore="HardcodedText" />
 
-    <com.google.android.material.switchmaterial.SwitchMaterial
-        android:id="@+id/switchDryRun"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="24dp"
-        android:text="@string/str_dry_run"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/schemeRadioGroup" />
+                <RadioButton
+                    android:id="@+id/button_scheme_m"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="1965-07"
+                    tools:ignore="HardcodedText" />
+
+                <RadioButton
+                    android:id="@+id/button_scheme_y"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="1965"
+                    tools:ignore="HardcodedText" />
+
+            </RadioGroup>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchForceFileMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="24dp"
+                android:text="@string/str_force_file_mode" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchDryRun"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:text="@string/str_dry_run" />
+
+        </LinearLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
