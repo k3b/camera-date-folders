@@ -22,6 +22,7 @@ public class PreferencesFragment extends Fragment
 {
     public static final String PREF_FOLDER_SCHEME = "prefFolderScheme";
     public static final String PREF_DRY_RUN = "prefDryRun";
+    public static final String PREF_FORCE_FILE_MODE = "prefForceFileMode";
 
     private static final String LOG_TAG = "CDF : PF";
     //private PreferencesViewModel viewModel;
@@ -119,6 +120,25 @@ public class PreferencesFragment extends Fragment
                 Log.d(LOG_TAG, "Dry Run switch = " + b);
                 SharedPreferences.Editor prefEditor = prefs.edit();
                 prefEditor.putBoolean(PREF_DRY_RUN, b);
+                prefEditor.apply();
+            }
+        });
+
+        //
+        // force file mode switch
+        //
+
+        final SwitchCompat swForceFileMode = binding.switchForceFileMode;
+        bState = prefs.getBoolean(PREF_FORCE_FILE_MODE, false);
+        swForceFileMode.setChecked(bState);
+        swForceFileMode.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton view, boolean b)
+            {
+                Log.d(LOG_TAG, "Force File Mode switch = " + b);
+                SharedPreferences.Editor prefEditor = prefs.edit();
+                prefEditor.putBoolean(PREF_FORCE_FILE_MODE, b);
                 prefEditor.apply();
             }
         });

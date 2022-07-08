@@ -58,6 +58,7 @@ import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMI
 import static de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment.PREF_CAM_FOLDER_URI;
 import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_DRY_RUN;
 import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_FOLDER_SCHEME;
+import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_FORCE_FILE_MODE;
 
 // https://stackoverflow.com/questions/63548323/how-to-use-viewmodel-in-a-fragment
 // https://stackoverflow.com/questions/6091194/how-to-handle-button-clicks-using-the-xml-onclick-within-fragments
@@ -85,6 +86,7 @@ public class MainActivity extends AppCompatActivity
     private boolean mbThreadRunning = false;
     private boolean mbThreadRunningRevert = false;
     private final static int sMaxLogLen = 10000;
+    private boolean mbPermissionGranted = false;
 
 
 
@@ -289,6 +291,7 @@ public class MainActivity extends AppCompatActivity
      *************************************************************************/
     private void onPermissionGranted()
     {
+        mbPermissionGranted = true;
     }
 
 
@@ -340,6 +343,7 @@ public class MainActivity extends AppCompatActivity
             onPermissionGranted();
         } else
         {
+            mbPermissionGranted = false;
             Log.d(LOG_TAG, "request permission");
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
@@ -431,7 +435,17 @@ public class MainActivity extends AppCompatActivity
     {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        String scheme = (bFlatten) ? "flat" :  prefs.getString(PREF_FOLDER_SCHEME, "ymd");
+        boolean forceFileMode = prefs.getBoolean(PREF_FORCE_FILE_MODE, false);
+        if (forceFileMode)
+        {
+            requestForPermissionOld();
+            if (!mbPermissionGranted)
+            {
+                Toast.makeText(this, "No permission, yet. Grant and retry!", Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+
         boolean dryRun = prefs.getBoolean(PREF_DRY_RUN, false);
         if (dryRun)
         {
@@ -439,7 +453,8 @@ public class MainActivity extends AppCompatActivity
         }
 
         MyApplication app = (MyApplication) getApplication();
-        int result = app.runWorkerThread(this, mDcimTreeUri, scheme, dryRun);
+        String scheme = (bFlatten) ? "flat" :  prefs.getString(PREF_FOLDER_SCHEME, "ymd");
+        int result = app.runWorkerThread(this, mDcimTreeUri, scheme, dryRun, forceFileMode);
         if (result == 0)
         {
             mCurrHomeText = "";

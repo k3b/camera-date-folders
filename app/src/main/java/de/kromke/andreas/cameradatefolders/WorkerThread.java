@@ -36,6 +36,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
     boolean mbSortMonth = true;
     boolean mbSortDay = true;
     private boolean mbDryRun = false;
+    private boolean mbForceFileMode = false;
     private Utils mUtils = null;
     // result
     private int nSuccess = 0;
@@ -47,7 +48,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         mApplication = application;
     }
 
-    public void setParameters(Context context, Uri uri, String scheme, boolean bDryRun)
+    public void setParameters(Context context, Uri uri, String scheme, boolean bDryRun, boolean bForceFileMode)
     {
         mTreeUri = uri;
         switch (scheme)
@@ -95,6 +96,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
                 break;
         }
         mbDryRun = bDryRun;
+        mbForceFileMode = bForceFileMode;
         mContext = context;
     }
 
@@ -123,7 +125,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         mustStop = false;
         Log.d(LOG_TAG, "run()");
 
-        boolean bFileMode = (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
+        boolean bFileMode = mbForceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
 
         nSuccess = 0;
         nFailure = 0;

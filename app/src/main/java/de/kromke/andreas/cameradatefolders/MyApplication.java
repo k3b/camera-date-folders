@@ -37,7 +37,7 @@ public class MyApplication extends Application
     private MainActivity mActivityForThread = null;  // null: thread is not running
 
     // called from UI thread
-    int runWorkerThread(MainActivity activity, Uri uri, String scheme, boolean bDryRun)
+    int runWorkerThread(MainActivity activity, Uri uri, String scheme, boolean bDryRun, boolean bForceFileMode)
     {
         if ((thread != null) && (thread.isBusy))
         {
@@ -53,7 +53,7 @@ public class MyApplication extends Application
             */
             thread = new WorkerThread(this);
         }
-        thread.setParameters(activity, uri, scheme, bDryRun);
+        thread.setParameters(activity, uri, scheme, bDryRun, bForceFileMode);
         mActivityForThread = activity;
         executor.execute(thread);
         return 0;
