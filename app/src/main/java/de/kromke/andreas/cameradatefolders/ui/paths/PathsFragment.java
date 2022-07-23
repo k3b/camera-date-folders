@@ -19,6 +19,7 @@ import de.kromke.andreas.cameradatefolders.databinding.FragmentPathsBinding;
 public class PathsFragment extends Fragment
 {
     public static final String PREF_CAM_FOLDER_URI = "prefCamFolderUri";
+    public static final String PREF_DEST_FOLDER_URI = "prefDestFolderUri";
 
     private PathsViewModel viewModel;
     private FragmentPathsBinding binding;
@@ -35,7 +36,8 @@ public class PathsFragment extends Fragment
 
         final TextView textView = binding.textPaths;
         String val = prefs.getString(PREF_CAM_FOLDER_URI, "(unset)");
-        viewModel.setText(val);
+        String val2 = prefs.getString(PREF_DEST_FOLDER_URI, "(unset)");
+        viewModel.setText(val, val2);
 //        textView.setText(val);
         viewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
         {
@@ -55,13 +57,16 @@ public class PathsFragment extends Fragment
         binding = null;
     }
 
-    public void onPathChanged(String uri)
+    public void onPathChanged(String uriDcim, String uriDest)
     {
-        viewModel.setText(uri);
+        viewModel.setText(uriDcim, uriDest);
     }
 
     public void cbSelectCameraFolder(View v)
     {
+    }
 
+    public void cbDestFolder(View view)
+    {
     }
 }

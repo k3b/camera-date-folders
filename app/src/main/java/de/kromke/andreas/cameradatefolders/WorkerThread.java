@@ -32,9 +32,11 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
     // parameters
     private Context mContext = null;
     private Uri mTreeUri = null;
+    private Uri mDestTreeUri = null;
     boolean mbSortYear = true;
     boolean mbSortMonth = true;
     boolean mbSortDay = true;
+    private boolean mbBackupCopy = false;
     private boolean mbDryRun = false;
     private boolean mbForceFileMode = false;
     private Utils mUtils = null;
@@ -48,9 +50,15 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         mApplication = application;
     }
 
-    public void setParameters(Context context, Uri uri, String scheme, boolean bDryRun, boolean bForceFileMode)
+    public void setParameters
+    (
+        Context context,
+        Uri srcUri, Uri dstUri,
+        String scheme,
+        boolean backupCopy, boolean bDryRun, boolean bForceFileMode
+    )
     {
-        mTreeUri = uri;
+        mTreeUri = srcUri;
         switch (scheme)
         {
             default:
@@ -95,6 +103,8 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
                 mbSortDay = false;
                 break;
         }
+        mDestTreeUri = dstUri;
+        mbBackupCopy = backupCopy;
         mbDryRun = bDryRun;
         mbForceFileMode = bForceFileMode;
         mContext = context;

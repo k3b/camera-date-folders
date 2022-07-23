@@ -21,6 +21,7 @@ import de.kromke.andreas.cameradatefolders.databinding.FragmentPreferencesBindin
 public class PreferencesFragment extends Fragment
 {
     public static final String PREF_FOLDER_SCHEME = "prefFolderScheme";
+    public static final String PREF_BACKUP_COPY = "prefBackupCopy";
     public static final String PREF_DRY_RUN = "prefDryRun";
     public static final String PREF_FORCE_FILE_MODE = "prefForceFileMode";
 
@@ -106,11 +107,30 @@ public class PreferencesFragment extends Fragment
             });
 
         //
+        // backup copy switch
+        //
+
+        final SwitchCompat swBackupCopy = binding.switchBackupCopy;
+        boolean bState = prefs.getBoolean(PREF_BACKUP_COPY, false);
+        swBackupCopy.setChecked(bState);
+        swBackupCopy.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton view, boolean b)
+            {
+                Log.d(LOG_TAG, "Backup Copy switch = " + b);
+                SharedPreferences.Editor prefEditor = prefs.edit();
+                prefEditor.putBoolean(PREF_BACKUP_COPY, b);
+                prefEditor.apply();
+            }
+        });
+
+        //
         // dry run switch
         //
 
         final SwitchCompat swDryRun = binding.switchDryRun;
-        boolean bState = prefs.getBoolean(PREF_DRY_RUN, false);
+        bState = prefs.getBoolean(PREF_DRY_RUN, false);
         swDryRun.setChecked(bState);
         swDryRun.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener()
         {

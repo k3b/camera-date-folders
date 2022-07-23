@@ -19,8 +19,9 @@ public class PathsViewModel extends ViewModel
         return mText;
     }
 
-    public void setText(final String text)
+    public void setText(final String srcPath, final String dstPath)
     {
+        String text = srcPath + "\n\n==>\n\n" + dstPath;
         String readable_text = text.replace("%3A", ":").replace("%2F", "/");
         mText.setValue(readable_text);
     }

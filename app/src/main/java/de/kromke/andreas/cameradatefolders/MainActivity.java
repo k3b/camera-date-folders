@@ -56,9 +56,11 @@ import de.kromke.andreas.cameradatefolders.ui.home.HomeFragment;
 
 import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION;
 import static de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment.PREF_CAM_FOLDER_URI;
+import static de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment.PREF_DEST_FOLDER_URI;
 import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_DRY_RUN;
 import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_FOLDER_SCHEME;
 import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_FORCE_FILE_MODE;
+import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_BACKUP_COPY;
 
 // https://stackoverflow.com/questions/63548323/how-to-use-viewmodel-in-a-fragment
 // https://stackoverflow.com/questions/6091194/how-to-handle-button-clicks-using-the-xml-onclick-within-fragments
@@ -74,6 +76,7 @@ public class MainActivity extends AppCompatActivity
     ActivityResultLauncher<Intent> mStorageAccessPermissionActivityLauncher;
     ActivityResultLauncher<Intent> mRequestDirectorySelectActivityLauncher;
     Uri mDcimTreeUri = null;
+    Uri mDestTreeUri = null;
     Timer mTimer;
     MyTimerTask mTimerTask;
     private static final int timerFrequency = 500;         // milliseconds
@@ -87,6 +90,7 @@ public class MainActivity extends AppCompatActivity
     private boolean mbThreadRunningRevert = false;
     private final static int sMaxLogLen = 10000;
     private boolean mbPermissionGranted = false;
+    private boolean mbSafModeIsDestFolder = false;  // hack, because cannot pass parameters
 
 
 
@@ -224,6 +228,11 @@ public class MainActivity extends AppCompatActivity
         if (val != null)
         {
             mDcimTreeUri = Uri.parse(val);
+        }
+        val = prefs.getString(PREF_DEST_FOLDER_URI, null);
+        if (val != null)
+        {
+            mDestTreeUri = Uri.parse(val);
         }
 
         registerDirectorySelectCallback();
@@ -452,9 +461,11 @@ public class MainActivity extends AppCompatActivity
             Toast.makeText(this, "Dry Run!", Toast.LENGTH_LONG).show();
         }
 
+        boolean backupCopy = prefs.getBoolean(PREF_BACKUP_COPY, false);
+
         MyApplication app = (MyApplication) getApplication();
         String scheme = (bFlatten) ? "flat" :  prefs.getString(PREF_FOLDER_SCHEME, "ymd");
-        int result = app.runWorkerThread(this, mDcimTreeUri, scheme, dryRun, forceFileMode);
+        int result = app.runWorkerThread(this, mDcimTreeUri, mDestTreeUri, scheme, backupCopy, dryRun, forceFileMode);
         if (result == 0)
         {
             mCurrHomeText = "";
@@ -544,6 +555,20 @@ public class MainActivity extends AppCompatActivity
      *************************************************************************/
     public void onClickSelectCameraFolder(View view)
     {
+        mbSafModeIsDestFolder = false;
+        Intent intent = createSafPickerIntent();
+        mRequestDirectorySelectActivityLauncher.launch(intent);
+    }
+
+
+    /**************************************************************************
+     *
+     * onClick callback
+     *
+     *************************************************************************/
+    public void onClickSelectDestinationFolder(View view)
+    {
+        mbSafModeIsDestFolder = true;
         Intent intent = createSafPickerIntent();
         mRequestDirectorySelectActivityLauncher.launch(intent);
     }
@@ -556,7 +581,7 @@ public class MainActivity extends AppCompatActivity
      * https://stackoverflow.com/questions/51385067/android-navigation-architecture-component-get-current-visible-fragment
      *
      *************************************************************************/
-    private void onDcimPathChanged()
+    private void onPathWasChanged()
     {
         FragmentManager fm = getSupportFragmentManager();
         // Fragment f = fm.findFragmentById(R.id.navigation_dashboard);     DOES not work, because of navigation bar
@@ -567,7 +592,7 @@ public class MainActivity extends AppCompatActivity
             if (f instanceof PathsFragment)
             {
                 PathsFragment fd = (PathsFragment) f;
-                fd.onPathChanged(mDcimTreeUri.getPath());
+                fd.onPathChanged(mDcimTreeUri.getPath(), mDestTreeUri.getPath());
             }
         }
     }
@@ -619,14 +644,20 @@ public class MainActivity extends AppCompatActivity
 
                                 grantUriPermission(getPackageName(), treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                                 getContentResolver().takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                                mDcimTreeUri = treeUri;
-
                                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                                 SharedPreferences.Editor prefEditor = prefs.edit();
-                                prefEditor.putString(PREF_CAM_FOLDER_URI, treeUri.toString());
+                                if (mbSafModeIsDestFolder)
+                                {
+                                    prefEditor.putString(PREF_DEST_FOLDER_URI, treeUri.toString());
+                                    mDestTreeUri = treeUri;
+                                }
+                                else
+                                {
+                                    prefEditor.putString(PREF_CAM_FOLDER_URI, treeUri.toString());
+                                    mDcimTreeUri = treeUri;
+                                }
                                 prefEditor.apply();
-
-                                onDcimPathChanged();
+                                onPathWasChanged();
                             }
                         }
                     }
