@@ -142,8 +142,16 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         nUnchanged = 0;
         if (mTreeUri != null)
         {
-            mUtils = new Utils(mContext, mTreeUri, mbSortYear, mbSortMonth, mbSortDay, bFileMode);
-            int ret = mUtils.gatherFiles(this);
+            if (bFileMode)
+            {
+                mUtils = new OpsFileMode(mContext, mTreeUri, mbSortYear, mbSortMonth, mbSortDay);
+            }
+            else
+            {
+                mUtils = new OpsSafMode(mContext, mTreeUri, mbSortYear, mbSortMonth, mbSortDay);
+            }
+            mUtils.gatherFiles(this);
+            int ret = mUtils.getOps().size();
             if (mustStop && (ret == 0))
             {
                 tellProgress("stopped on demand");
