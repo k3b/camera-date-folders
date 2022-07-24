@@ -41,6 +41,7 @@ public class OpsSafMode extends Utils
 {
     private static final String LOG_TAG = "CDF : OpsSaf";
     private final DocumentFile mRootDir;      // photo directory in proprietary SAF mode
+    private final DocumentFile mDestDir;      // maybe null
 
     // a single move operation in SAF mode
     public class mvOpSaf implements mvOp
@@ -87,7 +88,22 @@ public class OpsSafMode extends Utils
         if (pathsOverlap(treeUri, destUri))
         {
             mRootDir = null;
+            mDestDir = null;
             return;
+        }
+        if (destUri == null)
+        {
+            mDestDir = null;
+        }
+        else
+        {
+            mDestDir = DocumentFile.fromTreeUri(mContext, destUri);
+            if (mDestDir == null)
+            {
+                Log.e(LOG_TAG, "OpsFileMode() -- invalid destUri: " + destUri);
+                mRootDir = null;
+                return;
+            }
         }
         mRootDir = DocumentFile.fromTreeUri(mContext, treeUri);
     }

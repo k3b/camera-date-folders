@@ -28,6 +28,7 @@ public class OpsFileMode extends Utils
 {
     private static final String LOG_TAG = "CDF : OpsFile";
     private final File mRootDirFile;          // photo directory in traditional File mode
+    private final File mDestDirFile;          // maybe null
 
     // a single move operation in File mode
     public class mvOpFile implements mvOp
@@ -64,11 +65,31 @@ public class OpsFileMode extends Utils
     OpsFileMode(Context context, Uri treeUri, Uri destUri, boolean sortYear, boolean sortMonth, boolean sortDay)
     {
         super(context, sortYear, sortMonth, sortDay);
+
         if (pathsOverlap(treeUri, destUri))
         {
             mRootDirFile = null;
+            mDestDirFile = null;
             return;
         }
+
+        if (destUri == null)
+        {
+            mDestDirFile = null;
+        }
+        else
+        {
+            String p = UriToPath.getPathFromUri(context, destUri);
+            if (p == null)
+            {
+                Log.e(LOG_TAG, "OpsFileMode() -- invalid destUri: " + destUri);
+                mRootDirFile = null;
+                mDestDirFile = null;
+                return;
+            }
+            mDestDirFile = new File(p);
+        }
+
         String p = UriToPath.getPathFromUri(context, treeUri);
         if (p != null)
         {

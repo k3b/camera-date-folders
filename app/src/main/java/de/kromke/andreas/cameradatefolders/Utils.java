@@ -119,17 +119,18 @@ public class Utils
      *************************************************************************/
     public static boolean pathsOverlap(final Uri uri1, final Uri uri2)
     {
-        final String path1 = uri1.getPath();
-        final String path2 = uri2.getPath();
-        if (path2.startsWith(path1) || path1.startsWith(path2))
+        if ((uri1 != null) && (uri2 != null))
         {
-            Log.e(LOG_TAG, "pathsOverlap() -- paths may not overlap: " + path1 + " and " + path2);
-            return true;
+            final String path1 = uri1.getPath();
+            final String path2 = uri2.getPath();
+            if (path2.startsWith(path1) || path1.startsWith(path2))
+            {
+                Log.e(LOG_TAG, "pathsOverlap() -- paths may not overlap: " + path1 + " and " + path2);
+                return true;
+            }
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
 
