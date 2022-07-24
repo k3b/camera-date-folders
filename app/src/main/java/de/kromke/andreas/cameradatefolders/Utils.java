@@ -19,25 +19,23 @@
 package de.kromke.andreas.cameradatefolders;
 
 import android.annotation.SuppressLint;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.provider.DocumentsContract;
 import android.util.Log;
-import android.widget.Toast;
 
-import java.io.File;
+import java.io.Closeable;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
-import androidx.annotation.RequiresApi;
-import androidx.documentfile.provider.DocumentFile;
 
 // the actual work is done here
 public class Utils
@@ -373,6 +371,60 @@ public class Utils
             ret += date.year + "-" + date.month + "-" + date.day + "/";
         }
         return ret;
+    }
+
+
+    /**************************************************************************
+     *
+     * helper
+     *
+     *************************************************************************/
+    protected static void closeStream(Closeable s)
+    {
+        try
+        {
+            s.close();
+        }
+        catch (Exception e)
+        {
+            Log.e(LOG_TAG, "I/O exception");
+        }
+    }
+
+
+    /**************************************************************************
+     *
+     * helper
+     *
+     *************************************************************************/
+    protected static boolean copyStream(InputStream is, OutputStream os)
+    {
+        boolean result = true;
+        try
+        {
+            byte[] buffer = new byte[4096];
+            int length;
+            while ((length = is.read(buffer)) > 0)
+            {
+                os.write(buffer, 0, length);
+            }
+        } catch (FileNotFoundException e)
+        {
+            Log.e(LOG_TAG, "file not found");
+            result = false;
+        } catch (IOException e)
+        {
+            Log.e(LOG_TAG, "I/O exception");
+            result = false;
+        } finally
+        {
+            if (is != null)
+                closeStream(is);
+            if (os != null)
+                closeStream(os);
+        }
+
+        return result;
     }
 
 

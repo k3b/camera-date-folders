@@ -22,13 +22,19 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+
 
 // the actual work is done here
 public class OpsFileMode extends Utils
 {
     private static final String LOG_TAG = "CDF : OpsFile";
-    private final File mRootDirFile;          // photo directory in traditional File mode
-    private final File mDestDirFile;          // maybe null
+    private final File mRootDir;          // photo directory
+    private final File mDestDir;          // maybe null
+    private boolean mbMoveDocumentSupported = true;     // starting optimistic
 
     // a single move operation in File mode
     public class mvOpFile implements mvOp
@@ -68,14 +74,14 @@ public class OpsFileMode extends Utils
 
         if (pathsOverlap(treeUri, destUri))
         {
-            mRootDirFile = null;
-            mDestDirFile = null;
+            mRootDir = null;
+            mDestDir = null;
             return;
         }
 
         if (destUri == null)
         {
-            mDestDirFile = null;
+            mDestDir = null;
         }
         else
         {
@@ -83,21 +89,21 @@ public class OpsFileMode extends Utils
             if (p == null)
             {
                 Log.e(LOG_TAG, "OpsFileMode() -- invalid destUri: " + destUri);
-                mRootDirFile = null;
-                mDestDirFile = null;
+                mRootDir = null;
+                mDestDir = null;
                 return;
             }
-            mDestDirFile = new File(p);
+            mDestDir = new File(p);
         }
 
         String p = UriToPath.getPathFromUri(context, treeUri);
         if (p != null)
         {
-            mRootDirFile = new File(p);
+            mRootDir = new File(p);
         }
         else
         {
-            mRootDirFile = null;
+            mRootDir = null;
         }
     }
 
@@ -109,13 +115,17 @@ public class OpsFileMode extends Utils
      *************************************************************************/
     public void gatherFiles(ProgressCallBack callback)
     {
-        if (mRootDirFile == null)
+        super.gatherFiles(callback);
+        if (mRootDir == null)
         {
             Log.e(LOG_TAG, "gatherFiles() -- no directory");
             return;
         }
-        super.gatherFiles(callback);
-        gatherDirectoryFileMode(mRootDirFile, "", callback);
+        if (mDestDir != null)
+        {
+            gatherDirectory(mDestDir, "", true, callback);
+        }
+        gatherDirectory(mRootDir, "", false, callback);
     }
 
 
@@ -126,7 +136,7 @@ public class OpsFileMode extends Utils
      *************************************************************************/
     private boolean mvFile(mvOpFile op)
     {
-        File dstDirectory = (mDestDirFile != null) ? mDestDirFile : mRootDirFile;
+        File dstDirectory = (mDestDir != null) ? mDestDir : mRootDir;
         String[] pathFrags = op.dstPath.split("/");
         boolean newDirectory = false;
 
@@ -168,16 +178,20 @@ public class OpsFileMode extends Utils
         }
 
         File dstFile = new File(dstDirectory, op.srcFile.getName());
-        try
+        if ((mbMoveDocumentSupported) && ((mDestDir == null) || !mbBackupCopy))
         {
-            return op.srcFile.renameTo(dstFile);
+            try
+            {
+                return op.srcFile.renameTo(dstFile);
+            } catch (Exception e)
+            {
+                mbMoveDocumentSupported = false;
+                Log.e(LOG_TAG, "cannot move file to " + ((newDirectory) ? "new" : "existing") + "directory");
+                Log.e(LOG_TAG, "mvFile() -- exception " + e);
+            }
         }
-        catch (Exception e)
-        {
-            Log.e(LOG_TAG, "cannot move file to " + ((newDirectory) ? "new" : "existing") + "directory");
-            Log.e(LOG_TAG, "mvFile() -- exception " + e);
-        }
-        return false;
+
+        return copyFile(op.srcFile, dstDirectory, !mbBackupCopy);
     }
 
 
@@ -187,7 +201,7 @@ public class OpsFileMode extends Utils
      * (similar to gatherDirectory(), but in File instead of SAF mode)
      *
      *************************************************************************/
-    private void gatherDirectoryFileMode(File dd, String path, ProgressCallBack callback)
+    private void gatherDirectory(File dd, String path,  boolean bProcessingDestination, ProgressCallBack callback)
     {
         Log.d(LOG_TAG, "gatherDirectoryFileMode() -- ENTER DIRECTORY " + dd.getName());
 
@@ -221,14 +235,13 @@ public class OpsFileMode extends Utils
                 if (directoryLevel < maxDirectoryLevel)
                 {
                     directoryLevel++;
-                    gatherDirectoryFileMode(df, path + "/" + name, callback);
+                    gatherDirectory(df, path + "/" + name, bProcessingDestination, callback);
                     directoryLevel--;
                 }
                 else
                 {
                     Log.w(LOG_TAG, "gatherDirectoryFileMode() -- path depth overflow, ignoring " + name);
                 }
-
             }
             else
             {
@@ -244,20 +257,23 @@ public class OpsFileMode extends Utils
                     camFileDate date = isCameraFile(name);
                     if (date != null)
                     {
-                        Log.d(LOG_TAG, "gatherDirectoryFileMode() -- camera file found: " + path + "/" + name);
-                        mvOpFile op = new mvOpFile();
-                        op.srcPath = path + "/";
-                        op.dstPath = getDestPath(date);
-                        if (op.srcPath.equals(op.dstPath))
+                        // files in source that are already present in destination must not be processed
+                        boolean bProcess = mustBeProcessed(name, path, bProcessingDestination);
+                        if (bProcess)
                         {
-                            Log.d(LOG_TAG, "   already sorted to its date directory");
-                            mUnchangedFiles++;
-                        }
-                        else
-                        {
-                            op.srcDirectory = dd;
-                            op.srcFile = df;
-                            mOps.add(op);
+                            mvOpFile op = new mvOpFile();
+                            op.srcPath = path + "/";
+                            op.dstPath = getDestPath(date);
+                            if (op.srcPath.equals(op.dstPath))
+                            {
+                                Log.d(LOG_TAG, "   already sorted to its date directory");
+                                mUnchangedFiles++;
+                            } else
+                            {
+                                op.srcDirectory = dd;
+                                op.srcFile = df;
+                                mOps.add(op);
+                            }
                         }
                     }
                     else
@@ -274,6 +290,170 @@ public class OpsFileMode extends Utils
         }
 
         Log.d(LOG_TAG, "gatherDirectoryFileMode() -- LEAVE DIRECTORY " + dd.getName());
+    }
+
+
+    /**************************************************************************
+     *
+     * recursively walk through tree and remove unused date  directories
+     *
+     * return number of remaining directory entries in
+     *
+     *************************************************************************/
+    private int tidyDirectory(File dd, String path, ProgressCallBack callback)
+    {
+        Log.d(LOG_TAG, "tidyDirectory() -- ENTER DIRECTORY " + dd.getName());
+        int numOfRemainingFiles = 0;
+
+        if (mustStop)
+        {
+            Log.d(LOG_TAG, "tidyDirectory() -- stopped");
+            return 1;
+        }
+
+        File[] entries = dd.listFiles();
+        if (entries == null)
+        {
+            entries = new File[0];  // replace null ptr with empty array
+        }
+        Log.d(LOG_TAG, "tidyDirectory() -- number of files found: " + entries.length);
+        for (File df: entries)
+        {
+            if (mustStop)
+            {
+                numOfRemainingFiles = 1;
+                break;
+            }
+
+            final String name = df.getName();
+            if (df.isDirectory() && isDateDirectory(name))
+            {
+                if (directoryLevel < maxDirectoryLevel)
+                {
+                    directoryLevel++;
+                    int remain = tidyDirectory(df, path + "/" + name, callback);
+                    directoryLevel--;
+                    if (remain > 0)
+                    {
+                        numOfRemainingFiles++;
+                    }
+                    else
+                    {
+                        callback.tellProgress("removing empty " + path + "/" + name);
+                        if (!mbDryRun)
+                        {
+                            if (!df.delete())
+                            {
+                                Log.e(LOG_TAG, "cannot delete empty directory " + df);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    numOfRemainingFiles++;
+                    Log.w(LOG_TAG, "tidyDirectory() -- path depth overflow, ignoring " + name);
+                }
+
+            }
+            else
+            {
+                numOfRemainingFiles++;
+            }
+        }
+
+        Log.d(LOG_TAG, "tidyDirectory() -- LEAVE DIRECTORY " + dd.getName() + " with " + numOfRemainingFiles + " entries");
+        return numOfRemainingFiles;
+    }
+
+
+    /**************************************************************************
+     *
+     * Phase 3: remove empty directories that look like date/time related
+     *
+     *************************************************************************/
+    public void removeUnusedDateFolders(ProgressCallBack callback)
+    {
+        super.removeUnusedDateFolders(callback);
+        File destDir = (mDestDir != null) ? mDestDir : mRootDir;
+        tidyDirectory(destDir, "", callback);
+    }
+
+
+    /**************************************************************************
+     *
+     * Copy file to destination directory
+     *
+     *************************************************************************/
+    private boolean copyFile
+    (
+        File sourceDocument,
+        File targetParentDocument,
+        boolean bRemoveSrcOnSuccess
+    )
+    {
+        //
+        // open source file for reading
+        //
+
+        final String name = sourceDocument.getName();
+
+        InputStream is;
+        try
+        {
+            is = new FileInputStream(sourceDocument);
+        } catch (Exception e)
+        {
+            // cannot open source for reading: fatal failure
+            Log.e(LOG_TAG, "I/O exception: " + e);
+            return false;
+        }
+
+        //
+        // create a new destination file
+        //
+
+        File df = new File(targetParentDocument, name);
+        try
+        {
+            if (!df.createNewFile())
+            {
+                // cannot open source for reading: fatal failure
+                Log.e(LOG_TAG, "cannot create new file: " + df);
+                return false;
+            }
+        } catch (Exception e)
+        {
+            // cannot open source for reading: fatal failure
+            Log.e(LOG_TAG, "I/O exception: " + e);
+            return false;
+        }
+
+        //
+        // copy data
+        //
+
+        try
+        {
+            FileOutputStream os = new FileOutputStream(df);
+            if (copyStream(is, os))
+            {
+                if (bRemoveSrcOnSuccess)
+                {
+                    if (!sourceDocument.delete())
+                    {
+                        Log.e(LOG_TAG, "cannot delete source file " + sourceDocument);
+                    }
+                }
+                return true;
+            }
+        } catch (FileNotFoundException e)
+        {
+            closeStream(is);
+            Log.e(LOG_TAG, "cannot create output stream");
+        }
+
+        return false;
     }
 
 }

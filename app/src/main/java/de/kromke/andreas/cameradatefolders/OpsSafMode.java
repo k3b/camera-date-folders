@@ -25,9 +25,7 @@ import android.os.Build;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
-import java.io.Closeable;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -119,6 +117,11 @@ public class OpsSafMode extends Utils
     public void gatherFiles(ProgressCallBack callback)
     {
         super.gatherFiles(callback);
+        if (mRootDir == null)
+        {
+            Log.e(LOG_TAG, "gatherFiles() -- no directory");
+            return;
+        }
         if (mDestDir != null)
         {
             gatherDirectory(mDestDir, "", true, callback);
@@ -351,7 +354,11 @@ public class OpsSafMode extends Utils
                     directoryLevel++;
                     int remain = tidyDirectory(df, path + "/" + name, callback);
                     directoryLevel--;
-                    if (remain == 0)
+                    if (remain > 0)
+                    {
+                        numOfRemainingFiles++;
+                    }
+                    else
                     {
                         callback.tellProgress("removing empty " + path + "/" + name);
                         if (!mbDryRun)
@@ -380,7 +387,7 @@ public class OpsSafMode extends Utils
 
     /**************************************************************************
      *
-     * Phase 2: remove empty directories that look like date/time related
+     * Phase 3: remove empty directories that look like date/time related
      *
      *************************************************************************/
     public void removeUnusedDateFolders(ProgressCallBack callback)
@@ -388,60 +395,6 @@ public class OpsSafMode extends Utils
         super.removeUnusedDateFolders(callback);
         DocumentFile destDir = (mDestDir != null) ? mDestDir : mRootDir;
         tidyDirectory(destDir, "", callback);
-    }
-
-
-    /**************************************************************************
-     *
-     * helper
-     *
-     *************************************************************************/
-    private static void closeStream(Closeable s)
-    {
-        try
-        {
-            s.close();
-        }
-        catch (Exception e)
-        {
-            Log.e(LOG_TAG, "I/O exception");
-        }
-    }
-
-
-    /**************************************************************************
-     *
-     * helper
-     *
-     *************************************************************************/
-    private static boolean copyStream(InputStream is, OutputStream os)
-    {
-        boolean result = true;
-        try
-        {
-            byte[] buffer = new byte[4096];
-            int length;
-            while ((length = is.read(buffer)) > 0)
-            {
-                os.write(buffer, 0, length);
-            }
-        } catch (FileNotFoundException e)
-        {
-            Log.e(LOG_TAG, "file not found");
-            result = false;
-        } catch (IOException e)
-        {
-            Log.e(LOG_TAG, "I/O exception");
-            result = false;
-        } finally
-        {
-            if (is != null)
-                closeStream(is);
-            if (os != null)
-                closeStream(os);
-        }
-
-        return result;
     }
 
 
