@@ -36,7 +36,7 @@ public class PathsFragment extends Fragment
 
         final TextView textView = binding.textPaths;
         String val = prefs.getString(PREF_CAM_FOLDER_URI, "(unset)");
-        String val2 = prefs.getString(PREF_DEST_FOLDER_URI, "(unset)");
+        String val2 = prefs.getString(PREF_DEST_FOLDER_URI, null);
         viewModel.setText(val, val2);
 //        textView.setText(val);
         viewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()

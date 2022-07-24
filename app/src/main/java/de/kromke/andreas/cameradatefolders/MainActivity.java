@@ -568,9 +568,16 @@ public class MainActivity extends AppCompatActivity
      *************************************************************************/
     public void onClickSelectDestinationFolder(View view)
     {
-        mbSafModeIsDestFolder = true;
-        Intent intent = createSafPickerIntent();
-        mRequestDirectorySelectActivityLauncher.launch(intent);
+        if (mDcimTreeUri == null)
+        {
+            Toast.makeText(getApplicationContext(), R.string.str_must_select_dcim_path, Toast.LENGTH_LONG).show();
+        }
+        else
+        {
+            mbSafModeIsDestFolder = true;
+            Intent intent = createSafPickerIntent();
+            mRequestDirectorySelectActivityLauncher.launch(intent);
+        }
     }
 
 
@@ -592,7 +599,9 @@ public class MainActivity extends AppCompatActivity
             if (f instanceof PathsFragment)
             {
                 PathsFragment fd = (PathsFragment) f;
-                fd.onPathChanged(mDcimTreeUri.getPath(), mDestTreeUri.getPath());
+                String val1 = (mDcimTreeUri == null) ? null : mDcimTreeUri.getPath();
+                String val2 = (mDestTreeUri == null) ? null : mDestTreeUri.getPath();
+                fd.onPathChanged(val1, val2);
             }
         }
     }
@@ -634,31 +643,43 @@ public class MainActivity extends AppCompatActivity
                     {
                         int resultCode = result.getResultCode();
                         Intent data = result.getData();
+                        boolean bUpdatePrefs = false;
+                        Uri treeUri = null;
 
                         if ((resultCode == RESULT_OK) && (data != null))
                         {
-                            Uri treeUri = data.getData();
+                            treeUri = data.getData();
                             if (treeUri != null)
                             {
                                 Log.d(LOG_TAG, " URI = " + treeUri.getPath());
-
-                                grantUriPermission(getPackageName(), treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                                getContentResolver().takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                                SharedPreferences.Editor prefEditor = prefs.edit();
-                                if (mbSafModeIsDestFolder)
-                                {
-                                    prefEditor.putString(PREF_DEST_FOLDER_URI, treeUri.toString());
-                                    mDestTreeUri = treeUri;
-                                }
-                                else
-                                {
-                                    prefEditor.putString(PREF_CAM_FOLDER_URI, treeUri.toString());
-                                    mDcimTreeUri = treeUri;
-                                }
-                                prefEditor.apply();
-                                onPathWasChanged();
+                                bUpdatePrefs = true;
                             }
+                        }
+                        else
+                        if (mbSafModeIsDestFolder)
+                        {
+                            // remove dest folder
+                            bUpdatePrefs = true;
+                        }
+
+                        if (bUpdatePrefs)
+                        {
+                            // remove dest folder
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                            SharedPreferences.Editor prefEditor = prefs.edit();
+                            final String val = (treeUri != null) ? treeUri.toString() : null;
+                            if (mbSafModeIsDestFolder)
+                            {
+                                prefEditor.putString(PREF_DEST_FOLDER_URI, val);
+                                mDestTreeUri = treeUri;
+                            }
+                            else
+                            {
+                                prefEditor.putString(PREF_CAM_FOLDER_URI, val);
+                                mDcimTreeUri = treeUri;
+                            }
+                            prefEditor.apply();
+                            onPathWasChanged();
                         }
                     }
                 });
