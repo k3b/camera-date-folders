@@ -58,12 +58,17 @@ public class OpsFileMode extends Utils
 
     /**************************************************************************
      *
-     * constructor, also chooses between File and SAF mode
+     * constructor
      *
      *************************************************************************/
-    OpsFileMode(Context context, Uri treeUri, boolean sortYear, boolean sortMonth, boolean sortDay)
+    OpsFileMode(Context context, Uri treeUri, Uri destUri, boolean sortYear, boolean sortMonth, boolean sortDay)
     {
         super(context, sortYear, sortMonth, sortDay);
+        if (pathsOverlap(treeUri, destUri))
+        {
+            mRootDirFile = null;
+            return;
+        }
         String p = UriToPath.getPathFromUri(context, treeUri);
         if (p != null)
         {

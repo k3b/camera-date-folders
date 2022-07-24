@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.DocumentsContract;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -108,6 +109,27 @@ public class Utils
         mUnchangedFiles = 0;
         mFiles = 0;     // TODO: remove debug code
         directoryLevel = 0;
+    }
+
+
+    /**************************************************************************
+     *
+     * check if these two paths overlap
+     *
+     *************************************************************************/
+    public static boolean pathsOverlap(final Uri uri1, final Uri uri2)
+    {
+        final String path1 = uri1.getPath();
+        final String path2 = uri2.getPath();
+        if (path2.startsWith(path1) || path1.startsWith(path2))
+        {
+            Log.e(LOG_TAG, "pathsOverlap() -- paths may not overlap: " + path1 + " and " + path2);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
 

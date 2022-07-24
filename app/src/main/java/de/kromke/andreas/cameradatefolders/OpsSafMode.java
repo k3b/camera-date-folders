@@ -78,12 +78,17 @@ public class OpsSafMode extends Utils
 
     /**************************************************************************
      *
-     * constructor, also chooses between File and SAF mode
+     * constructor
      *
      *************************************************************************/
-    OpsSafMode(Context context, Uri treeUri, boolean sortYear, boolean sortMonth, boolean sortDay)
+    OpsSafMode(Context context, Uri treeUri, Uri destUri, boolean sortYear, boolean sortMonth, boolean sortDay)
     {
         super(context, sortYear, sortMonth, sortDay);
+        if (pathsOverlap(treeUri, destUri))
+        {
+            mRootDir = null;
+            return;
+        }
         mRootDir = DocumentFile.fromTreeUri(mContext, treeUri);
     }
 

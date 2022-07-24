@@ -652,6 +652,14 @@ public class MainActivity extends AppCompatActivity
                             if (treeUri != null)
                             {
                                 Log.d(LOG_TAG, " URI = " + treeUri.getPath());
+                                if (mbSafModeIsDestFolder)
+                                {
+                                    if (Utils.pathsOverlap(mDcimTreeUri, treeUri))
+                                    {
+                                        treeUri = null;     // remove path
+                                        Toast.makeText(getApplicationContext(), R.string.str_paths_overlap, Toast.LENGTH_LONG).show();
+                                    }
+                                }
                                 bUpdatePrefs = true;
                             }
                         }
