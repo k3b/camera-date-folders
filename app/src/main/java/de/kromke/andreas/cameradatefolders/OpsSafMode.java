@@ -83,9 +83,9 @@ public class OpsSafMode extends Utils
      * constructor
      *
      *************************************************************************/
-    OpsSafMode(Context context, Uri treeUri, Uri destUri, boolean backupCopy, boolean sortYear, boolean sortMonth, boolean sortDay)
+    OpsSafMode(Context context, Uri treeUri, Uri destUri, boolean backupCopy, boolean dryRun, boolean sortYear, boolean sortMonth, boolean sortDay)
     {
-        super(context, backupCopy, sortYear, sortMonth, sortDay);
+        super(context, backupCopy, dryRun, sortYear, sortMonth, sortDay);
         mResolver = mContext.getContentResolver();
         if (pathsOverlap(treeUri, destUri))
         {
@@ -139,7 +139,7 @@ public class OpsSafMode extends Utils
         String[] pathFrags = op.dstPath.split("/");
         boolean newDirectory = false;
 
-        DocumentFile[] temp = dstDirectory.listFiles();     // DEBUG
+        //DocumentFile[] temp = dstDirectory.listFiles();     // DEBUG
 
         for (String frag: pathFrags)
         {
@@ -312,6 +312,82 @@ public class OpsSafMode extends Utils
         }
 
         Log.d(LOG_TAG, "gatherDirectory() -- LEAVE DIRECTORY " + dd.getName());
+    }
+
+
+    /**************************************************************************
+     *
+     * recursively walk through tree and remove unused date  directories
+     *
+     * return number of remaining directory entries in
+     *
+     *************************************************************************/
+    private int tidyDirectory(DocumentFile dd, String path, ProgressCallBack callback)
+    {
+        Log.d(LOG_TAG, "tidyDirectory() -- ENTER DIRECTORY " + dd.getName());
+        int numOfRemainingFiles = 0;
+
+        if (mustStop)
+        {
+            Log.d(LOG_TAG, "tidyDirectory() -- stopped");
+            return 1;
+        }
+
+        DocumentFile[] entries = dd.listFiles();
+        Log.d(LOG_TAG, "tidyDirectory() -- number of files found: " + entries.length);
+        for (DocumentFile df: entries)
+        {
+            if (mustStop)
+            {
+                numOfRemainingFiles = 1;
+                break;
+            }
+
+            final String name = df.getName();
+            if ((name != null) && df.isDirectory() && isDateDirectory(name))
+            {
+                if (directoryLevel < maxDirectoryLevel)
+                {
+                    directoryLevel++;
+                    int remain = tidyDirectory(df, path + "/" + name, callback);
+                    directoryLevel--;
+                    if (remain == 0)
+                    {
+                        callback.tellProgress("removing empty " + path + "/" + name);
+                        if (!mbDryRun)
+                        {
+                            df.delete();
+                        }
+                    }
+                }
+                else
+                {
+                    numOfRemainingFiles++;
+                    Log.w(LOG_TAG, "tidyDirectory() -- path depth overflow, ignoring " + name);
+                }
+
+            }
+            else
+            {
+                numOfRemainingFiles++;
+            }
+        }
+
+        Log.d(LOG_TAG, "tidyDirectory() -- LEAVE DIRECTORY " + dd.getName() + " with " + numOfRemainingFiles + " entries");
+        return numOfRemainingFiles;
+    }
+
+
+    /**************************************************************************
+     *
+     * Phase 2: remove empty directories that look like date/time related
+     *
+     *************************************************************************/
+    public void removeUnusedDateFolders(ProgressCallBack callback)
+    {
+        super.removeUnusedDateFolders(callback);
+        DocumentFile destDir = (mDestDir != null) ? mDestDir : mRootDir;
+        tidyDirectory(destDir, "", callback);
     }
 
 

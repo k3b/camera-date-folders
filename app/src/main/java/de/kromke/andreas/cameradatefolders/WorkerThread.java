@@ -144,11 +144,11 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         {
             if (bFileMode)
             {
-                mUtils = new OpsFileMode(mContext, mTreeUri, mDestTreeUri, mbBackupCopy, mbSortYear, mbSortMonth, mbSortDay);
+                mUtils = new OpsFileMode(mContext, mTreeUri, mDestTreeUri, mbBackupCopy, mbDryRun, mbSortYear, mbSortMonth, mbSortDay);
             }
             else
             {
-                mUtils = new OpsSafMode(mContext, mTreeUri, mDestTreeUri, mbBackupCopy, mbSortYear, mbSortMonth, mbSortDay);
+                mUtils = new OpsSafMode(mContext, mTreeUri, mDestTreeUri, mbBackupCopy, mbDryRun, mbSortYear, mbSortMonth, mbSortDay);
             }
             mUtils.gatherFiles(this);
             int ret = mUtils.getOps().size();
@@ -200,6 +200,8 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
                 }
                 Log.d(LOG_TAG, "files moved: " + nSuccess + ", failures: " + nFailure);
             }
+
+            mUtils.removeUnusedDateFolders(this);
         }
 
         mUtils = null;

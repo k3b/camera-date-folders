@@ -46,6 +46,7 @@ public class Utils
     public boolean mustStop = false;
     protected Context mContext;
     protected boolean mbBackupCopy;
+    protected boolean mbDryRun;
     protected int directoryLevel;
     protected static final int maxDirectoryLevel = 8;
     protected static final int maxFiles = 1000000;    // TODO: remove debug code
@@ -56,6 +57,7 @@ public class Utils
     protected Set<String> mFilesInDest = null;    // list of photo files in destination directory
 
     public int mUnchangedFiles;
+    public int mRemovedDirectories;
     protected int mFiles;    // TODO: remove debug code
     protected FindFileCache mFfCache = new FindFileCache();
 
@@ -88,10 +90,11 @@ public class Utils
      * constructor, also chooses between File and SAF mode
      *
      *************************************************************************/
-    Utils(Context context, boolean backupCopy, boolean sortYear, boolean sortMonth, boolean sortDay)
+    Utils(Context context, boolean backupCopy, boolean dryRun, boolean sortYear, boolean sortMonth, boolean sortDay)
     {
         mContext = context;
         mbBackupCopy = backupCopy;
+        mbDryRun = dryRun;
         mSortYear = sortYear;
         mSortMonth = sortMonth;
         mSortDay = sortDay;
@@ -115,6 +118,18 @@ public class Utils
         mFilesInDest = new HashSet<>();     // hash is faster than ArrayList when searching
         mUnchangedFiles = 0;
         mFiles = 0;     // TODO: remove debug code
+        directoryLevel = 0;
+    }
+
+
+    /**************************************************************************
+     *
+     * Phase 2: remove empty directories that look like date/time related
+     *
+     *************************************************************************/
+    public void removeUnusedDateFolders(ProgressCallBack callback)
+    {
+        mRemovedDirectories = 0;
         directoryLevel = 0;
     }
 
@@ -298,6 +313,42 @@ public class Utils
         }
 
         return ret;
+    }
+
+
+    /**************************************************************************
+     *
+     * heuristic method to decide if a directory is date related
+     *
+     * name scheme is yyyy or yyyy-mm or yyyy-mm-dd
+     *
+     *************************************************************************/
+    protected boolean isDateDirectory(final String name)
+    {
+        int len = name.length();
+        if (len > 10)
+        {
+            return false;
+        }
+        int i;
+        for (i = 0; i < len; i++)
+        {
+            char c = name.charAt(i);
+            if ((i == 4) || (i == 7))
+            {
+                if (c != '-')
+                {
+                    return false;
+                }
+            }
+            else
+            if (!Character.isDigit(c))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 

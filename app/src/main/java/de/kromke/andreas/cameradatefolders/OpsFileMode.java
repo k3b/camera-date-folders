@@ -62,9 +62,9 @@ public class OpsFileMode extends Utils
      * constructor
      *
      *************************************************************************/
-    OpsFileMode(Context context, Uri treeUri, Uri destUri, boolean backupCopy, boolean sortYear, boolean sortMonth, boolean sortDay)
+    OpsFileMode(Context context, Uri treeUri, Uri destUri, boolean backupCopy, boolean dryRun, boolean sortYear, boolean sortMonth, boolean sortDay)
     {
-        super(context, backupCopy, sortYear, sortMonth, sortDay);
+        super(context, backupCopy, dryRun, sortYear, sortMonth, sortDay);
 
         if (pathsOverlap(treeUri, destUri))
         {
