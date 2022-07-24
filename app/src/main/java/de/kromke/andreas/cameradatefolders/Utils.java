@@ -33,6 +33,8 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import androidx.annotation.RequiresApi;
 import androidx.documentfile.provider.DocumentFile;
@@ -43,6 +45,7 @@ public class Utils
     private static final String LOG_TAG = "CDF : Utils";
     public boolean mustStop = false;
     protected Context mContext;
+    protected boolean mbBackupCopy;
     protected int directoryLevel;
     protected static final int maxDirectoryLevel = 8;
     protected static final int maxFiles = 1000000;    // TODO: remove debug code
@@ -50,6 +53,8 @@ public class Utils
     protected boolean mSortMonth;
     protected boolean mSortDay;
     public ArrayList<mvOp> mOps = null;
+    protected Set<String> mFilesInDest = null;    // list of photo files in destination directory
+
     public int mUnchangedFiles;
     protected int mFiles;    // TODO: remove debug code
     protected FindFileCache mFfCache = new FindFileCache();
@@ -83,9 +88,10 @@ public class Utils
      * constructor, also chooses between File and SAF mode
      *
      *************************************************************************/
-    Utils(Context context, boolean sortYear, boolean sortMonth, boolean sortDay)
+    Utils(Context context, boolean backupCopy, boolean sortYear, boolean sortMonth, boolean sortDay)
     {
         mContext = context;
+        mbBackupCopy = backupCopy;
         mSortYear = sortYear;
         mSortMonth = sortMonth;
         mSortDay = sortDay;
@@ -106,9 +112,45 @@ public class Utils
     public void gatherFiles(ProgressCallBack callback)
     {
         mOps = new ArrayList<>();
+        mFilesInDest = new HashSet<>();     // hash is faster than ArrayList when searching
         mUnchangedFiles = 0;
         mFiles = 0;     // TODO: remove debug code
         directoryLevel = 0;
+    }
+
+
+    /**************************************************************************
+     *
+     * (Phase 1): check if file must be moved/copied in case path does not match
+     *
+     * path is only for log
+     *
+     *************************************************************************/
+    protected boolean mustBeProcessed(final String name, final String path, boolean bIsInDestDir)
+    {
+        if (bIsInDestDir)
+        {
+            // gather filenames in destination directory
+            Log.d(LOG_TAG, "gatherDirectory() -- camera file found in dest: " + path + "/" + name);
+            mFilesInDest.add(name);
+        }
+        else
+        if (mFilesInDest != null)
+        {
+            // check if file is already stored in destination
+            if (mFilesInDest.contains(name))
+            {
+                Log.d(LOG_TAG, "gatherDirectory() -- old camera file found: " + path + "/" + name);
+                return false;
+            } else
+            {
+                Log.d(LOG_TAG, "gatherDirectory() -- new camera file found: " + path + "/" + name);
+            }
+        } else
+        {
+            Log.d(LOG_TAG, "gatherDirectory() -- camera file found: " + path + "/" + name);
+        }
+        return true;
     }
 
 

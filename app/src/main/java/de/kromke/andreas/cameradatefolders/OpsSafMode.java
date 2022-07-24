@@ -18,20 +18,18 @@
 
 package de.kromke.andreas.cameradatefolders;
 
-import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.io.Closeable;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import androidx.annotation.RequiresApi;
 import androidx.documentfile.provider.DocumentFile;
@@ -42,13 +40,16 @@ public class OpsSafMode extends Utils
     private static final String LOG_TAG = "CDF : OpsSaf";
     private final DocumentFile mRootDir;      // photo directory in proprietary SAF mode
     private final DocumentFile mDestDir;      // maybe null
+    private final ContentResolver mResolver;
+    private boolean mbMoveDocumentSupported = true;     // starting optimistic
+    private boolean mbCopyDocumentSupported = true;
 
     // a single move operation in SAF mode
     public class mvOpSaf implements mvOp
     {
         public DocumentFile srcFile;
         public DocumentFile srcDirectory;
-        public String dstPath;              // relative to photo directory
+        public String dstPath;              // relative to photo directory or destination directory
         public String srcPath;              // debug helper
 
         public String getName()
@@ -82,9 +83,10 @@ public class OpsSafMode extends Utils
      * constructor
      *
      *************************************************************************/
-    OpsSafMode(Context context, Uri treeUri, Uri destUri, boolean sortYear, boolean sortMonth, boolean sortDay)
+    OpsSafMode(Context context, Uri treeUri, Uri destUri, boolean backupCopy, boolean sortYear, boolean sortMonth, boolean sortDay)
     {
-        super(context, sortYear, sortMonth, sortDay);
+        super(context, backupCopy, sortYear, sortMonth, sortDay);
+        mResolver = mContext.getContentResolver();
         if (pathsOverlap(treeUri, destUri))
         {
             mRootDir = null;
@@ -117,7 +119,11 @@ public class OpsSafMode extends Utils
     public void gatherFiles(ProgressCallBack callback)
     {
         super.gatherFiles(callback);
-        gatherDirectory(mRootDir, "", callback);
+        if (mDestDir != null)
+        {
+            gatherDirectory(mDestDir, "", true, callback);
+        }
+        gatherDirectory(mRootDir, "", false, callback);
     }
 
 
@@ -129,10 +135,11 @@ public class OpsSafMode extends Utils
     @RequiresApi(api = Build.VERSION_CODES.N)
     private boolean mvFileSaf(mvOpSaf op)
     {
-        ContentResolver content = mContext.getContentResolver();
-        DocumentFile dstDirectory = mRootDir;
+        DocumentFile dstDirectory = (mDestDir != null) ? mDestDir : mRootDir;
         String[] pathFrags = op.dstPath.split("/");
         boolean newDirectory = false;
+
+        DocumentFile[] temp = dstDirectory.listFiles();     // DEBUG
 
         for (String frag: pathFrags)
         {
@@ -171,17 +178,41 @@ public class OpsSafMode extends Utils
             }
         }
 
-        try
+        if ((mbMoveDocumentSupported) && ((mDestDir == null) || !mbBackupCopy))
         {
-            Uri newUri = DocumentsContract.moveDocument(content, op.srcFile.getUri(), op.srcDirectory.getUri(), dstDirectory.getUri());
-            return newUri != null;
+            try
+            {
+                Uri newUri = DocumentsContract.moveDocument(mResolver, op.srcFile.getUri(), op.srcDirectory.getUri(), dstDirectory.getUri());
+                return newUri != null;
+            } catch (Exception e)
+            {
+                mbMoveDocumentSupported = false;
+                Log.e(LOG_TAG, "cannot move file to " + ((newDirectory) ? "new" : "existing") + " directory");
+                Log.e(LOG_TAG, "mvFile() -- exception " + e);
+            }
         }
-        catch (Exception e)
+
+        if ((mDestDir != null) && mbCopyDocumentSupported)
         {
-            Log.e(LOG_TAG, "cannot move file to " + ((newDirectory) ? "new" : "existing") + "directory");
-            Log.e(LOG_TAG, "mvFile() -- exception " + e);
+            try
+            {
+                Uri newUri = DocumentsContract.copyDocument(mResolver, op.srcFile.getUri(), dstDirectory.getUri());
+                if ((newUri != null) && !mbBackupCopy)
+                {
+                    op.srcFile.delete();
+                    return true;        // copy source to destination, then delete source
+                }
+                return false;
+            }
+            catch (Exception ec)
+            {
+                mbCopyDocumentSupported = false;
+                Log.e(LOG_TAG, "cannot copy file to " + ((newDirectory) ? "new" : "existing") + " directory");
+                Log.e(LOG_TAG, "mvFile() -- exception " + ec);
+            }
         }
-        return false;
+
+        return copyFile(op.srcFile, dstDirectory, !mbBackupCopy);
     }
 
 
@@ -190,7 +221,7 @@ public class OpsSafMode extends Utils
      * recursively walk through tree and gather mv operations to mOps
      *
      *************************************************************************/
-    private void gatherDirectory(DocumentFile dd, String path, ProgressCallBack callback)
+    private void gatherDirectory(DocumentFile dd, String path, boolean bProcessingDestination, ProgressCallBack callback)
     {
         Log.d(LOG_TAG, "gatherDirectory() -- ENTER DIRECTORY " + dd.getName());
 
@@ -225,7 +256,7 @@ public class OpsSafMode extends Utils
                 if (directoryLevel < maxDirectoryLevel)
                 {
                     directoryLevel++;
-                    gatherDirectory(df, path + "/" + name, callback);
+                    gatherDirectory(df, path + "/" + name, bProcessingDestination, callback);
                     directoryLevel--;
                 }
                 else
@@ -248,20 +279,23 @@ public class OpsSafMode extends Utils
                     camFileDate date = isCameraFile(name);
                     if (date != null)
                     {
-                        Log.d(LOG_TAG, "gatherDirectory() -- camera file found: " + path + "/" + name);
-                        mvOpSaf op = new mvOpSaf();
-                        op.srcPath = path + "/";
-                        op.dstPath = getDestPath(date);
-                        if (op.srcPath.equals(op.dstPath))
+                        // files in source that are already present in destination must not be processed
+                        boolean bProcess = mustBeProcessed(name, path, bProcessingDestination);
+                        if (bProcess)
                         {
-                            Log.d(LOG_TAG, "   already sorted to its date directory");
-                            mUnchangedFiles++;
-                        }
-                        else
-                        {
-                            op.srcDirectory = dd;
-                            op.srcFile = df;
-                            mOps.add(op);
+                            mvOpSaf op = new mvOpSaf();
+                            op.srcPath = path + "/";
+                            op.dstPath = getDestPath(date);
+                            if (op.srcPath.equals(op.dstPath))
+                            {
+                                Log.d(LOG_TAG, "   already sorted to its date directory");
+                                mUnchangedFiles++;
+                            } else
+                            {
+                                op.srcDirectory = dd;
+                                op.srcFile = df;
+                                mOps.add(op);
+                            }
                         }
                     }
                     else
@@ -278,5 +312,133 @@ public class OpsSafMode extends Utils
         }
 
         Log.d(LOG_TAG, "gatherDirectory() -- LEAVE DIRECTORY " + dd.getName());
+    }
+
+
+    /**************************************************************************
+     *
+     * helper
+     *
+     *************************************************************************/
+    private static void closeStream(Closeable s)
+    {
+        try
+        {
+            s.close();
+        }
+        catch (Exception e)
+        {
+            Log.e(LOG_TAG, "I/O exception");
+        }
+    }
+
+
+    /**************************************************************************
+     *
+     * helper
+     *
+     *************************************************************************/
+    private static boolean copyStream(InputStream is, OutputStream os)
+    {
+        boolean result = true;
+        try
+        {
+            byte[] buffer = new byte[4096];
+            int length;
+            while ((length = is.read(buffer)) > 0)
+            {
+                os.write(buffer, 0, length);
+            }
+        } catch (FileNotFoundException e)
+        {
+            Log.e(LOG_TAG, "file not found");
+            result = false;
+        } catch (IOException e)
+        {
+            Log.e(LOG_TAG, "I/O exception");
+            result = false;
+        } finally
+        {
+            if (is != null)
+                closeStream(is);
+            if (os != null)
+                closeStream(os);
+        }
+
+        return result;
+    }
+
+
+    /**************************************************************************
+     *
+     * Copy file to destination directory
+     *
+     *************************************************************************/
+    private boolean copyFile
+    (
+        DocumentFile sourceDocument,
+        DocumentFile targetParentDocument,
+        boolean bRemoveSrcOnSuccess
+    )
+    {
+        //
+        // open source file for reading
+        //
+
+        final String name = sourceDocument.getName();
+        if (name == null)
+        {
+            Log.e(LOG_TAG, "cannot get name: " + sourceDocument.getUri());
+            return false;
+        }
+
+        InputStream is;
+        try
+        {
+            is = mResolver.openInputStream(sourceDocument.getUri());
+        } catch (Exception e)
+        {
+            // cannot open source for reading: fatal failure
+            Log.e(LOG_TAG, "I/O exception: " + e);
+            return false;
+        }
+
+        //
+        // create a new destination file
+        //
+
+        String type = mResolver.getType(sourceDocument.getUri());
+        DocumentFile df = targetParentDocument.createFile(type, name);
+        if (df == null)
+        {
+            // cannot create destination file: fatal failure
+            Log.e(LOG_TAG, "cannot create destination file " + name + " in: " + targetParentDocument.getUri());
+            closeStream(is);
+            return false;
+        }
+
+        //
+        // copy data
+        //
+
+        OutputStream os;
+        try
+        {
+            os = mResolver.openOutputStream(df.getUri());
+            if (copyStream(is, os))
+            {
+                if (bRemoveSrcOnSuccess)
+                {
+                    sourceDocument.delete();
+                }
+                return true;
+            }
+        } catch (FileNotFoundException e)
+        {
+            closeStream(is);
+            Log.e(LOG_TAG, "cannot create output stream");
+        }
+
+        return false;
     }
 }

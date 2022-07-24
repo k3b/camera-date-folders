@@ -144,11 +144,11 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         {
             if (bFileMode)
             {
-                mUtils = new OpsFileMode(mContext, mTreeUri, mDestTreeUri, mbSortYear, mbSortMonth, mbSortDay);
+                mUtils = new OpsFileMode(mContext, mTreeUri, mDestTreeUri, mbBackupCopy, mbSortYear, mbSortMonth, mbSortDay);
             }
             else
             {
-                mUtils = new OpsSafMode(mContext, mTreeUri, mDestTreeUri, mbSortYear, mbSortMonth, mbSortDay);
+                mUtils = new OpsSafMode(mContext, mTreeUri, mDestTreeUri, mbBackupCopy, mbSortYear, mbSortMonth, mbSortDay);
             }
             mUtils.gatherFiles(this);
             int ret = mUtils.getOps().size();

@@ -62,9 +62,9 @@ public class OpsFileMode extends Utils
      * constructor
      *
      *************************************************************************/
-    OpsFileMode(Context context, Uri treeUri, Uri destUri, boolean sortYear, boolean sortMonth, boolean sortDay)
+    OpsFileMode(Context context, Uri treeUri, Uri destUri, boolean backupCopy, boolean sortYear, boolean sortMonth, boolean sortDay)
     {
-        super(context, sortYear, sortMonth, sortDay);
+        super(context, backupCopy, sortYear, sortMonth, sortDay);
 
         if (pathsOverlap(treeUri, destUri))
         {
@@ -126,7 +126,7 @@ public class OpsFileMode extends Utils
      *************************************************************************/
     private boolean mvFile(mvOpFile op)
     {
-        File dstDirectory = mRootDirFile;
+        File dstDirectory = (mDestDirFile != null) ? mDestDirFile : mRootDirFile;
         String[] pathFrags = op.dstPath.split("/");
         boolean newDirectory = false;
 
