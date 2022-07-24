@@ -1,5 +1,7 @@
 Sorts all photos, located in the device's camera folder, into a date specific subfolder structure. This makes it easier to transfer specific photos to a computer, e.g. via USB cable (MTP protocol).
 
+Either keep photos inside the camera folder tree or move or copy them to a separate directory. This can also used as a simple backup method.
+
 Up to three levels are supported: year, month and day. The sorting can be reverted, i.e. all photos can be moved back to the camera base directory.
 
 The program does not read metadata (EXIF) from the photo files, instead it uses the data information encoded in the filenames.
