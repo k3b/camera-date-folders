@@ -29,7 +29,8 @@ This program creates a folder tree structure and sorts the photos into these fol
 * File names beginning with "PXL\_yyyymmdd_" or "IMG\_yyyymmdd\_".
 * File name extensions ".jpg", ".jpeg" and ".mp4".
 * Storage Access Framework used for Android 7 and newer.
-* Traditional File mode used for Android 5 and 6, as SAF does not support file move operations.
+* Traditional File mode used for Android 4.4, 5 and 6, as SAF does not support file move operations.
+* Fixed camera path "DCIM/Camera" for Android 4.4 due to lack of file selector.
 * Traditional File mode can be forced for Android 7 to 10 for higher speed, but due to Android without write permission to SD card.
 
 # Current Limitations (Yet)
@@ -40,7 +41,7 @@ This program creates a folder tree structure and sorts the photos into these fol
 
 # Permissions Needed
 
-* For Android 5 and 6: Storage write access
+* For Android 4.4, 5 and 6: Storage write access
 * For Android 7 and newer: Storage write access only needed on demand, if File mode is forced
 
 # Technical Procedere

@@ -32,6 +32,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -44,6 +45,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
@@ -555,9 +557,30 @@ public class MainActivity extends AppCompatActivity
      *************************************************************************/
     public void onClickSelectCameraFolder(View view)
     {
-        mbSafModeIsDestFolder = false;
-        Intent intent = createSafPickerIntent();
-        mRequestDirectorySelectActivityLauncher.launch(intent);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
+        {
+            mbSafModeIsDestFolder = false;
+            Intent intent = null;
+            intent = createSafPickerIntent();
+            mRequestDirectorySelectActivityLauncher.launch(intent);
+        }
+        else
+        {
+            File dcimPath = new File(Environment.getExternalStorageDirectory(), "DCIM");
+            File camPath = new File(dcimPath, "Camera");
+            if (!camPath.isDirectory())
+            {
+                camPath = dcimPath;
+            }
+            mDcimTreeUri = Uri.fromFile(camPath);
+
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            SharedPreferences.Editor prefEditor = prefs.edit();
+            prefEditor.putString(PREF_CAM_FOLDER_URI, mDcimTreeUri.toString());
+            prefEditor.apply();
+
+            onPathWasChanged();
+        }
     }
 
 
@@ -574,9 +597,17 @@ public class MainActivity extends AppCompatActivity
         }
         else
         {
-            mbSafModeIsDestFolder = true;
-            Intent intent = createSafPickerIntent();
-            mRequestDirectorySelectActivityLauncher.launch(intent);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
+            {
+                mbSafModeIsDestFolder = true;
+                Intent intent = createSafPickerIntent();
+                mRequestDirectorySelectActivityLauncher.launch(intent);
+            }
+            else
+            {
+                mDestTreeUri = null;
+                onPathWasChanged();
+            }
         }
     }
 
@@ -672,7 +703,6 @@ public class MainActivity extends AppCompatActivity
 
                         if (bUpdatePrefs)
                         {
-                            // remove dest folder
                             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                             SharedPreferences.Editor prefEditor = prefs.edit();
                             final String val = (treeUri != null) ? treeUri.toString() : null;
