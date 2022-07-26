@@ -259,6 +259,8 @@ public class OpsSafMode extends Utils
             return;
         }
 
+        boolean bComparePaths = bProcessingDestination || (mDestDir == null);
+
         DocumentFile[] entries = dd.listFiles();
         Log.d(LOG_TAG, "gatherDirectory() -- number of files found: " + entries.length);
         for (DocumentFile df: entries)
@@ -314,7 +316,7 @@ public class OpsSafMode extends Utils
                             mvOpSaf op = new mvOpSaf();
                             op.srcPath = path + "/";
                             op.dstPath = getDestPath(date);
-                            if (op.srcPath.equals(op.dstPath))
+                            if (bComparePaths && op.srcPath.equals(op.dstPath))
                             {
                                 Log.d(LOG_TAG, "   already sorted to its date directory");
                                 mUnchangedFiles++;

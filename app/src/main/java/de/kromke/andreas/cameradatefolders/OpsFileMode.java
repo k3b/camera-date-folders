@@ -224,6 +224,7 @@ public class OpsFileMode extends Utils
             Log.d(LOG_TAG, "gatherDirectoryFileMode() -- stopped");
             return;
         }
+        boolean bComparePaths = bProcessingDestination || (mDestDir == null);
 
         File[] entries = dd.listFiles();
         if (entries == null)
@@ -278,7 +279,7 @@ public class OpsFileMode extends Utils
                             mvOpFile op = new mvOpFile();
                             op.srcPath = path + "/";
                             op.dstPath = getDestPath(date);
-                            if (op.srcPath.equals(op.dstPath))
+                            if (bComparePaths && op.srcPath.equals(op.dstPath))
                             {
                                 Log.d(LOG_TAG, "   already sorted to its date directory");
                                 mUnchangedFiles++;
