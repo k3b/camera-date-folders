@@ -49,6 +49,7 @@ public class OpsSafMode extends Utils
         public DocumentFile srcDirectory;
         public String dstPath;              // relative to photo directory or destination directory
         public String srcPath;              // debug helper
+        public boolean bCopy;               // copy from source to destination
 
         public String getName()
         {
@@ -132,7 +133,7 @@ public class OpsSafMode extends Utils
 
     /**************************************************************************
      *
-     * Phase 2: execute a single move operation
+     * Phase 2: execute a single move or copy operation
      *
      *************************************************************************/
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -181,12 +182,22 @@ public class OpsSafMode extends Utils
             }
         }
 
-        if ((mbMoveDocumentSupported) && ((mDestDir == null) || !mbBackupCopy))
+        //
+        // First try atomic move operation (in destination folder or if no destination was given)
+        //
+
+        if ((mbMoveDocumentSupported) && (!op.bCopy))
         {
             try
             {
                 Uri newUri = DocumentsContract.moveDocument(mResolver, op.srcFile.getUri(), op.srcDirectory.getUri(), dstDirectory.getUri());
-                return newUri != null;
+                if (newUri != null)
+                {
+                    // move was successful
+                    return true;
+                }
+                Log.e(LOG_TAG, "cannot move file to " + ((newDirectory) ? "new" : "existing") + " directory");
+                return false;
             } catch (Exception e)
             {
                 mbMoveDocumentSupported = false;
@@ -195,16 +206,26 @@ public class OpsSafMode extends Utils
             }
         }
 
+        //
+        // Try atomic copy operation (not inside source folder!)
+        // and delete source, if to be moved from source to destination folder or inside destination folder
+        //
+
         if ((mDestDir != null) && mbCopyDocumentSupported)
         {
             try
             {
                 Uri newUri = DocumentsContract.copyDocument(mResolver, op.srcFile.getUri(), dstDirectory.getUri());
-                if ((newUri != null) && !mbBackupCopy)
+                if (newUri != null)
                 {
-                    op.srcFile.delete();
-                    return true;        // copy source to destination, then delete source
+                    // copy was successful, now delete source, if requested
+                    if (!op.bCopy)
+                    {
+                        op.srcFile.delete();
+                    }
+                    return true;
                 }
+                Log.e(LOG_TAG, "cannot copy file to " + ((newDirectory) ? "new" : "existing") + " directory");
                 return false;
             }
             catch (Exception ec)
@@ -215,7 +236,11 @@ public class OpsSafMode extends Utils
             }
         }
 
-        return copyFile(op.srcFile, dstDirectory, !mbBackupCopy);
+        //
+        // Finally do copy-delete operation manually
+        //
+
+        return copyFile(op.srcFile, dstDirectory, !op.bCopy);
     }
 
 
@@ -297,6 +322,7 @@ public class OpsSafMode extends Utils
                             {
                                 op.srcDirectory = dd;
                                 op.srcFile = df;
+                                op.bCopy = (!bProcessingDestination && mbBackupCopy);
                                 mOps.add(op);
                             }
                         }

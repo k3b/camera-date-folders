@@ -43,6 +43,7 @@ public class OpsFileMode extends Utils
         public File srcFile;
         public File srcDirectory;
         public String dstPath;              // relative to photo directory
+        public boolean bCopy;               // copy from source to destination
 
         public String getName()
         {
@@ -131,7 +132,7 @@ public class OpsFileMode extends Utils
 
     /**************************************************************************
      *
-     * Phase 2: execute a single move operation
+     * Phase 2: execute a single move or copy operation
      *
      *************************************************************************/
     private boolean mvFile(mvOpFile op)
@@ -177,12 +178,21 @@ public class OpsFileMode extends Utils
             }
         }
 
-        File dstFile = new File(dstDirectory, op.srcFile.getName());
-        if ((mbMoveDocumentSupported) && ((mDestDir == null) || !mbBackupCopy))
+        //
+        // First try atomic move operation (in destination folder or if no destination was given)
+        //
+
+        if ((mbMoveDocumentSupported) && (!op.bCopy))
         {
+            File dstFile = new File(dstDirectory, op.srcFile.getName());
             try
             {
-                return op.srcFile.renameTo(dstFile);
+                if (op.srcFile.renameTo(dstFile))
+                {
+                    return true;
+                }
+                Log.e(LOG_TAG, "cannot move file to " + ((newDirectory) ? "new" : "existing") + " directory");
+                return false;
             } catch (Exception e)
             {
                 mbMoveDocumentSupported = false;
@@ -191,7 +201,11 @@ public class OpsFileMode extends Utils
             }
         }
 
-        return copyFile(op.srcFile, dstDirectory, !mbBackupCopy);
+        //
+        // Finally do copy-delete operation manually
+        //
+
+        return copyFile(op.srcFile, dstDirectory, !op.bCopy);
     }
 
 
@@ -272,6 +286,7 @@ public class OpsFileMode extends Utils
                             {
                                 op.srcDirectory = dd;
                                 op.srcFile = df;
+                                op.bCopy = (!bProcessingDestination && mbBackupCopy);
                                 mOps.add(op);
                             }
                         }
