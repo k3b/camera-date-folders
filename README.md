@@ -22,8 +22,9 @@ This program creates a folder tree structure and sorts the photos into these fol
 * One, two or three levels of subfolders.
 * Daily, monthly or yearly subfolders.
 * Revert, i.e. all files are moved back from subfolders to main folder (flattening).
-* Keep photos within camera folder path or specify separate destination directory. A selected destination directory can be removed by leaving the file selector with the BACK button.
+* Keep photos within camera folder path or specify separate destination directory. Deselect destination directory by leaving the file selector with the BACK button.
 * Either move or copy (kind of backup) photos to separate destination directory.
+* Already sorted photos will be re-sorted when subfolder scheme was changed, also in destination folder (if any).
 * File names beginning with "yyyymmdd\_".
 * File names beginning with "PXL\_yyyymmdd_" or "IMG\_yyyymmdd\_".
 * File name extensions ".jpg", ".jpeg" and ".mp4".
@@ -41,6 +42,25 @@ This program creates a folder tree structure and sorts the photos into these fol
 
 * For Android 5 and 6: Storage write access
 * For Android 7 and newer: Storage write access only needed on demand, if File mode is forced
+
+# Technical Procedere
+
+Without destination path:
+
+1. Scan photos and remember those that must be moved, including demanded relative path.
+2. Create all necessary subfolders.
+3. Process all remembered move operations.
+4. Scan photo directory to remove empty date related subfolders.
+
+With destination path:
+
+1. Scan photos in destination path and remember them.
+2. And remember those that must be moved, including demanded relative path.
+3. Scan photos in source path and remember those that are not present in destination path, including demanded relative path in destination.
+4. Create all necessary subfolders in destination path.
+5. Process all remembered move operations in destination path.
+6. Process all remembered move or copy operations from source to destination path.
+7. Scan destination directory to remove empty date related subfolders.
 
 # License
 
