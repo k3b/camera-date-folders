@@ -45,7 +45,6 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
@@ -689,6 +688,22 @@ public class MainActivity extends AppCompatActivity
                                     {
                                         treeUri = null;     // remove path
                                         Toast.makeText(getApplicationContext(), R.string.str_paths_overlap, Toast.LENGTH_LONG).show();
+                                    }
+                                    else
+                                    {
+                                        // in case we are going to use file mode, check if destination is write permitted
+                                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                                        boolean forceFileMode = prefs.getBoolean(PREF_FORCE_FILE_MODE, false);
+                                        boolean bFileMode = forceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
+                                        if (bFileMode)
+                                        {
+                                            String p = UriToPath.getPathFromUri(getApplicationContext(), treeUri);
+                                            File f = (p == null) ? null : new File(p);
+                                            if ((f == null) || !f.canWrite())
+                                            {
+                                                Toast.makeText(getApplicationContext(), R.string.str_permission_denied, Toast.LENGTH_LONG).show();
+                                            }
+                                        }
                                     }
                                 }
                                 bUpdatePrefs = true;

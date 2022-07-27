@@ -69,7 +69,13 @@ public class OpsFileMode extends Utils
      * constructor
      *
      *************************************************************************/
-    OpsFileMode(Context context, Uri treeUri, Uri destUri, boolean backupCopy, boolean dryRun, boolean sortYear, boolean sortMonth, boolean sortDay)
+    OpsFileMode
+    (
+        Context context,
+        Uri treeUri, Uri destUri,
+        boolean backupCopy, boolean dryRun,
+        boolean sortYear, boolean sortMonth, boolean sortDay
+    )
     {
         super(context, backupCopy, dryRun, sortYear, sortMonth, sortDay);
 
@@ -119,11 +125,17 @@ public class OpsFileMode extends Utils
         super.gatherFiles(callback);
         if (mRootDir == null)
         {
+            callback.tellProgress("ERROR: no directory");
             Log.e(LOG_TAG, "gatherFiles() -- no directory");
             return;
         }
         if (mDestDir != null)
         {
+            if (!mDestDir.canWrite())
+            {
+                callback.tellProgress("ERROR: Destination directory is not writeable in File mode.\n");
+                return;
+            }
             gatherDirectory(mDestDir, "", true, callback);
         }
         gatherDirectory(mRootDir, "", false, callback);

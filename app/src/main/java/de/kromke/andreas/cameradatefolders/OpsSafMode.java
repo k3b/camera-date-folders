@@ -125,6 +125,11 @@ public class OpsSafMode extends Utils
         }
         if (mDestDir != null)
         {
+            if (!mDestDir.canWrite())
+            {
+                callback.tellProgress("ERROR: Destination directory is not writeable in SAF mode.\n");
+                return;
+            }
             gatherDirectory(mDestDir, "", true, callback);
         }
         gatherDirectory(mRootDir, "", false, callback);
