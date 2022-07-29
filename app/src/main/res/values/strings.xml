@@ -20,6 +20,7 @@
     <string name="str_no_cam_path">No camera folder selected. Go to Paths view!</string>
     <string name="str_must_select_dcim_path">First select camera folder!</string>
     <string name="str_paths_overlap">ERROR: Destination must not overlap source path!</string>
+    <string name="str_paths_same">Destination same as source. Removing.</string>
     <string name="str_permission_denied">External storage write access denied. Hence, it cannot function properly. Please consider granting this permission!</string>
     <string name="str_no_file_write">Directory write access denied in File mode. Switch to SAF mode or choose different directory!</string>
 </resources>

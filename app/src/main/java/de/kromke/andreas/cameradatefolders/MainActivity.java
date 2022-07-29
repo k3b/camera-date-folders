@@ -674,6 +674,76 @@ public class MainActivity extends AppCompatActivity
 
     /**************************************************************************
      *
+     * path was changed via file selector
+     *
+     *************************************************************************/
+    private void pathSelectedByUser(Uri treeUri, boolean isDest)
+    {
+        boolean bUpdatePrefs = false;
+
+        if (treeUri != null)
+        {
+            Log.d(LOG_TAG, " URI = " + treeUri.getPath());
+            if (isDest)
+            {
+                if (treeUri.equals(mDcimTreeUri))
+                {
+                    treeUri = null;     // remove path
+                    Toast.makeText(getApplicationContext(), R.string.str_paths_same, Toast.LENGTH_LONG).show();
+                }
+                else
+                if (Utils.pathsOverlap(mDcimTreeUri, treeUri))
+                {
+                    treeUri = null;     // remove path
+                    Toast.makeText(getApplicationContext(), R.string.str_paths_overlap, Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    // in case we are going to use file mode, check if destination is write permitted
+                    readPreferences();
+                    if (mbFileMode)
+                    {
+                        String p = UriToPath.getPathFromUri(getApplicationContext(), treeUri);
+                        File f = (p == null) ? null : new File(p);
+                        if ((f == null) || !f.canWrite())
+                        {
+                            Toast.makeText(getApplicationContext(), R.string.str_no_file_write, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+            }
+            bUpdatePrefs = true;
+        }
+        else
+        if (isDest)
+        {
+            // remove dest folder
+            bUpdatePrefs = true;
+        }
+
+        if (bUpdatePrefs)
+        {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            SharedPreferences.Editor prefEditor = prefs.edit();
+            final String val = (treeUri != null) ? treeUri.toString() : null;
+            if (mbSafModeIsDestFolder)
+            {
+                prefEditor.putString(PREF_DEST_FOLDER_URI, val);
+                mDestTreeUri = treeUri;
+            }
+            else
+            {
+                prefEditor.putString(PREF_CAM_FOLDER_URI, val);
+                mDcimTreeUri = treeUri;
+            }
+            prefEditor.apply();
+            onPathWasChanged();
+        }
+    }
+
+
+    /**************************************************************************
+     *
      * helper for deprecated startActivityForResult()
      *
      *************************************************************************/
@@ -688,67 +758,14 @@ public class MainActivity extends AppCompatActivity
                     {
                         int resultCode = result.getResultCode();
                         Intent data = result.getData();
-                        boolean bUpdatePrefs = false;
                         Uri treeUri = null;
 
                         if ((resultCode == RESULT_OK) && (data != null))
                         {
                             treeUri = data.getData();
-                            if (treeUri != null)
-                            {
-                                Log.d(LOG_TAG, " URI = " + treeUri.getPath());
-                                if (mbSafModeIsDestFolder)
-                                {
-                                    if (Utils.pathsOverlap(mDcimTreeUri, treeUri))
-                                    {
-                                        treeUri = null;     // remove path
-                                        Toast.makeText(getApplicationContext(), R.string.str_paths_overlap, Toast.LENGTH_LONG).show();
-                                    }
-                                    else
-                                    {
-                                        // in case we are going to use file mode, check if destination is write permitted
-                                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                                        boolean forceFileMode = prefs.getBoolean(PREF_FORCE_FILE_MODE, false);
-                                        boolean bFileMode = forceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
-                                        if (bFileMode)
-                                        {
-                                            String p = UriToPath.getPathFromUri(getApplicationContext(), treeUri);
-                                            File f = (p == null) ? null : new File(p);
-                                            if ((f == null) || !f.canWrite())
-                                            {
-                                                Toast.makeText(getApplicationContext(), R.string.str_no_file_write, Toast.LENGTH_LONG).show();
-                                            }
-                                        }
-                                    }
-                                }
-                                bUpdatePrefs = true;
-                            }
-                        }
-                        else
-                        if (mbSafModeIsDestFolder)
-                        {
-                            // remove dest folder
-                            bUpdatePrefs = true;
                         }
 
-                        if (bUpdatePrefs)
-                        {
-                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                            SharedPreferences.Editor prefEditor = prefs.edit();
-                            final String val = (treeUri != null) ? treeUri.toString() : null;
-                            if (mbSafModeIsDestFolder)
-                            {
-                                prefEditor.putString(PREF_DEST_FOLDER_URI, val);
-                                mDestTreeUri = treeUri;
-                            }
-                            else
-                            {
-                                prefEditor.putString(PREF_CAM_FOLDER_URI, val);
-                                mDcimTreeUri = treeUri;
-                            }
-                            prefEditor.apply();
-                            onPathWasChanged();
-                        }
+                        pathSelectedByUser(treeUri, mbSafModeIsDestFolder);
                     }
                 });
     }
