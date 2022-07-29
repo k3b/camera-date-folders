@@ -17,13 +17,17 @@ While standalone cameras usually sort photos taken to specific folders on the SD
 
 This program creates a folder tree structure and sorts the photos into these folders. As a result, no more than photos taken on one day or month shall be stored in the same directory. As a consequence it it will become trivial to copy a day or month folder from the device to the computer.
 
+Even more: Given a Document Provider (like the "CIFS Documents Provider" or some cloud services, but not Google) supporting directories, the application can directly make incremental backups e.g. on a computer in the same LAN.
+
 # Supported
 
 * One, two or three levels of subfolders.
 * Daily, monthly or yearly subfolders.
 * Revert, i.e. all files are moved back from subfolders to main folder (flattening).
-* Keep photos within camera folder path or specify separate destination directory. Deselect destination directory by leaving the file selector with the BACK button.
-* Either move or copy (kind of backup) photos to separate destination directory.
+* Keep photos within camera folder path or specify separate destination directory.
+* Either move or copy (incremental backup) photos to separate destination directory.
+* In SAF mode the destination could also be a shared folder on a computer (needs a Document Provider app on the device).
+* Deselect destination directory by leaving the file selector with the BACK button or set as same as camera folder.
 * Already sorted photos will be re-sorted when subfolder scheme was changed, also in destination folder (if any).
 * File names beginning with "yyyymmdd\_".
 * File names beginning with "PXL\_yyyymmdd_" or "IMG\_yyyymmdd\_".
