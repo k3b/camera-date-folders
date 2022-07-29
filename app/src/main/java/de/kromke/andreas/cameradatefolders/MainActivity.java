@@ -92,7 +92,10 @@ public class MainActivity extends AppCompatActivity
     private final static int sMaxLogLen = 10000;
     private boolean mbPermissionGranted = false;
     private boolean mbSafModeIsDestFolder = false;  // hack, because cannot pass parameters
-
+    private boolean mbFileMode;
+    private boolean mbDryRun;
+    private boolean mbBackupCopy;
+    private String mFolderScheme;
 
 
     /**************************************************************************
@@ -438,17 +441,30 @@ public class MainActivity extends AppCompatActivity
 
     /**************************************************************************
      *
+     * update remembered settings
+     *
+     *************************************************************************/
+    private void readPreferences()
+    {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        boolean forceFileMode = prefs.getBoolean(PREF_FORCE_FILE_MODE, false);
+        mbFileMode = forceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
+        mbDryRun = prefs.getBoolean(PREF_DRY_RUN, false);
+        mbBackupCopy = prefs.getBoolean(PREF_BACKUP_COPY, false);
+        mFolderScheme = prefs.getString(PREF_FOLDER_SCHEME, "ymd");
+    }
+
+
+    /**************************************************************************
+     *
      * helper to run thread
      *
      *************************************************************************/
     private void runThread(boolean bFlatten)
     {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        readPreferences();
 
-        boolean forceFileMode = prefs.getBoolean(PREF_FORCE_FILE_MODE, false);
-        boolean fileMode = forceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
-
-        if (fileMode)
+        if (mbFileMode)
         {
             requestForPermissionOld();
             if (!mbPermissionGranted)
@@ -458,21 +474,18 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
-        boolean dryRun = prefs.getBoolean(PREF_DRY_RUN, false);
-        if (dryRun)
+        if (mbDryRun)
         {
             Toast.makeText(this, "Dry Run!", Toast.LENGTH_LONG).show();
         }
 
-        boolean backupCopy = prefs.getBoolean(PREF_BACKUP_COPY, false);
-
         MyApplication app = (MyApplication) getApplication();
-        String scheme = (bFlatten) ? "flat" :  prefs.getString(PREF_FOLDER_SCHEME, "ymd");
-        int result = app.runWorkerThread(this, mDcimTreeUri, mDestTreeUri, scheme, backupCopy, dryRun, fileMode);
+        String scheme = (bFlatten) ? "flat" :  mFolderScheme;
+        int result = app.runWorkerThread(this, mDcimTreeUri, mDestTreeUri, scheme, mbBackupCopy, mbDryRun, mbFileMode);
         if (result == 0)
         {
             mCurrHomeText = "";
-            mNewHomeText = fileMode ? "in progress (File mode)...\n\n" : "in progress...\n\n";
+            mNewHomeText = mbFileMode ? "in progress (File mode)...\n\n" : "in progress...\n\n";
             mbThreadRunningRevert = bFlatten;
             mbThreadRunning = true;
         }
@@ -561,8 +574,7 @@ public class MainActivity extends AppCompatActivity
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
         {
             mbSafModeIsDestFolder = false;
-            Intent intent = null;
-            intent = createSafPickerIntent();
+            Intent intent = createSafPickerIntent();
             mRequestDirectorySelectActivityLauncher.launch(intent);
         }
         else
@@ -631,8 +643,9 @@ public class MainActivity extends AppCompatActivity
             if (f instanceof PathsFragment)
             {
                 PathsFragment fd = (PathsFragment) f;
-                String val1 = (mDcimTreeUri == null) ? null : mDcimTreeUri.getPath();
-                String val2 = (mDestTreeUri == null) ? null : mDestTreeUri.getPath();
+                readPreferences();
+                String val1 = (mDcimTreeUri == null) ? null : ((mbFileMode) ? mDcimTreeUri.getPath() : mDcimTreeUri.toString());
+                String val2 = (mDestTreeUri == null) ? null : ((mbFileMode) ? mDestTreeUri.getPath() : mDestTreeUri.toString());
                 fd.onPathChanged(val1, val2);
             }
         }
@@ -703,7 +716,7 @@ public class MainActivity extends AppCompatActivity
                                             File f = (p == null) ? null : new File(p);
                                             if ((f == null) || !f.canWrite())
                                             {
-                                                Toast.makeText(getApplicationContext(), R.string.str_permission_denied, Toast.LENGTH_LONG).show();
+                                                Toast.makeText(getApplicationContext(), R.string.str_no_file_write, Toast.LENGTH_LONG).show();
                                             }
                                         }
                                     }
