@@ -426,6 +426,11 @@ public class OpsSafMode extends Utils
     public void removeUnusedDateFolders(ProgressCallBack callback)
     {
         super.removeUnusedDateFolders(callback);
+        if (mRootDir == null)
+        {
+            Log.e(LOG_TAG, "removeUnusedDateFolders() -- no directory");
+            return;
+        }
         DocumentFile destDir = (mDestDir != null) ? mDestDir : mRootDir;
         tidyDirectory(destDir, "", callback);
     }

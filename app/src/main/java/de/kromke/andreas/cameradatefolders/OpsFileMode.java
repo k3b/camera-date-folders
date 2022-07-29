@@ -125,7 +125,7 @@ public class OpsFileMode extends Utils
         super.gatherFiles(callback);
         if (mRootDir == null)
         {
-            callback.tellProgress("ERROR: no directory");
+            callback.tellProgress("ERROR: invalid path(s)");
             Log.e(LOG_TAG, "gatherFiles() -- no directory");
             return;
         }
@@ -403,6 +403,11 @@ public class OpsFileMode extends Utils
     public void removeUnusedDateFolders(ProgressCallBack callback)
     {
         super.removeUnusedDateFolders(callback);
+        if (mRootDir == null)
+        {
+            Log.e(LOG_TAG, "removeUnusedDateFolders() -- no directory");
+            return;
+        }
         File destDir = (mDestDir != null) ? mDestDir : mRootDir;
         tidyDirectory(destDir, "", callback);
     }
