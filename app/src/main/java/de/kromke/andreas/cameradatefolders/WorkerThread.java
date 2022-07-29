@@ -20,7 +20,6 @@ package de.kromke.andreas.cameradatefolders;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
 import android.util.Log;
 
 class WorkerThread implements Runnable, Utils.ProgressCallBack
@@ -38,7 +37,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
     boolean mbSortDay = true;
     private boolean mbBackupCopy = false;
     private boolean mbDryRun = false;
-    private boolean mbForceFileMode = false;
+    private boolean mbFileMode = false;
     private Utils mUtils = null;
     // result
     private int nSuccess = 0;
@@ -55,7 +54,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         Context context,
         Uri srcUri, Uri dstUri,
         String scheme,
-        boolean backupCopy, boolean bDryRun, boolean bForceFileMode
+        boolean backupCopy, boolean bDryRun, boolean bFileMode
     )
     {
         mTreeUri = srcUri;
@@ -106,7 +105,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         mDestTreeUri = dstUri;
         mbBackupCopy = backupCopy;
         mbDryRun = bDryRun;
-        mbForceFileMode = bForceFileMode;
+        mbFileMode = bFileMode;
         mContext = context;
     }
 
@@ -135,14 +134,12 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         mustStop = false;
         Log.d(LOG_TAG, "run()");
 
-        boolean bFileMode = mbForceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
-
         nSuccess = 0;
         nFailure = 0;
         nUnchanged = 0;
         if (mTreeUri != null)
         {
-            if (bFileMode)
+            if (mbFileMode)
             {
                 mUtils = new OpsFileMode(mContext, mTreeUri, mDestTreeUri, mbBackupCopy, mbDryRun, mbSortYear, mbSortMonth, mbSortDay);
             }

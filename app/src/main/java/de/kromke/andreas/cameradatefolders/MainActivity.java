@@ -446,7 +446,9 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         boolean forceFileMode = prefs.getBoolean(PREF_FORCE_FILE_MODE, false);
-        if (forceFileMode)
+        boolean fileMode = forceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
+
+        if (fileMode)
         {
             requestForPermissionOld();
             if (!mbPermissionGranted)
@@ -466,11 +468,11 @@ public class MainActivity extends AppCompatActivity
 
         MyApplication app = (MyApplication) getApplication();
         String scheme = (bFlatten) ? "flat" :  prefs.getString(PREF_FOLDER_SCHEME, "ymd");
-        int result = app.runWorkerThread(this, mDcimTreeUri, mDestTreeUri, scheme, backupCopy, dryRun, forceFileMode);
+        int result = app.runWorkerThread(this, mDcimTreeUri, mDestTreeUri, scheme, backupCopy, dryRun, fileMode);
         if (result == 0)
         {
             mCurrHomeText = "";
-            mNewHomeText = "in progress...\n\n";
+            mNewHomeText = fileMode ? "in progress (File mode)...\n\n" : "in progress...\n\n";
             mbThreadRunningRevert = bFlatten;
             mbThreadRunning = true;
         }
