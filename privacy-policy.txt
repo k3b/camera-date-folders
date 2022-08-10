@@ -1,29 +1,29 @@
 Privacy Policy
 ==============
 
-2022-02-05
+2022-08-10
 
 
 General
 -------
 
-Camera Date Folders ("CDS") is developed and maintained by one developer. As the developer of CDS, I do care about and respect your privacy.
+Camera Date Folders ("CDF") is developed and maintained by one developer. As the developer of CDF, I do care about and respect your privacy.
 
 This Privacy Policy ("Policy") aims to describe how information obtained from users is collected, used and disclosed.
 
-By using CDS, you agree that your personal information will be handled as described in this Policy.
+By using CDF, you agree that your personal information will be handled as described in this Policy.
 
 
 Information being collected
 ---------------------------
 
-CDS does not collect or store any personal information. Currently CDS does not have network access, thus it would not even be technically possible to share any data.
+CDF does not collect or store any personal information.
 
 
 Crash Reports
 -------------
 
-CDS does not contain any crash report software. However, if you are using Google Play and agreed accordingly, Google will share anonymised information about the crash location, device type and Android version.
+CDF does not contain any crash report software. However, if you are using Google Play and agreed accordingly, Google will share anonymised information about the crash location, device type and Android version.
 
 
 Changes to the Policy
