@@ -627,6 +627,32 @@ public class MainActivity extends AppCompatActivity
 
     /**************************************************************************
      *
+     * onClick callback
+     *
+     *************************************************************************/
+    public void onClickShowPrivacyUrl(View view)
+    {
+        final String url = "https://gitlab.com/AndreasK/camera-date-folders/-/raw/main/privacy-policy.txt";
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(browserIntent);
+    }
+
+
+    /**************************************************************************
+     *
+     * onClick callback
+     *
+     *************************************************************************/
+    public void onClickShowVersionHistoryUrl(View view)
+    {
+        final String url = "https://gitlab.com/AndreasK/camera-date-folders/-/releases";
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(browserIntent);
+    }
+
+
+    /**************************************************************************
+     *
      * call PathsFragment() due to configuration change
      *
      * https://stackoverflow.com/questions/51385067/android-navigation-architecture-component-get-current-visible-fragment

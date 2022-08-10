@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
         android:text="@string/str_author"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -56,16 +56,29 @@
         />
 
     <TextView
+        android:id="@+id/privacy_url"
+        android:onClick="onClickShowPrivacyUrl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="26dp"
+        android:textSize="14sp"
+        android:text="Show Privacy Policy"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/author_info"
+        />
+
+    <TextView
         android:id="@+id/version_info"
+        android:onClick="onClickShowVersionHistoryUrl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:text="Version l.m.n (1984-88-88T88:88+8888)"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/author_info"
+        app:layout_constraintTop_toBottomOf="@id/privacy_url"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:ignore="HardcodedText" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
