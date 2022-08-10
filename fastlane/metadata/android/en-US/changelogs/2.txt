@@ -1,0 +1,9 @@
+Version 1.1
+
+- File (non SAF) mode added for Android 4.4, 5 and 6.
+- Fixed camera path "DCIM/Camera" for Android 4.4 due to lack of file selector.
+- File mode can also be forced for newer Android versions, but might suffer from permission problems.
+- Additionally to the camera path, a separate destination directory can be selected.
+- A selected destination directory can be removed by leaving the file selector with the BACK button.
+- If using a separate destination: Either move photos there or make a copy (as backup).
+- Tidy up directory tree, i.e. remove empty date related directories, especially after "Revert".

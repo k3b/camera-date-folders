@@ -1,0 +1,3 @@
+Version 1.1.1
+
+- Attempt to solve Google Play ban: Added URL to privacy policy to "About" page
