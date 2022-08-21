@@ -153,7 +153,11 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
             }
 
             tellProgress("Collecting files ...");
-            int err = mUtils.gatherFiles(this);
+            int err = mUtils.gatherFilesDst(this);
+            if (err == 0)
+            {
+                err = mUtils.gatherFilesSrc(this);
+            }
             if (err == 0)
             {
                 int ret = mUtils.getOps().size();

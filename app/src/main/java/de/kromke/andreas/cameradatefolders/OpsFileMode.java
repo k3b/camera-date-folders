@@ -117,12 +117,12 @@ public class OpsFileMode extends Utils
 
     /**************************************************************************
      *
-     * Phase 1: gather move operations
+     * Phase 1a: gather move operations for destination path, if any
      *
      *************************************************************************/
-    public int gatherFiles(ProgressCallBack callback)
+    public int gatherFilesDst(ProgressCallBack callback)
     {
-        super.gatherFiles(callback);
+        super.gatherFilesDst(callback);
         if (mRootDir == null)
         {
             callback.tellProgress("ERROR: invalid path(s)");
@@ -136,9 +136,37 @@ public class OpsFileMode extends Utils
                 callback.tellProgress("ERROR: Destination directory is not writeable in File mode.\n");
                 return -2;
             }
+            callback.tellProgress("scanning destination path...");
             gatherDirectory(mDestDir, "", true, callback);
+            callback.tellProgress("...done");
+        }
+        return 0;
+    }
+
+
+    /**************************************************************************
+     *
+     * Phase 1b: gather move operations for source path
+     *
+     *************************************************************************/
+    public int gatherFilesSrc(ProgressCallBack callback)
+    {
+        super.gatherFilesSrc(callback);
+        if (mRootDir == null)
+        {
+            callback.tellProgress("ERROR: invalid path(s)");
+            Log.e(LOG_TAG, "gatherFiles() -- no directory");
+            return -1;
+        }
+        if (mDestDir != null)
+        {
+            callback.tellProgress("scanning source path...");
         }
         gatherDirectory(mRootDir, "", false, callback);
+        if (mDestDir != null)
+        {
+            callback.tellProgress("...done");
+        }
         return 0;
     }
 

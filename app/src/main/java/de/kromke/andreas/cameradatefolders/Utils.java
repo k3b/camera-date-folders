@@ -108,15 +108,27 @@ public class Utils
 
     /**************************************************************************
      *
-     * Phase 1: gather move operations
+     * Phase 1a: gather move operations for destination path, if any
      *
      *************************************************************************/
-    public int gatherFiles(ProgressCallBack callback)
+    public int gatherFilesDst(ProgressCallBack callback)
     {
         mOps = new ArrayList<>();
         mFilesInDest = new HashSet<>();     // hash is faster than ArrayList when searching
         mUnchangedFiles = 0;
         mFiles = 0;     // TODO: remove debug code
+        directoryLevel = 0;
+        return 0;
+    }
+
+
+    /**************************************************************************
+     *
+     * Phase 1b: gather move operations for source path
+     *
+     *************************************************************************/
+    public int gatherFilesSrc(ProgressCallBack callback)
+    {
         directoryLevel = 0;
         return 0;
     }
