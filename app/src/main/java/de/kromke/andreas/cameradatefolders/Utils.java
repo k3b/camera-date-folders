@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+
 // the actual work is done here
 public class Utils
 {
@@ -110,13 +111,14 @@ public class Utils
      * Phase 1: gather move operations
      *
      *************************************************************************/
-    public void gatherFiles(ProgressCallBack callback)
+    public int gatherFiles(ProgressCallBack callback)
     {
         mOps = new ArrayList<>();
         mFilesInDest = new HashSet<>();     // hash is faster than ArrayList when searching
         mUnchangedFiles = 0;
         mFiles = 0;     // TODO: remove debug code
         directoryLevel = 0;
+        return 0;
     }
 
 
@@ -441,6 +443,12 @@ public class Utils
         public boolean isDebug;
     }
 
+
+    /**************************************************************************
+     *
+     * Helper for "About" page
+     *
+     *************************************************************************/
     public static AppVersionInfo getVersionInfo(Context context)
     {
         AppVersionInfo ret = new AppVersionInfo();
@@ -476,5 +484,36 @@ public class Utils
         ret.isDebug = BuildConfig.DEBUG;
 
         return ret;
+    }
+
+
+    /**************************************************************************
+     *
+     * convert milliseconds as human readable string
+     *
+     *************************************************************************/
+    public static String getTimeStr(long ms)
+    {
+        ms /= 1000;       // -> seconds
+
+        long h = ms / 3600;
+        ms %= 3600;
+
+        String stime = "";
+        if (h > 0)
+        {
+            stime = "" + h + 'h';
+        }
+
+        long m = ms / 60;
+        ms %= 60;
+
+        if (m > 0)
+        {
+            stime += "" + m + '\'';
+        }
+        stime += "" + ms + "''";
+
+        return stime;
     }
 }

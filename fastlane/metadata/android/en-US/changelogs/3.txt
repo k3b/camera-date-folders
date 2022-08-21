@@ -1,5 +1,4 @@
-Version 1.1.1
-
 - Attempt to solve Google Play ban: Added URL to privacy policy to "About" page
 - README and version information can also be opened in web browser via "About" page
 - Newer Android libraries
+- (v1.1.1)

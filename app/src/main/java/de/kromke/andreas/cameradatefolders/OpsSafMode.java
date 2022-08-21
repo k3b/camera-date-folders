@@ -115,24 +115,26 @@ public class OpsSafMode extends Utils
      * Phase 1: gather move operations
      *
      *************************************************************************/
-    public void gatherFiles(ProgressCallBack callback)
+    public int gatherFiles(ProgressCallBack callback)
     {
         super.gatherFiles(callback);
         if (mRootDir == null)
         {
             Log.e(LOG_TAG, "gatherFiles() -- no directory");
-            return;
+            return -1;
         }
         if (mDestDir != null)
         {
             if (!mDestDir.canWrite())
             {
                 callback.tellProgress("ERROR: Destination directory is not writeable in SAF mode.\n");
-                return;
+                return -2;
             }
             gatherDirectory(mDestDir, "", true, callback);
         }
         gatherDirectory(mRootDir, "", false, callback);
+
+        return 0;
     }
 
 

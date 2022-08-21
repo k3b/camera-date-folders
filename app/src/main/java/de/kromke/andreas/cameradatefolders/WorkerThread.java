@@ -22,11 +22,13 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
+import static java.lang.System.currentTimeMillis;
+
 class WorkerThread implements Runnable, Utils.ProgressCallBack
 {
     private static final String LOG_TAG = "CDF : WT";
     public boolean isBusy = false;
-    private boolean mustStop = false;
+    private boolean mMustStop = false;
     private final MyApplication mApplication;
     // parameters
     private Context mContext = null;
@@ -131,7 +133,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
     public void run()
     {
         isBusy = true;
-        mustStop = false;
+        mMustStop = false;
         Log.d(LOG_TAG, "run()");
 
         nSuccess = 0;
@@ -139,6 +141,8 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         nUnchanged = 0;
         if (mTreeUri != null)
         {
+            final long startTime = currentTimeMillis();
+
             if (mbFileMode)
             {
                 mUtils = new OpsFileMode(mContext, mTreeUri, mDestTreeUri, mbBackupCopy, mbDryRun, mbSortYear, mbSortMonth, mbSortDay);
@@ -147,58 +151,78 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
             {
                 mUtils = new OpsSafMode(mContext, mTreeUri, mDestTreeUri, mbBackupCopy, mbDryRun, mbSortYear, mbSortMonth, mbSortDay);
             }
-            mUtils.gatherFiles(this);
-            int ret = mUtils.getOps().size();
-            if (mustStop && (ret == 0))
-            {
-                tellProgress("stopped on demand");
-            }
 
-            /*
-            /// +test code
-            for (int i = 0; i < 100; i++)
+            tellProgress("Collecting files ...");
+            int err = mUtils.gatherFiles(this);
+            if (err == 0)
             {
-                tellProgress("" + i + " lines");
-            }
-            /// -test code
-            */
-            nUnchanged = mUtils.mUnchangedFiles;
-            if (ret > 0)
-            {
-                tellProgress("" + ret + " files collected\n");
-                int i = 0;
-                for (Utils.mvOp op: mUtils.getOps())
+                int ret = mUtils.getOps().size();
+                if (mMustStop && (ret == 0))
                 {
-                    if (mustStop)
-                    {
-                        tellProgress("stopped on demand");
-                        break;
-                    }
+                    tellProgress("stopped on demand");
+                }
 
-                    String fileName = op.getName();
-                    Log.d(LOG_TAG, " mv " + op.getSrcPath() + fileName + " ==> " + op.getDstPath());
-                    if (mbDryRun)
+                /*
+                /// +test code
+                for (int i = 0; i < 100; i++)
+                {
+                    tellProgress("" + i + " lines");
+                }
+                /// -test code
+                */
+                nUnchanged = mUtils.mUnchangedFiles;
+                if (ret > 0)
+                {
+                    tellProgress("" + ret + " files collected.\n\nStart file operations ...");
+                    int i = 0;
+                    for (Utils.mvOp op : mUtils.getOps())
                     {
-                        nSuccess++;
-                    }
-                    else
-                    {
-                        boolean retm = op.move();
-                        if (retm)
+                        if (mMustStop)
+                        {
+                            tellProgress("stopped on demand.");
+                            break;
+                        }
+
+                        String fileName = op.getName();
+                        Log.d(LOG_TAG, " mv " + op.getSrcPath() + fileName + " ==> " + op.getDstPath());
+                        if (mbDryRun)
                         {
                             nSuccess++;
                         } else
                         {
-                            nFailure++;
+                            boolean retm = op.move();
+                            if (retm)
+                            {
+                                nSuccess++;
+                            } else
+                            {
+                                nFailure++;
+                            }
                         }
+                        i++;
+                        tellProgress(fileName + " (" + i + "/" + mUtils.mOps.size() + ")");
                     }
-                    i++;
-                    tellProgress(fileName + " (" + i + "/" + mUtils.mOps.size() + ")");
+
+                    tellProgress(" ... file operations done.\n");
+                    Log.d(LOG_TAG, "files moved: " + nSuccess + ", failures: " + nFailure);
                 }
-                Log.d(LOG_TAG, "files moved: " + nSuccess + ", failures: " + nFailure);
+
+                if (!mMustStop)
+                {
+                    tellProgress("Tidy up ...");
+                    mUtils.removeUnusedDateFolders(this);
+                    if (!mMustStop)
+                    {
+                        tellProgress("... done\n");
+                    } else
+                    {
+                        tellProgress("stopped on demand.");
+                    }
+                }
             }
 
-            mUtils.removeUnusedDateFolders(this);
+            final String timeSpent = Utils.getTimeStr( currentTimeMillis() - startTime);
+            tellProgress(timeSpent + " spent.");
         }
 
         mUtils = null;
@@ -209,7 +233,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
     {
         if (isBusy)
         {
-            mustStop = true;
+            mMustStop = true;
             if (mUtils != null)
             {
                 mUtils.mustStop = true;
