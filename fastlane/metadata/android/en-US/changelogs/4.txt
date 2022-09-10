@@ -1,4 +1,4 @@
-- User feedback about tidy up phase.
+- User feedback about tidy up phase and destination directory scan (if specified).
 - User feedback about time spent (in minutes and seconds)
 - TODO: show number of move operations per minute
 - TODO: Option "manage all files" for the F-Droid version.
