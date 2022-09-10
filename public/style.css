@@ -5,9 +5,9 @@ body {
 }
 
 .navbar {
-  background-color: #313236;
-  border-radius: 2px;
-  max-width: 800px;
+  background-color: #202080;
+  border-radius: 8px;
+  max-width: 1024px;
 }
 
 .navbar a {
