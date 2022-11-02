@@ -152,8 +152,17 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
                 mUtils = new OpsSafMode(mContext, mTreeUri, mDestTreeUri, mbBackupCopy, mbDryRun, mbSortYear, mbSortMonth, mbSortDay);
             }
 
-            tellProgress("Collecting files ...");
-            int err = mUtils.gatherFilesDst(this);
+            int err = 0;
+            if (mUtils.mErrCode < 0)
+            {
+                tellProgress("Invalid directory/ies. Please reselect!");
+                err = mUtils.mErrCode;
+            }
+            else
+            {
+                tellProgress("Collecting files ...");
+                err = mUtils.gatherFilesDst(this);
+            }
             if (err == 0)
             {
                 err = mUtils.gatherFilesSrc(this);
