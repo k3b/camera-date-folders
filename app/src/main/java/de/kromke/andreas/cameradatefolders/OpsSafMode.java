@@ -90,6 +90,7 @@ public class OpsSafMode extends Utils
         {
             mRootDir = null;
             mDestDir = null;
+            mErrCode = -4;
             return;
         }
         if (destUri == null)
@@ -101,12 +102,41 @@ public class OpsSafMode extends Utils
             mDestDir = DocumentFile.fromTreeUri(mContext, destUri);
             if (mDestDir == null)
             {
-                Log.e(LOG_TAG, "OpsFileMode() -- invalid destUri: " + destUri);
+                Log.e(LOG_TAG, "OpsSafMode() -- invalid destUri: " + destUri);
                 mRootDir = null;
+                mErrCode = -3;
                 return;
             }
         }
-        mRootDir = DocumentFile.fromTreeUri(mContext, treeUri);
+
+        DocumentFile rootDir = DocumentFile.fromTreeUri(mContext, treeUri);
+        if (rootDir != null)
+        {
+            // debug stuff
+            /*
+            Log.d(LOG_TAG, "OpsSafMode() -- treeUri: " + rootDir.getUri());
+            Log.d(LOG_TAG, "             --  scheme: " + rootDir.getUri().getScheme());
+            Log.d(LOG_TAG, "             --  authority: " + rootDir.getUri().getAuthority());
+            Log.d(LOG_TAG, "             --  path: " + rootDir.getUri().getPath());
+            Log.d(LOG_TAG, "             --  path segments: " + rootDir.getUri().getPathSegments());
+            Log.d(LOG_TAG, "             -- name: " + rootDir.getName());
+            Log.d(LOG_TAG, "             -- exists: " + rootDir.exists());
+            Log.d(LOG_TAG, "             -- isDirectory: " + rootDir.isDirectory());
+            Log.d(LOG_TAG, "             -- canRead: " + rootDir.canRead());
+            Log.d(LOG_TAG, "             -- canWrite: " + rootDir.canWrite());
+            */
+            if (!rootDir.isDirectory() || !rootDir.canRead())
+            {
+                rootDir = null;
+            }
+        }
+
+        mRootDir = rootDir;
+        if (mRootDir == null)
+        {
+            Log.e(LOG_TAG, "OpsSafMode() -- invalid srcUri: " + treeUri);
+            mErrCode = -1;
+        }
     }
 
 

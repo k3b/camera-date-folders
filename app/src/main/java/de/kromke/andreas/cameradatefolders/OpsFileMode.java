@@ -83,6 +83,7 @@ public class OpsFileMode extends Utils
         {
             mRootDir = null;
             mDestDir = null;
+            mErrCode = -4;
             return;
         }
 
@@ -98,6 +99,7 @@ public class OpsFileMode extends Utils
                 Log.e(LOG_TAG, "OpsFileMode() -- invalid destUri: " + destUri);
                 mRootDir = null;
                 mDestDir = null;
+                mErrCode = -3;
                 return;
             }
             mDestDir = new File(p);
@@ -111,6 +113,7 @@ public class OpsFileMode extends Utils
         else
         {
             mRootDir = null;
+            mErrCode = -1;
         }
     }
 
