@@ -1,3 +1,10 @@
+Version 1.2
+
+- Persistent permission.
+- Invalid directories cause error message.
+- Better user feedback during file operations.
+- Newer Gradle and libraries.
+
 Version 1.1.1
 
 - Attempt to solve Google Play ban: Added URL to privacy policy to "About" page
