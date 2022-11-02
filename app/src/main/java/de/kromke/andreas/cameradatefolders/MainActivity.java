@@ -229,11 +229,13 @@ public class MainActivity extends AppCompatActivity
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String val = prefs.getString(PREF_CAM_FOLDER_URI, null);
+        Log.d(LOG_TAG, "onCreate() -- PREF_CAM_FOLDER_URI value = " + val);
         if (val != null)
         {
             mDcimTreeUri = Uri.parse(val);
         }
         val = prefs.getString(PREF_DEST_FOLDER_URI, null);
+        Log.d(LOG_TAG, "onCreate() -- PREF_DEST_FOLDER_URI value = " + val);
         if (val != null)
         {
             mDestTreeUri = Uri.parse(val);
@@ -334,8 +336,7 @@ public class MainActivity extends AppCompatActivity
                     onPermissionGranted();
                 } else
                 {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    // permission denied
                 }
             }
         }
@@ -579,6 +580,7 @@ public class MainActivity extends AppCompatActivity
         }
         else
         {
+            // Android 4.4 does not have a file selector. Instead just ask Android for the camera folder.
             File dcimPath = new File(Environment.getExternalStorageDirectory(), "DCIM");
             File camPath = new File(dcimPath, "Camera");
             if (!camPath.isDirectory())
@@ -802,6 +804,9 @@ public class MainActivity extends AppCompatActivity
                         if ((resultCode == RESULT_OK) && (data != null))
                         {
                             treeUri = data.getData();
+                            // These two commands guarantee that the permission is still valid the next time the app is started.
+                            grantUriPermission(getPackageName(), treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                            getContentResolver().takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                         }
 
                         pathSelectedByUser(treeUri, mbSafModeIsDestFolder);
