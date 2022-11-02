@@ -43,6 +43,7 @@ public class Utils
 {
     private static final String LOG_TAG = "CDF : Utils";
     public boolean mustStop = false;
+    public int mErrCode = 0;
     protected Context mContext;
     protected boolean mbBackupCopy;
     protected boolean mbDryRun;
