@@ -10,8 +10,8 @@
     <string name="str_app_name">Camera Date Folders</string>
     <string name="str_app_description">Automatically sort your photos to date related subdirectories, based on timestamp encoded in filenames</string>
     <string name="str_author">Andreas Kromke</string>
-    <string name="str_sel_path">Select Camera Folder Path</string>
-    <string name="str_sel_dest_path">Select Destination Folder Path</string>
+    <string name="str_sel_path">Select Camera Folder</string>
+    <string name="str_sel_dest_path">(Optional) Select Destination Folder</string>
     <string name="str_scheme">Subfolder Scheme</string>
     <string name="str_force_file_mode">Force File Mode (Android 7, 8, 9):</string>
     <string name="str_dry_run">Dry Run (debug mode):</string>

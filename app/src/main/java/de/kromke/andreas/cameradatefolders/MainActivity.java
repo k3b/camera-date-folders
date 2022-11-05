@@ -19,6 +19,7 @@
 package de.kromke.andreas.cameradatefolders;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -42,6 +43,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -567,6 +569,41 @@ public class MainActivity extends AppCompatActivity
 
     /**************************************************************************
      *
+     * ask if file shall be overwritten
+     *
+     *************************************************************************/
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void dialogAskDestinationFolder()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select Destination Folder?");
+        builder.setMessage("The destination folder is optional. Select one, if you want to move the photos outside of the camera folder or if you want to manage a backup copy. You can later deselect it by aborting the file select dialogue.");
+        builder.setPositiveButton("Continue", new DialogInterface.OnClickListener()
+        {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1)
+            {
+                mbSafModeIsDestFolder = true;
+                Intent intent = createSafPickerIntent();
+                mRequestDirectorySelectActivityLauncher.launch(intent);
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+        {
+            @Override
+            public void onClick(DialogInterface dialog, int which)
+            {
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+
+    /**************************************************************************
+     *
      * onClick callback
      *
      *************************************************************************/
@@ -614,9 +651,12 @@ public class MainActivity extends AppCompatActivity
         {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
             {
+                dialogAskDestinationFolder();
+                /*
                 mbSafModeIsDestFolder = true;
                 Intent intent = createSafPickerIntent();
                 mRequestDirectorySelectActivityLauncher.launch(intent);
+                */
             }
             else
             {

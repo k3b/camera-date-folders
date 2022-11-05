@@ -1,6 +1,7 @@
 Version 1.2
 
 - Persistent permission.
+- UI clarifies that the destination folder is optional.
 - Invalid directories cause error message.
 - Better user feedback during file operations.
 - Newer Gradle and libraries.
