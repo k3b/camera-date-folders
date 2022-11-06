@@ -99,21 +99,21 @@ public class OpsFileMode extends Utils
                 Log.e(LOG_TAG, "OpsFileMode() -- invalid destUri: " + destUri);
                 mRootDir = null;
                 mDestDir = null;
-                mErrCode = -3;
+                mErrCode = -10;
                 return;
             }
             mDestDir = new File(p);
         }
 
         String p = UriToPath.getPathFromUri(context, treeUri);
-        if (p != null)
+        if (p == null)
         {
-            mRootDir = new File(p);
+            mRootDir = null;
+            mErrCode = -11;
         }
         else
         {
-            mRootDir = null;
-            mErrCode = -1;
+            mRootDir = new File(p);
         }
     }
 

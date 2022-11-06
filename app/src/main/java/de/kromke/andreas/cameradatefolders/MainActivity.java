@@ -121,6 +121,10 @@ public class MainActivity extends AppCompatActivity
                     else
                     {
                         mNewHomeText += "ERROR" + "\n";
+                        if (text != null)
+                        {
+                            dialogShowError(text);
+                        }
                     }
 
                     // restore button text, currently it is "STOP"
@@ -564,6 +568,29 @@ public class MainActivity extends AppCompatActivity
                 mRevertButton.setText(R.string.str_stop);
             }
         }
+    }
+
+
+    /**************************************************************************
+     *
+     * show error message in dialogue
+     *
+     *************************************************************************/
+    private void dialogShowError(String text)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("ERROR");
+        builder.setMessage(text);
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+        {
+            @Override
+            public void onClick(DialogInterface dialog, int which)
+            {
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
 

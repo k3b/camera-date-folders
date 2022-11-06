@@ -18,16 +18,9 @@
 
 package de.kromke.andreas.cameradatefolders;
 
-import android.content.ContentUris;
 import android.content.Context;
-import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.util.Log;
-
-import java.io.File;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -54,6 +47,7 @@ public class UriToPath
     private static final String PATH_TREE = "tree";
     //private static final String PATH_DOCUMENT = "document";
 
+    @SuppressWarnings("unused")
     public static String getPathFromUri(Context context, @NonNull Uri uri)
     {
         String intentScheme = uri.getScheme();

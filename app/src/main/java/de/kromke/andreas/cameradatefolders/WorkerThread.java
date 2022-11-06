@@ -111,11 +111,23 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         mContext = context;
     }
 
-    private void done()
+    private void done(int err)
     {
         if (mApplication != null)
         {
-            mApplication.msgFromWorkerThread(nSuccess, nFailure, nUnchanged, null, true);
+            String text = null;
+            if ((err == -10) || (err == -11))
+            {
+                text = "No valid path(s). Location(s) can only be accessed in SAF mode.";
+                nSuccess = err;
+            }
+            else
+            if (err == -4)
+            {
+                text = "Source and destination paths overlap.";
+                nSuccess = err;
+            }
+            mApplication.msgFromWorkerThread(nSuccess, nFailure, nUnchanged, text, true);
         }
         isBusy = false;
     }
@@ -139,6 +151,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         nSuccess = 0;
         nFailure = 0;
         nUnchanged = 0;
+        int err = 0;
         if (mTreeUri != null)
         {
             final long startTime = currentTimeMillis();
@@ -152,7 +165,6 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
                 mUtils = new OpsSafMode(mContext, mTreeUri, mDestTreeUri, mbBackupCopy, mbDryRun, mbSortYear, mbSortMonth, mbSortDay);
             }
 
-            int err = 0;
             if (mUtils.mErrCode < 0)
             {
                 tellProgress("Invalid directory/ies. Please reselect!");
@@ -234,12 +246,12 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
                 }
             }
 
-            final String timeSpent = Utils.getTimeStr( currentTimeMillis() - startTime);
+            final String timeSpent = Utils.getTimeStr(currentTimeMillis() - startTime);
             tellProgress(timeSpent + " spent.");
         }
 
         mUtils = null;
-        done();
+        done(err);
     }
 
     public void stop()
