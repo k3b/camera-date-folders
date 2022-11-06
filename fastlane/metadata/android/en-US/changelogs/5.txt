@@ -1,0 +1,4 @@
+- Remove destination path immediately, via dialogue, not via file selector.
+- TODO: show number of move operations per minute
+- TODO: Option "manage all files" for the F-Droid version.
+- (v1.3)
