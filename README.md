@@ -27,7 +27,6 @@ Even more: Given a Document Provider (like the "CIFS Documents Provider" or some
 * Keep photos within camera folder path or specify separate destination directory.
 * Either move or copy (incremental backup) photos to separate destination directory.
 * In SAF mode the destination could also be a shared folder on a computer (needs a Document Provider app on the device).
-* Deselect destination directory by leaving the file selector with the BACK button or set as same as camera folder.
 * Already sorted photos will be re-sorted when subfolder scheme was changed, also in destination folder (if any).
 * File names beginning with "yyyymmdd\_".
 * File names beginning with "PXL\_yyyymmdd_" or "IMG\_yyyymmdd\_".

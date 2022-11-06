@@ -78,8 +78,8 @@ public class MainActivity extends AppCompatActivity
     private ActivityMainBinding binding;
     ActivityResultLauncher<Intent> mStorageAccessPermissionActivityLauncher;
     ActivityResultLauncher<Intent> mRequestDirectorySelectActivityLauncher;
-    Uri mDcimTreeUri = null;
-    Uri mDestTreeUri = null;
+    Uri mDcimTreeUri = null;            // camera path (null: not set)
+    Uri mDestTreeUri = null;            // destination path (optional or null)
     Timer mTimer;
     MyTimerTask mTimerTask;
     private static final int timerFrequency = 500;         // milliseconds
@@ -577,7 +577,7 @@ public class MainActivity extends AppCompatActivity
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Select Destination Folder?");
-        builder.setMessage("The destination folder is optional. Select one, if you want to move the photos outside of the camera folder or if you want to manage a backup copy. You can later deselect it by aborting the file select dialogue.");
+        builder.setMessage(R.string.str_ask_dest_folder);
         builder.setPositiveButton("Continue", new DialogInterface.OnClickListener()
         {
             @Override
@@ -596,6 +596,19 @@ public class MainActivity extends AppCompatActivity
             {
             }
         });
+
+        if (mDestTreeUri != null)
+        {
+            builder.setNeutralButton("Remove", new DialogInterface.OnClickListener()
+            {
+                @Override
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    mDestTreeUri = null;
+                    onPathWasChanged();
+                }
+            });
+        }
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
@@ -793,12 +806,6 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
             }
-            bUpdatePrefs = true;
-        }
-        else
-        if (isDest)
-        {
-            // remove dest folder
             bUpdatePrefs = true;
         }
 
