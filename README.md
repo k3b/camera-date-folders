@@ -40,7 +40,7 @@ Even more: Given a Document Provider (like the "CIFS Documents Provider" or some
 
 * Currently no EXIF metadata are extracted, instead the photo's date must be encoded in the file name.
 * Only one photo directory is currently supported.
-* Due to Google's policy, the program is forced to use Google's Storage Access Framework, which is extremely slow. A faster version is technically trivial, but that one would not be allowed to be published in Play Store.
+* Due to Google's policy, the program is forced to use Google's Storage Access Framework, which is extremely slow (measured factor 1/60). A faster version is technically trivial, but that one would not be allowed to be published in Play Store.
 
 # Permissions Needed
 
