@@ -131,12 +131,14 @@ public class MainActivity extends AppCompatActivity
                     if (mStartButton != null)
                     {
                         mStartButton.setText(mStartButtonText);
+                        mStartButton.setEnabled(true);
                         mStartButton = null;
                     }
 
                     if (mRevertButton != null)
                     {
                         mRevertButton.setText(mRevertButtonText);
+                        mRevertButton.setEnabled(true);
                         mRevertButton = null;
                     }
 
@@ -535,6 +537,12 @@ public class MainActivity extends AppCompatActivity
             runThread(false);
             if (mbThreadRunning)
             {
+                mRevertButton = findViewById(R.id.button_revert);
+                if (mRevertButton != null)
+                {
+                    mRevertButtonText = mRevertButton.getText();
+                    mRevertButton.setEnabled(false);
+                }
                 mStartButton = (Button) view;
                 mStartButtonText = mStartButton.getText();
                 mStartButton.setText(R.string.str_stop);
@@ -563,6 +571,12 @@ public class MainActivity extends AppCompatActivity
             runThread(true);
             if (mbThreadRunning)
             {
+                mStartButton = findViewById(R.id.button_start);
+                if (mStartButton != null)
+                {
+                    mStartButtonText = mStartButton.getText();
+                    mStartButton.setEnabled(false);
+                }
                 mRevertButton = (Button) view;
                 mRevertButtonText = mRevertButton.getText();
                 mRevertButton.setText(R.string.str_stop);
