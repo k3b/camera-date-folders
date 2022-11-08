@@ -1,5 +1,6 @@
 - Remove destination path immediately, via dialogue, not via file selector.
 - Show error dialogue in case a location is not accessible in File mode, e.g. a network share.
 - Disable other button (Start or Revert) during processing.
+- Do not allow copy (backup) mode without destination folder.
 - TODO: Option "manage all files" for the F-Droid version.
 - (v1.3)

@@ -483,6 +483,12 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
+        if (mbBackupCopy && (mDestTreeUri == null))
+        {
+            Toast.makeText(this, "Copy (Backup) mode\n needs destination folder!", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         if (mbDryRun)
         {
             Toast.makeText(this, "Dry Run!", Toast.LENGTH_LONG).show();
@@ -645,6 +651,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onClick(DialogInterface dialog, int which)
                 {
+                    writePathToPrefs(true, null);
                     mDestTreeUri = null;
                     onPathWasChanged();
                 }
@@ -809,6 +816,27 @@ public class MainActivity extends AppCompatActivity
 
     /**************************************************************************
      *
+     * update path in preferences
+     *
+     *************************************************************************/
+    private void writePathToPrefs(boolean isDest, final String val)
+    {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor prefEditor = prefs.edit();
+        if (isDest)
+        {
+            prefEditor.putString(PREF_DEST_FOLDER_URI, val);
+        }
+        else
+        {
+            prefEditor.putString(PREF_CAM_FOLDER_URI, val);
+        }
+        prefEditor.apply();
+    }
+
+
+    /**************************************************************************
+     *
      * path was changed via file selector
      *
      *************************************************************************/
@@ -852,20 +880,17 @@ public class MainActivity extends AppCompatActivity
 
         if (bUpdatePrefs)
         {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            SharedPreferences.Editor prefEditor = prefs.edit();
             final String val = (treeUri != null) ? treeUri.toString() : null;
+            writePathToPrefs(mbSafModeIsDestFolder, val);
+
             if (mbSafModeIsDestFolder)
             {
-                prefEditor.putString(PREF_DEST_FOLDER_URI, val);
                 mDestTreeUri = treeUri;
             }
             else
             {
-                prefEditor.putString(PREF_CAM_FOLDER_URI, val);
                 mDcimTreeUri = treeUri;
             }
-            prefEditor.apply();
             onPathWasChanged();
         }
     }
