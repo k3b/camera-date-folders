@@ -54,6 +54,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import de.kromke.andreas.cameradatefolders.databinding.ActivityMainBinding;
+import de.kromke.andreas.cameradatefolders.ui.home.HomeViewModel;
 import de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment;
 import de.kromke.andreas.cameradatefolders.ui.home.HomeFragment;
 
@@ -114,6 +115,9 @@ public class MainActivity extends AppCompatActivity
                 //Log.d(LOG_TAG, "called from thread");
                 if (threadEnded)
                 {
+                    HomeViewModel.bSortRunning = false;
+                    HomeViewModel.bRevertRunning = false;
+
                     if (result >= 0)
                     {
                         mNewHomeText += "success:" + result + ", failure:" + result2 + ", unchanged:" + result3 +"\n";
@@ -128,18 +132,28 @@ public class MainActivity extends AppCompatActivity
                     }
 
                     // restore button text, currently it is "STOP"
-                    if (mStartButton != null)
+                    Fragment f = getCurrFragment();
+                    if (f instanceof HomeFragment)
                     {
-                        mStartButton.setText(mStartButtonText);
-                        mStartButton.setEnabled(true);
-                        mStartButton = null;
-                    }
+                        HomeFragment fd = (HomeFragment) f;
+                        fd.updateButtons(getApplicationContext());
+                        /*
+                        if (mStartButton != null)
+                        {
+                            Log.d(LOG_TAG, "messageFromThread() -- re-enable start button");
+                            mStartButton.setText(mStartButtonText);
+                            mStartButton.setEnabled(true);
+                            mStartButton = null;
+                        }
 
-                    if (mRevertButton != null)
-                    {
-                        mRevertButton.setText(mRevertButtonText);
-                        mRevertButton.setEnabled(true);
-                        mRevertButton = null;
+                        if (mRevertButton != null)
+                        {
+                            Log.d(LOG_TAG, "messageFromThread() -- re-enable revert button");
+                            mRevertButton.setText(mRevertButtonText);
+                            mRevertButton.setEnabled(true);
+                            mRevertButton = null;
+                        }
+                        */
                     }
 
                     mbThreadRunning = false;
@@ -180,6 +194,7 @@ public class MainActivity extends AppCompatActivity
                 mNewHomeText = "";
                 bUpdate = true;
             }
+            /*
             else
             if (mDcimTreeUri == null)
             {
@@ -189,6 +204,8 @@ public class MainActivity extends AppCompatActivity
                     bUpdate = true;
                 }
             }
+             */
+            /*
             else
             {
                 if (mCurrHomeText.isEmpty() || mCurrHomeText.equals(strNoCamPath))
@@ -197,6 +214,7 @@ public class MainActivity extends AppCompatActivity
                     bUpdate = true;
                 }
             }
+            */
 
             if (bUpdate)
             {
@@ -549,6 +567,7 @@ public class MainActivity extends AppCompatActivity
                     mRevertButtonText = mRevertButton.getText();
                     mRevertButton.setEnabled(false);
                 }
+                HomeViewModel.bSortRunning = true;
                 mStartButton = (Button) view;
                 mStartButtonText = mStartButton.getText();
                 mStartButton.setText(R.string.str_stop);
@@ -583,6 +602,7 @@ public class MainActivity extends AppCompatActivity
                     mStartButtonText = mStartButton.getText();
                     mStartButton.setEnabled(false);
                 }
+                HomeViewModel.bRevertRunning = true;
                 mRevertButton = (Button) view;
                 mRevertButtonText = mRevertButton.getText();
                 mRevertButton.setText(R.string.str_stop);

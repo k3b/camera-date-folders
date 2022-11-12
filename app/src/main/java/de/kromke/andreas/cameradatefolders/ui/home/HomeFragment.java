@@ -1,10 +1,12 @@
 package de.kromke.andreas.cameradatefolders.ui.home;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -31,7 +33,7 @@ public class HomeFragment extends Fragment
         View root = binding.getRoot();
 
         final TextView textView = binding.textHome;
-        viewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
+        viewModel.getText(getActivity()).observe(getViewLifecycleOwner(), new Observer<String>()
         {
             @Override
             public void onChanged(@Nullable String s)
@@ -39,6 +41,35 @@ public class HomeFragment extends Fragment
                 textView.setText(s);
             }
         });
+
+        final Button buttonStartView = binding.buttonStart;
+        if (HomeViewModel.bRevertRunning)
+        {
+            buttonStartView.setEnabled(false);
+        }
+        viewModel.getStartButtonText(getActivity()).observe(getViewLifecycleOwner(), new Observer<String>()
+        {
+            @Override
+            public void onChanged(@Nullable String s)
+            {
+                buttonStartView.setText(s);
+            }
+        });
+
+        final Button buttonRevertView = binding.buttonRevert;
+        if (HomeViewModel.bSortRunning)
+        {
+            buttonRevertView.setEnabled(false);
+        }
+        viewModel.getRevertButtonText(getActivity()).observe(getViewLifecycleOwner(), new Observer<String>()
+        {
+            @Override
+            public void onChanged(@Nullable String s)
+            {
+                buttonRevertView.setText(s);
+            }
+        });
+
         return root;
     }
 
@@ -57,6 +88,17 @@ public class HomeFragment extends Fragment
         binding = null;
     }
 
+    public void updateButtons(Context context)
+    {
+        final Button buttonStartView = binding.buttonStart;
+        buttonStartView.setEnabled(!HomeViewModel.bRevertRunning);
+
+        final Button buttonRevert = binding.buttonRevert;
+        buttonRevert.setEnabled(!HomeViewModel.bSortRunning);
+
+        viewModel.setButtonText(context);
+    }
+
     // change text and afterwards scroll to end position
     public void onTextChanged(String text)
     {
@@ -64,4 +106,11 @@ public class HomeFragment extends Fragment
         final int scrollAmount = mScanTextView.getLayout().getLineTop(mScanTextView.getLineCount()) - mScanTextView.getHeight();
         mScanTextView.scrollTo(0, Math.max(scrollAmount, 0));
     }
+
+    /*
+    public void onStartButtonTextChanged(String text)
+    {
+        viewModel.setStartButtonText(text);
+    }
+    */
 }
