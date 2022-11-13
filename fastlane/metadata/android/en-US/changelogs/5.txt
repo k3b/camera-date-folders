@@ -1,8 +1,9 @@
 - Remove destination path immediately, via dialogue, not via file selector.
-- Show error dialogue in case a location is not accessible in File mode, e.g. a network share.
+- User feedback in case a location is not accessible in File mode, e.g. a network share, or not writable.
 - Disable other button (Start or Revert) during processing.
 - Do not allow copy (backup) mode without destination folder.
 - File name extensions ".heif", ".heic" and ".dng" added.
-- Dynamically change text in action buttons, "enable" status and explanation.
+- Dynamically change text in action buttons, "enable" status and explanations.
+- Added option to reset preferences.
 - TODO: Option "manage all files" for the F-Droid version.
 - (v1.3)
