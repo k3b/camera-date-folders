@@ -17,7 +17,7 @@
     <string name="str_dry_run">Dry Run (debug mode):</string>
     <string name="str_backup_copy">Make Copies (Backup):</string>
     <string name="str_press_start">Press SORT to sort your photos or REVERT to move them back to base directory.</string>
-    <string name="str_press_backup">Press BACKUP to copy and sort your photos or REVERT to backup and flatten them.</string>
+    <string name="str_press_backup">Press BACKUP to copy and sort your photos or FLATTEN to backup and flatten them.</string>
     <string name="str_no_cam_path">No camera folder selected. Go to Paths view!</string>
     <string name="str_no_dest_path">No destination folder for backup selected. Go to Paths view!</string>
     <string name="str_must_select_dcim_path">First select camera folder!</string>
