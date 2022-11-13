@@ -1,12 +1,16 @@
 package de.kromke.andreas.cameradatefolders.ui.paths;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+
+import java.io.File;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import de.kromke.andreas.cameradatefolders.StatusAndPrefs;
+import de.kromke.andreas.cameradatefolders.UriToPath;
 
 public class PathsViewModel extends ViewModel
 {
@@ -18,7 +22,40 @@ public class PathsViewModel extends ViewModel
         mText.setValue("");
     }
 
-    private String getRawText()
+    private String getPathWithExplanationFromUriString(Context context, String uriString, boolean bWrite)
+    {
+        Uri uri = Uri.parse(uriString);
+        String text = UriToPath.getPathFromUri(context, uri);
+        if (text != null)
+        {
+            File f = new File(text);
+            if (f.isDirectory())
+            {
+                if (f.canRead())
+                {
+                    if (bWrite && !f.canWrite())
+                    {
+                        text += "\n(NOT WRITABLE!)";
+                    }
+                }
+                else
+                {
+                    text += "\n(NOT READABLE!)";
+                }
+            }
+            else
+            {
+                text += "\n(NOT A DIRECTORY!)";
+            }
+        }
+        else
+        {
+            text = uri.getPath() + "\n(INVALID FOR FILE MODE!)";
+        }
+        return text;
+    }
+
+    private String getRawText(Context context)
     {
         String text;
         if (StatusAndPrefs.mCamFolder == null)
@@ -27,31 +64,48 @@ public class PathsViewModel extends ViewModel
         }
         else
         {
-            Uri camUri = Uri.parse(StatusAndPrefs.mCamFolder);
-
+            String text2 = null;
             boolean bFileMode = StatusAndPrefs.mbForceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
-            text = (bFileMode) ? camUri.getPath() : camUri.toString();
-            if (StatusAndPrefs.mDestFolder != null)
+            if (!bFileMode)
             {
-                Uri destUri = Uri.parse(StatusAndPrefs.mDestFolder);
-                text +=  "\n\n==>\n\n" + ((bFileMode) ? destUri.getPath() : destUri.toString());
+                text = StatusAndPrefs.mCamFolder;
+                text2 = StatusAndPrefs.mDestFolder;
+            }
+            else
+            {
+                if (StatusAndPrefs.mDestFolder != null)
+                {
+                    text = getPathWithExplanationFromUriString(context, StatusAndPrefs.mCamFolder, false);
+                    text2 = getPathWithExplanationFromUriString(context, StatusAndPrefs.mDestFolder, true);
+                }
+                else
+                {
+                    text = getPathWithExplanationFromUriString(context, StatusAndPrefs.mCamFolder, true);
+                }
             }
 
-            text = text.replace("%3A", ":").replace("%2F", "/");
+            if (text2 != null)
+            {
+                text +=  "\n\n==>\n\n" + text2;
+            }
+
+            if (text != null)
+            {
+                text = text.replace("%3A", ":").replace("%2F", "/");
+            }
         }
 
         return text;
     }
 
-    public LiveData<String> getText()
+    public LiveData<String> getText(Context context)
     {
-
-        mText.setValue(getRawText());
+        mText.setValue(getRawText(context));
         return mText;
     }
 
-    public void setText()
+    public void setText(Context context)
     {
-        mText.setValue(getRawText());
+        mText.setValue(getRawText(context));
     }
 }

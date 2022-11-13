@@ -718,7 +718,7 @@ public class MainActivity extends AppCompatActivity
             if (f instanceof PathsFragment)
             {
                 PathsFragment fd = (PathsFragment) f;
-                fd.onPathChanged();
+                fd.onPathChanged(this);
             }
         }
     }

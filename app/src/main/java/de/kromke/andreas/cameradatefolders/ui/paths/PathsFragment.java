@@ -1,5 +1,6 @@
 package de.kromke.andreas.cameradatefolders.ui.paths;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,31 +32,8 @@ public class PathsFragment extends Fragment
         binding = FragmentPathsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        boolean fileMode = (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) || StatusAndPrefs.mbForceFileMode;
-
         final TextView textView = binding.textPaths;
-        /*
-        String val = StatusAndPrefs.mCamFolder;
-        String val2 = StatusAndPrefs.mDestFolder;
-        if (fileMode)
-        {
-            if (val != null)
-            {
-                val = Uri.parse(val).getPath();
-            }
-            if (val2 != null)
-            {
-                val2 = Uri.parse(val2).getPath();
-            }
-        }
-        if (val == null)
-        {
-            val = "(unset)";
-        }
-
-        viewModel.setText(val, val2);
-         */
-        viewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
+        viewModel.getText(getActivity()).observe(getViewLifecycleOwner(), new Observer<String>()
         {
             @Override
             public void onChanged(@Nullable String s)
@@ -73,8 +51,8 @@ public class PathsFragment extends Fragment
         binding = null;
     }
 
-    public void onPathChanged()
+    public void onPathChanged(Context context)
     {
-        viewModel.setText();
+        viewModel.setText(context);
     }
 }
