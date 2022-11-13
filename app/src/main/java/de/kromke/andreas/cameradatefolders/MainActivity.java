@@ -421,6 +421,12 @@ public class MainActivity extends AppCompatActivity
      *************************************************************************/
     private void runThread(boolean bFlatten)
     {
+        if (StatusAndPrefs.mCamFolder == null)
+        {
+            Toast.makeText(this, "No camera folder selected!", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         boolean bFileMode = StatusAndPrefs.mbForceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
 
         if (bFileMode)
@@ -712,10 +718,7 @@ public class MainActivity extends AppCompatActivity
             if (f instanceof PathsFragment)
             {
                 PathsFragment fd = (PathsFragment) f;
-                boolean bFileMode = StatusAndPrefs.mbForceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
-                String val1 = (mDcimTreeUri == null) ? null : ((bFileMode) ? mDcimTreeUri.getPath() : mDcimTreeUri.toString());
-                String val2 = (mDestTreeUri == null) ? null : ((bFileMode) ? mDestTreeUri.getPath() : mDestTreeUri.toString());
-                fd.onPathChanged(val1, val2);
+                fd.onPathChanged();
             }
         }
     }

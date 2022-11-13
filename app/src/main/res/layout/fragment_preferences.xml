@@ -106,6 +106,14 @@
                 android:layout_marginStart="24dp"
                 android:text="@string/str_dry_run" />
 
+            <Button
+                android:id="@+id/resetPreferences"
+                style="@android:style/Widget.Holo.Light.Button.Borderless.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:text="@string/str_reset_preferences" />
+
         </LinearLayout>
     </ScrollView>
 

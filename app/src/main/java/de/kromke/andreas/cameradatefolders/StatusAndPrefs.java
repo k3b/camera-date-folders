@@ -54,6 +54,17 @@ public class StatusAndPrefs
     public static void Init(Context context)
     {
         mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        read();
+    }
+
+
+    /**************************************************************************
+     *
+     * get all values
+     *
+     *************************************************************************/
+    private static void read()
+    {
         mCamFolder = mPrefs.getString(PREF_CAM_FOLDER_URI, null);
         mDestFolder = mPrefs.getString(PREF_DEST_FOLDER_URI, null);
         mFolderScheme = mPrefs.getString(PREF_FOLDER_SCHEME, "ymd");
@@ -61,6 +72,35 @@ public class StatusAndPrefs
         mbDryRun = mPrefs.getBoolean(PREF_DRY_RUN, false);
         mbForceFileMode = mPrefs.getBoolean(PREF_FORCE_FILE_MODE, false);
     }
+
+
+    /**************************************************************************
+     *
+     * reset all values
+     *
+     *************************************************************************/
+    public static void reset()
+    {
+        SharedPreferences.Editor prefEditor;
+        if (mPrefs != null)
+        {
+            prefEditor = mPrefs.edit();
+            prefEditor.remove(PREF_CAM_FOLDER_URI);
+            prefEditor.remove(PREF_DEST_FOLDER_URI);
+            prefEditor.remove(PREF_FOLDER_SCHEME);
+            prefEditor.remove(PREF_BACKUP_COPY);
+            prefEditor.remove(PREF_DRY_RUN);
+            prefEditor.remove(PREF_FORCE_FILE_MODE);
+            prefEditor.apply();
+        }
+        else
+        {
+            Log.e(LOG_TAG, "reset() : lost Context");
+        }
+
+        read();
+    }
+
 
     /**************************************************************************
      *
@@ -105,8 +145,8 @@ public class StatusAndPrefs
                 break;
 
             case PREF_DRY_RUN:
-                mbBackupCopy = (boolean) val;
-                mbDryRun = true;
+                mbDryRun = (boolean) val;
+                isBool = true;
                 break;
 
             case PREF_FORCE_FILE_MODE:

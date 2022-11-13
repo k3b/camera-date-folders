@@ -24,26 +24,33 @@ public class HomeViewModel extends ViewModel
         mStartButtonText.setValue("SORT");
 
         mRevertButtonText = new MutableLiveData<>();
-        mRevertButtonText.setValue("SORT");
+        mRevertButtonText.setValue("REVERT");
     }
 
     public LiveData<String> getText(Context context)
     {
+        String text;
         if (StatusAndPrefs.mCamFolder == null)
         {
-            mText.setValue(context.getString(R.string.str_no_cam_path));
+            text = context.getString(R.string.str_no_cam_path);
         }
         else
         {
             if (StatusAndPrefs.mbBackupCopy && (StatusAndPrefs.mDestFolder == null))
             {
-                mText.setValue(context.getString(R.string.str_no_dest_path));
+                text = context.getString(R.string.str_no_dest_path);
             }
             else
             {
-                mText.setValue(context.getString(StatusAndPrefs.mbBackupCopy ? R.string.str_press_backup : R.string.str_press_start));
+                text = context.getString(StatusAndPrefs.mbBackupCopy ? R.string.str_press_backup : R.string.str_press_start);
+                if (StatusAndPrefs.mbDryRun)
+                {
+                    text += "\n\nAttention: dry run mode!";
+                }
             }
         }
+
+        mText.setValue(text);
         return mText;
     }
 

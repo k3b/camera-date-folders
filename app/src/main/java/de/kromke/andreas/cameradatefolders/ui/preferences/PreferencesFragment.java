@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 
@@ -140,6 +141,21 @@ public class PreferencesFragment extends Fragment
             {
                 Log.d(LOG_TAG, "Force File Mode switch = " + b);
                 StatusAndPrefs.writeValue(StatusAndPrefs.PREF_FORCE_FILE_MODE, b);
+            }
+        });
+
+        //
+        // "reset preferences" button
+        //
+
+        final Button buttonResetPreferences = binding.resetPreferences;
+        buttonResetPreferences.setOnClickListener(new Button.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Log.d(LOG_TAG, "Reset Preferences button");
+                StatusAndPrefs.reset();
             }
         });
         /*

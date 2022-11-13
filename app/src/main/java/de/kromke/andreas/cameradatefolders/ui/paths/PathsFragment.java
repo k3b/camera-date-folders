@@ -34,6 +34,7 @@ public class PathsFragment extends Fragment
         boolean fileMode = (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) || StatusAndPrefs.mbForceFileMode;
 
         final TextView textView = binding.textPaths;
+        /*
         String val = StatusAndPrefs.mCamFolder;
         String val2 = StatusAndPrefs.mDestFolder;
         if (fileMode)
@@ -53,6 +54,7 @@ public class PathsFragment extends Fragment
         }
 
         viewModel.setText(val, val2);
+         */
         viewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>()
         {
             @Override
@@ -71,16 +73,8 @@ public class PathsFragment extends Fragment
         binding = null;
     }
 
-    public void onPathChanged(String uriDcim, String uriDest)
+    public void onPathChanged()
     {
-        viewModel.setText(uriDcim, uriDest);
-    }
-
-    public void cbSelectCameraFolder(View v)
-    {
-    }
-
-    public void cbDestFolder(View view)
-    {
+        viewModel.setText();
     }
 }
