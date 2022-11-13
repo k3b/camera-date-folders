@@ -21,16 +21,13 @@ package de.kromke.andreas.cameradatefolders;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import java.io.File;
@@ -54,17 +51,10 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import de.kromke.andreas.cameradatefolders.databinding.ActivityMainBinding;
-import de.kromke.andreas.cameradatefolders.ui.home.HomeViewModel;
 import de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment;
 import de.kromke.andreas.cameradatefolders.ui.home.HomeFragment;
 
 import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION;
-import static de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment.PREF_CAM_FOLDER_URI;
-import static de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment.PREF_DEST_FOLDER_URI;
-import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_DRY_RUN;
-import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_FOLDER_SCHEME;
-import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_FORCE_FILE_MODE;
-import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_BACKUP_COPY;
 
 // https://stackoverflow.com/questions/63548323/how-to-use-viewmodel-in-a-fragment
 // https://stackoverflow.com/questions/6091194/how-to-handle-button-clicks-using-the-xml-onclick-within-fragments
@@ -86,19 +76,24 @@ public class MainActivity extends AppCompatActivity
     private static final int timerFrequency = 500;         // milliseconds
     String mCurrHomeText = "";
     String mNewHomeText = "";     // set from worker thread, but in UI thread context
-    private Button mStartButton = null;
-    private CharSequence mStartButtonText;
-    private Button mRevertButton = null;
-    private CharSequence mRevertButtonText;
     private boolean mbThreadRunning = false;
     private boolean mbThreadRunningRevert = false;
     private final static int sMaxLogLen = 10000;
     private boolean mbPermissionGranted = false;
     private boolean mbSafModeIsDestFolder = false;  // hack, because cannot pass parameters
-    private boolean mbFileMode;
-    private boolean mbDryRun;
-    private boolean mbBackupCopy;
-    private String mFolderScheme;
+
+
+    // update text and enab-ility for both action buttons
+    private void updateActionButtons()
+    {
+        // restore button text, currently it is "STOP"
+        Fragment f = getCurrFragment();
+        if (f instanceof HomeFragment)
+        {
+            HomeFragment fd = (HomeFragment) f;
+            fd.updateButtons();
+        }
+    }
 
 
     /**************************************************************************
@@ -115,8 +110,8 @@ public class MainActivity extends AppCompatActivity
                 //Log.d(LOG_TAG, "called from thread");
                 if (threadEnded)
                 {
-                    HomeViewModel.bSortRunning = false;
-                    HomeViewModel.bRevertRunning = false;
+                    StatusAndPrefs.bSortRunning = false;
+                    StatusAndPrefs.bRevertRunning = false;
 
                     if (result >= 0)
                     {
@@ -132,31 +127,8 @@ public class MainActivity extends AppCompatActivity
                     }
 
                     // restore button text, currently it is "STOP"
-                    Fragment f = getCurrFragment();
-                    if (f instanceof HomeFragment)
-                    {
-                        HomeFragment fd = (HomeFragment) f;
-                        fd.updateButtons(getApplicationContext());
-                        /*
-                        if (mStartButton != null)
-                        {
-                            Log.d(LOG_TAG, "messageFromThread() -- re-enable start button");
-                            mStartButton.setText(mStartButtonText);
-                            mStartButton.setEnabled(true);
-                            mStartButton = null;
-                        }
-
-                        if (mRevertButton != null)
-                        {
-                            Log.d(LOG_TAG, "messageFromThread() -- re-enable revert button");
-                            mRevertButton.setText(mRevertButtonText);
-                            mRevertButton.setEnabled(true);
-                            mRevertButton = null;
-                        }
-                        */
-                    }
-
                     mbThreadRunning = false;
+                    updateActionButtons();
                 }
                 else
                 if ((text != null) && !text.isEmpty())
@@ -182,7 +154,6 @@ public class MainActivity extends AppCompatActivity
         {
             boolean bUpdate = false;
 
-            final String strNoCamPath = getString(R.string.str_no_cam_path);
             if (!mNewHomeText.isEmpty())
             {
                 if (mCurrHomeText.length() > sMaxLogLen)
@@ -194,27 +165,6 @@ public class MainActivity extends AppCompatActivity
                 mNewHomeText = "";
                 bUpdate = true;
             }
-            /*
-            else
-            if (mDcimTreeUri == null)
-            {
-                if (!mCurrHomeText.equals(strNoCamPath))
-                {
-                    mCurrHomeText = strNoCamPath;
-                    bUpdate = true;
-                }
-            }
-             */
-            /*
-            else
-            {
-                if (mCurrHomeText.isEmpty() || mCurrHomeText.equals(strNoCamPath))
-                {
-                    mCurrHomeText = getString(R.string.str_press_start);
-                    bUpdate = true;
-                }
-            }
-            */
 
             if (bUpdate)
             {
@@ -250,21 +200,19 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        StatusAndPrefs.Init(getApplicationContext());
 
         registerStorageAccessPermissionCallback();
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        String val = prefs.getString(PREF_CAM_FOLDER_URI, null);
-        Log.d(LOG_TAG, "onCreate() -- PREF_CAM_FOLDER_URI value = " + val);
-        if (val != null)
+        Log.d(LOG_TAG, "onCreate() -- PREF_CAM_FOLDER_URI value = " + StatusAndPrefs.mCamFolder);
+        if (StatusAndPrefs.mCamFolder != null)
         {
-            mDcimTreeUri = Uri.parse(val);
+            mDcimTreeUri = Uri.parse(StatusAndPrefs.mCamFolder);
         }
-        val = prefs.getString(PREF_DEST_FOLDER_URI, null);
-        Log.d(LOG_TAG, "onCreate() -- PREF_DEST_FOLDER_URI value = " + val);
-        if (val != null)
+        Log.d(LOG_TAG, "onCreate() -- PREF_DEST_FOLDER_URI value = " + StatusAndPrefs.mDestFolder);
+        if (StatusAndPrefs.mDestFolder != null)
         {
-            mDestTreeUri = Uri.parse(val);
+            mDestTreeUri = Uri.parse(StatusAndPrefs.mDestFolder);
         }
 
         registerDirectorySelectCallback();
@@ -423,26 +371,26 @@ public class MainActivity extends AppCompatActivity
     private void registerStorageAccessPermissionCallback()
     {
         mStorageAccessPermissionActivityLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                new ActivityResultCallback<ActivityResult>()
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>()
+            {
+                @Override
+                @RequiresApi(api = Build.VERSION_CODES.R)
+                public void onActivityResult(ActivityResult result)
                 {
-                    @Override
-                    @RequiresApi(api = Build.VERSION_CODES.R)
-                    public void onActivityResult(ActivityResult result)
+                    // Note that the resultCode is not helpful here, fwr
+                    if (Environment.isExternalStorageManager())
                     {
-                        // Note that the resultCode is not helpful here, fwr
-                        if (Environment.isExternalStorageManager())
-                        {
-                            Log.d(LOG_TAG, "registerStorageAccessPermissionCallback(): permission granted");
-                            onPermissionGranted();
-                        }
-                        else
-                        {
-                            Log.d(LOG_TAG, "registerStorageAccessPermissionCallback(): permission denied");
-                            Toast.makeText(getApplicationContext(), R.string.str_permission_denied, Toast.LENGTH_LONG).show();
-                        }
+                        Log.d(LOG_TAG, "registerStorageAccessPermissionCallback(): permission granted");
+                        onPermissionGranted();
                     }
-                });
+                    else
+                    {
+                        Log.d(LOG_TAG, "registerStorageAccessPermissionCallback(): permission denied");
+                        Toast.makeText(getApplicationContext(), R.string.str_permission_denied, Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
     }
 
 
@@ -468,30 +416,14 @@ public class MainActivity extends AppCompatActivity
 
     /**************************************************************************
      *
-     * update remembered settings
-     *
-     *************************************************************************/
-    private void readPreferences()
-    {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        boolean forceFileMode = prefs.getBoolean(PREF_FORCE_FILE_MODE, false);
-        mbFileMode = forceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
-        mbDryRun = prefs.getBoolean(PREF_DRY_RUN, false);
-        mbBackupCopy = prefs.getBoolean(PREF_BACKUP_COPY, false);
-        mFolderScheme = prefs.getString(PREF_FOLDER_SCHEME, "ymd");
-    }
-
-
-    /**************************************************************************
-     *
      * helper to run thread
      *
      *************************************************************************/
     private void runThread(boolean bFlatten)
     {
-        readPreferences();
+        boolean bFileMode = StatusAndPrefs.mbForceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
 
-        if (mbFileMode)
+        if (bFileMode)
         {
             requestForPermissionOld();
             if (!mbPermissionGranted)
@@ -501,24 +433,24 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
-        if (mbBackupCopy && (mDestTreeUri == null))
+        if (StatusAndPrefs.mbBackupCopy && (mDestTreeUri == null))
         {
             Toast.makeText(this, "Copy (Backup) mode\n needs destination folder!", Toast.LENGTH_LONG).show();
             return;
         }
 
-        if (mbDryRun)
+        if (StatusAndPrefs.mbDryRun)
         {
             Toast.makeText(this, "Dry Run!", Toast.LENGTH_LONG).show();
         }
 
         MyApplication app = (MyApplication) getApplication();
-        String scheme = (bFlatten) ? "flat" :  mFolderScheme;
-        int result = app.runWorkerThread(this, mDcimTreeUri, mDestTreeUri, scheme, mbBackupCopy, mbDryRun, mbFileMode);
+        String scheme = (bFlatten) ? "flat" :  StatusAndPrefs.mFolderScheme;
+        int result = app.runWorkerThread(this, mDcimTreeUri, mDestTreeUri, scheme, StatusAndPrefs.mbBackupCopy, StatusAndPrefs.mbDryRun, bFileMode);
         if (result == 0)
         {
             mCurrHomeText = "";
-            mNewHomeText = mbFileMode ? "in progress (File mode)...\n\n" : "in progress...\n\n";
+            mNewHomeText = bFileMode ? "in progress (File mode)...\n\n" : "in progress...\n\n";
             mbThreadRunningRevert = bFlatten;
             mbThreadRunning = true;
         }
@@ -561,16 +493,8 @@ public class MainActivity extends AppCompatActivity
             runThread(false);
             if (mbThreadRunning)
             {
-                mRevertButton = findViewById(R.id.button_revert);
-                if (mRevertButton != null)
-                {
-                    mRevertButtonText = mRevertButton.getText();
-                    mRevertButton.setEnabled(false);
-                }
-                HomeViewModel.bSortRunning = true;
-                mStartButton = (Button) view;
-                mStartButtonText = mStartButton.getText();
-                mStartButton.setText(R.string.str_stop);
+                StatusAndPrefs.bSortRunning = true;
+                updateActionButtons();
             }
         }
     }
@@ -596,16 +520,8 @@ public class MainActivity extends AppCompatActivity
             runThread(true);
             if (mbThreadRunning)
             {
-                mStartButton = findViewById(R.id.button_start);
-                if (mStartButton != null)
-                {
-                    mStartButtonText = mStartButton.getText();
-                    mStartButton.setEnabled(false);
-                }
-                HomeViewModel.bRevertRunning = true;
-                mRevertButton = (Button) view;
-                mRevertButtonText = mRevertButton.getText();
-                mRevertButton.setText(R.string.str_stop);
+                StatusAndPrefs.bRevertRunning = true;
+                updateActionButtons();
             }
         }
     }
@@ -671,7 +587,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onClick(DialogInterface dialog, int which)
                 {
-                    writePathToPrefs(true, null);
+                    StatusAndPrefs.writeValue(StatusAndPrefs.PREF_DEST_FOLDER_URI, null);
                     mDestTreeUri = null;
                     onPathWasChanged();
                 }
@@ -706,11 +622,7 @@ public class MainActivity extends AppCompatActivity
                 camPath = dcimPath;
             }
             mDcimTreeUri = Uri.fromFile(camPath);
-
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            SharedPreferences.Editor prefEditor = prefs.edit();
-            prefEditor.putString(PREF_CAM_FOLDER_URI, mDcimTreeUri.toString());
-            prefEditor.apply();
+            StatusAndPrefs.writeValue(StatusAndPrefs.PREF_CAM_FOLDER_URI, mDcimTreeUri.toString());
 
             onPathWasChanged();
         }
@@ -733,11 +645,6 @@ public class MainActivity extends AppCompatActivity
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
             {
                 dialogAskDestinationFolder();
-                /*
-                mbSafModeIsDestFolder = true;
-                Intent intent = createSafPickerIntent();
-                mRequestDirectorySelectActivityLauncher.launch(intent);
-                */
             }
             else
             {
@@ -805,9 +712,9 @@ public class MainActivity extends AppCompatActivity
             if (f instanceof PathsFragment)
             {
                 PathsFragment fd = (PathsFragment) f;
-                readPreferences();
-                String val1 = (mDcimTreeUri == null) ? null : ((mbFileMode) ? mDcimTreeUri.getPath() : mDcimTreeUri.toString());
-                String val2 = (mDestTreeUri == null) ? null : ((mbFileMode) ? mDestTreeUri.getPath() : mDestTreeUri.toString());
+                boolean bFileMode = StatusAndPrefs.mbForceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
+                String val1 = (mDcimTreeUri == null) ? null : ((bFileMode) ? mDcimTreeUri.getPath() : mDcimTreeUri.toString());
+                String val2 = (mDestTreeUri == null) ? null : ((bFileMode) ? mDestTreeUri.getPath() : mDestTreeUri.toString());
                 fd.onPathChanged(val1, val2);
             }
         }
@@ -831,27 +738,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         return f;
-    }
-
-
-    /**************************************************************************
-     *
-     * update path in preferences
-     *
-     *************************************************************************/
-    private void writePathToPrefs(boolean isDest, final String val)
-    {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        SharedPreferences.Editor prefEditor = prefs.edit();
-        if (isDest)
-        {
-            prefEditor.putString(PREF_DEST_FOLDER_URI, val);
-        }
-        else
-        {
-            prefEditor.putString(PREF_CAM_FOLDER_URI, val);
-        }
-        prefEditor.apply();
     }
 
 
@@ -883,8 +769,8 @@ public class MainActivity extends AppCompatActivity
                 else
                 {
                     // in case we are going to use file mode, check if destination is write permitted
-                    readPreferences();
-                    if (mbFileMode)
+                    boolean bFileMode = StatusAndPrefs.mbForceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
+                    if (bFileMode)
                     {
                         String p = UriToPath.getPathFromUri(getApplicationContext(), treeUri);
                         File f = (p == null) ? null : new File(p);
@@ -901,14 +787,15 @@ public class MainActivity extends AppCompatActivity
         if (bUpdatePrefs)
         {
             final String val = (treeUri != null) ? treeUri.toString() : null;
-            writePathToPrefs(mbSafModeIsDestFolder, val);
 
             if (mbSafModeIsDestFolder)
             {
                 mDestTreeUri = treeUri;
+                StatusAndPrefs.writeValue(StatusAndPrefs.PREF_DEST_FOLDER_URI, val);
             }
             else
             {
+                StatusAndPrefs.writeValue(StatusAndPrefs.PREF_CAM_FOLDER_URI, val);
                 mDcimTreeUri = treeUri;
             }
             onPathWasChanged();

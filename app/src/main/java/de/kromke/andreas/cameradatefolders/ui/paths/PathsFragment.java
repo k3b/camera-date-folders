@@ -1,10 +1,8 @@
 package de.kromke.andreas.cameradatefolders.ui.paths;
 
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,16 +13,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import de.kromke.andreas.cameradatefolders.StatusAndPrefs;
 import de.kromke.andreas.cameradatefolders.databinding.FragmentPathsBinding;
 
-import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_FORCE_FILE_MODE;
 
 @SuppressWarnings("Convert2Lambda")
 public class PathsFragment extends Fragment
 {
-    public static final String PREF_CAM_FOLDER_URI = "prefCamFolderUri";
-    public static final String PREF_DEST_FOLDER_URI = "prefDestFolderUri";
-
     private PathsViewModel viewModel;
     private FragmentPathsBinding binding;
 
@@ -36,12 +31,11 @@ public class PathsFragment extends Fragment
         binding = FragmentPathsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        boolean fileMode = (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) || prefs.getBoolean(PREF_FORCE_FILE_MODE, false);
+        boolean fileMode = (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) || StatusAndPrefs.mbForceFileMode;
 
         final TextView textView = binding.textPaths;
-        String val = prefs.getString(PREF_CAM_FOLDER_URI, null);
-        String val2 = prefs.getString(PREF_DEST_FOLDER_URI, null);
+        String val = StatusAndPrefs.mCamFolder;
+        String val2 = StatusAndPrefs.mDestFolder;
         if (fileMode)
         {
             if (val != null)

@@ -1,8 +1,6 @@
 package de.kromke.andreas.cameradatefolders.ui.preferences;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,16 +13,12 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 //import androidx.lifecycle.ViewModelProvider;
 import de.kromke.andreas.cameradatefolders.R;
+import de.kromke.andreas.cameradatefolders.StatusAndPrefs;
 import de.kromke.andreas.cameradatefolders.databinding.FragmentPreferencesBinding;
 
 @SuppressWarnings("Convert2Lambda")
 public class PreferencesFragment extends Fragment
 {
-    public static final String PREF_FOLDER_SCHEME = "prefFolderScheme";
-    public static final String PREF_BACKUP_COPY = "prefBackupCopy";
-    public static final String PREF_DRY_RUN = "prefDryRun";
-    public static final String PREF_FORCE_FILE_MODE = "prefForceFileMode";
-
     private static final String LOG_TAG = "CDF : PF";
     //private PreferencesViewModel viewModel;
     private FragmentPreferencesBinding binding;
@@ -83,45 +77,37 @@ public class PreferencesFragment extends Fragment
         binding = FragmentPreferencesBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-
         //
         // folder scheme
         //
 
         final RadioGroup folderScheme = binding.schemeRadioGroup;
-        String val = prefs.getString(PREF_FOLDER_SCHEME, "ymd");
-        folderScheme.check(schemeVal2Id(val));
+        folderScheme.check(schemeVal2Id(StatusAndPrefs.mFolderScheme));
         folderScheme.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(RadioGroup view, int checkedId)
             {
-                @Override
-                public void onCheckedChanged(RadioGroup view, int checkedId)
-                {
-                    int id = view.getCheckedRadioButtonId();
-                    Log.d(LOG_TAG, "checked Button id = " + id);
-                    final String val = schemeId2Val(id);
-                    SharedPreferences.Editor prefEditor = prefs.edit();
-                    prefEditor.putString(PREF_FOLDER_SCHEME, val);
-                    prefEditor.apply();
-                }
-            });
+                int id = view.getCheckedRadioButtonId();
+                Log.d(LOG_TAG, "checked Button id = " + id);
+                final String val = schemeId2Val(id);
+                StatusAndPrefs.writeValue(StatusAndPrefs.PREF_FOLDER_SCHEME, val);
+            }
+        });
 
         //
         // backup copy switch
         //
 
         final SwitchCompat swBackupCopy = binding.switchBackupCopy;
-        boolean bState = prefs.getBoolean(PREF_BACKUP_COPY, false);
-        swBackupCopy.setChecked(bState);
+        swBackupCopy.setChecked(StatusAndPrefs.mbBackupCopy);
         swBackupCopy.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener()
         {
             @Override
             public void onCheckedChanged(CompoundButton view, boolean b)
             {
                 Log.d(LOG_TAG, "Backup Copy switch = " + b);
-                SharedPreferences.Editor prefEditor = prefs.edit();
-                prefEditor.putBoolean(PREF_BACKUP_COPY, b);
-                prefEditor.apply();
+                StatusAndPrefs.writeValue(StatusAndPrefs.PREF_BACKUP_COPY, b);
             }
         });
 
@@ -130,17 +116,14 @@ public class PreferencesFragment extends Fragment
         //
 
         final SwitchCompat swDryRun = binding.switchDryRun;
-        bState = prefs.getBoolean(PREF_DRY_RUN, false);
-        swDryRun.setChecked(bState);
+        swDryRun.setChecked(StatusAndPrefs.mbDryRun);
         swDryRun.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener()
         {
             @Override
             public void onCheckedChanged(CompoundButton view, boolean b)
             {
                 Log.d(LOG_TAG, "Dry Run switch = " + b);
-                SharedPreferences.Editor prefEditor = prefs.edit();
-                prefEditor.putBoolean(PREF_DRY_RUN, b);
-                prefEditor.apply();
+                StatusAndPrefs.writeValue(StatusAndPrefs.PREF_DRY_RUN, b);
             }
         });
 
@@ -149,17 +132,14 @@ public class PreferencesFragment extends Fragment
         //
 
         final SwitchCompat swForceFileMode = binding.switchForceFileMode;
-        bState = prefs.getBoolean(PREF_FORCE_FILE_MODE, false);
-        swForceFileMode.setChecked(bState);
+        swForceFileMode.setChecked(StatusAndPrefs.mbForceFileMode);
         swForceFileMode.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener()
         {
             @Override
             public void onCheckedChanged(CompoundButton view, boolean b)
             {
                 Log.d(LOG_TAG, "Force File Mode switch = " + b);
-                SharedPreferences.Editor prefEditor = prefs.edit();
-                prefEditor.putBoolean(PREF_FORCE_FILE_MODE, b);
-                prefEditor.apply();
+                StatusAndPrefs.writeValue(StatusAndPrefs.PREF_FORCE_FILE_MODE, b);
             }
         });
         /*

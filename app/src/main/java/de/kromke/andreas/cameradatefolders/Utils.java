@@ -236,6 +236,7 @@ public class Utils
         return (name.endsWith(".mp4") ||
                 name.endsWith(".3gp") ||
                 name.endsWith(".heif") ||
+                name.endsWith(".heic") ||
                 name.endsWith(".dng") ||
                 name.endsWith(".jpg") ||
                 name.endsWith(".jpeg"));

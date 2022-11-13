@@ -1,6 +1,5 @@
 package de.kromke.andreas.cameradatefolders.ui.home;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
@@ -15,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import de.kromke.andreas.cameradatefolders.R;
+import de.kromke.andreas.cameradatefolders.StatusAndPrefs;
 import de.kromke.andreas.cameradatefolders.databinding.FragmentHomeBinding;
 
 @SuppressWarnings("Convert2Lambda")
@@ -23,6 +23,10 @@ public class HomeFragment extends Fragment
     private HomeViewModel viewModel;
     private FragmentHomeBinding binding;
     private TextView mScanTextView;
+    private int mButtonStartPaddingLeft;
+    private int mButtonStartPaddingTop;
+    private int mButtonStartPaddingRight;
+    private int mButtonStartPaddingBottom;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState)
@@ -43,25 +47,42 @@ public class HomeFragment extends Fragment
         });
 
         final Button buttonStartView = binding.buttonStart;
-        if (HomeViewModel.bRevertRunning)
+        // hack to get original padding that we can later change for larger texts
+        mButtonStartPaddingLeft = buttonStartView.getPaddingLeft();
+        mButtonStartPaddingTop = buttonStartView.getPaddingTop();
+        mButtonStartPaddingRight = buttonStartView.getPaddingRight();
+        mButtonStartPaddingBottom = buttonStartView.getPaddingBottom();
+        if (StatusAndPrefs.bRevertRunning)
         {
             buttonStartView.setEnabled(false);
         }
-        viewModel.getStartButtonText(getActivity()).observe(getViewLifecycleOwner(), new Observer<String>()
+        viewModel.getStartButtonText().observe(getViewLifecycleOwner(), new Observer<String>()
         {
             @Override
             public void onChanged(@Nullable String s)
             {
+                if (s != null)
+                {
+                    int padLeft = mButtonStartPaddingLeft;
+                    int padRight = mButtonStartPaddingRight;
+                    if (s.length() > 5)
+                    {
+                        // smaller padding for larger text
+                        padLeft = (padLeft * 2) / 3;
+                        padRight = (padRight * 2) / 3;
+                    }
+                    buttonStartView.setPadding(padLeft, mButtonStartPaddingTop, padRight, mButtonStartPaddingBottom);
+                }
                 buttonStartView.setText(s);
             }
         });
 
         final Button buttonRevertView = binding.buttonRevert;
-        if (HomeViewModel.bSortRunning)
+        if (StatusAndPrefs.bSortRunning)
         {
             buttonRevertView.setEnabled(false);
         }
-        viewModel.getRevertButtonText(getActivity()).observe(getViewLifecycleOwner(), new Observer<String>()
+        viewModel.getRevertButtonText().observe(getViewLifecycleOwner(), new Observer<String>()
         {
             @Override
             public void onChanged(@Nullable String s)
@@ -88,15 +109,15 @@ public class HomeFragment extends Fragment
         binding = null;
     }
 
-    public void updateButtons(Context context)
+    public void updateButtons()
     {
         final Button buttonStartView = binding.buttonStart;
-        buttonStartView.setEnabled(!HomeViewModel.bRevertRunning);
+        buttonStartView.setEnabled(!StatusAndPrefs.bRevertRunning);
 
         final Button buttonRevert = binding.buttonRevert;
-        buttonRevert.setEnabled(!HomeViewModel.bSortRunning);
+        buttonRevert.setEnabled(!StatusAndPrefs.bSortRunning);
 
-        viewModel.setButtonText(context);
+        viewModel.setButtonText();
     }
 
     // change text and afterwards scroll to end position
@@ -106,11 +127,4 @@ public class HomeFragment extends Fragment
         final int scrollAmount = mScanTextView.getLayout().getLineTop(mScanTextView.getLineCount()) - mScanTextView.getHeight();
         mScanTextView.scrollTo(0, Math.max(scrollAmount, 0));
     }
-
-    /*
-    public void onStartButtonTextChanged(String text)
-    {
-        viewModel.setStartButtonText(text);
-    }
-    */
 }

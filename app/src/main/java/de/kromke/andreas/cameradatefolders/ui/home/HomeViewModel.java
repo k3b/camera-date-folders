@@ -1,25 +1,16 @@
 package de.kromke.andreas.cameradatefolders.ui.home;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Build;
-import android.preference.PreferenceManager;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import de.kromke.andreas.cameradatefolders.R;
-import de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment;
+import de.kromke.andreas.cameradatefolders.StatusAndPrefs;
 
-import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_BACKUP_COPY;
-import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_DRY_RUN;
-import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_FOLDER_SCHEME;
-import static de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment.PREF_FORCE_FILE_MODE;
 
 public class HomeViewModel extends ViewModel
 {
-    public static boolean bSortRunning = false;
-    public static boolean bRevertRunning = false;
     private MutableLiveData<String> mText;
     private final MutableLiveData<String> mStartButtonText;
     private final MutableLiveData<String> mRevertButtonText;
@@ -38,75 +29,57 @@ public class HomeViewModel extends ViewModel
 
     public LiveData<String> getText(Context context)
     {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String camFolder = prefs.getString(PathsFragment.PREF_CAM_FOLDER_URI, null);
-        if (camFolder == null)
+        if (StatusAndPrefs.mCamFolder == null)
         {
             mText.setValue(context.getString(R.string.str_no_cam_path));
         }
         else
         {
-            String destFolder = prefs.getString(PathsFragment.PREF_DEST_FOLDER_URI, null);
-            boolean bBackupCopy = prefs.getBoolean(PREF_BACKUP_COPY, false);
-            if (bBackupCopy && (destFolder == null))
+            if (StatusAndPrefs.mbBackupCopy && (StatusAndPrefs.mDestFolder == null))
             {
                 mText.setValue(context.getString(R.string.str_no_dest_path));
             }
             else
             {
-                mText.setValue(context.getString(bBackupCopy ? R.string.str_press_backup : R.string.str_press_start));
+                mText.setValue(context.getString(StatusAndPrefs.mbBackupCopy ? R.string.str_press_backup : R.string.str_press_start));
             }
         }
         return mText;
     }
 
-    private String getStartButtonRawText(Context context)
+    private String getStartButtonRawText()
     {
-        if (bSortRunning)
+        if (StatusAndPrefs.bSortRunning)
         {
             return "STOP";
         }
         else
         {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-            //boolean forceFileMode = prefs.getBoolean(PREF_FORCE_FILE_MODE, false);
-            //mbFileMode = forceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
-            //mbDryRun = prefs.getBoolean(PREF_DRY_RUN, false);
-            boolean bBackupCopy = prefs.getBoolean(PREF_BACKUP_COPY, false);
-            //mFolderScheme = prefs.getString(PREF_FOLDER_SCHEME, "ymd");
-
-            return (bBackupCopy) ? "BACKUP" : "SORT";
+            return (StatusAndPrefs.mbBackupCopy) ? "BACKUP" : "SORT";
         }
     }
 
-    private String getRevertButtonRawText(Context context)
+    private String getRevertButtonRawText()
     {
-        if (bRevertRunning)
+        if (StatusAndPrefs.bRevertRunning)
         {
             return "STOP";
         }
         else
         {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-            //boolean forceFileMode = prefs.getBoolean(PREF_FORCE_FILE_MODE, false);
-            //mbFileMode = forceFileMode || (Build.VERSION.SDK_INT < Build.VERSION_CODES.N);
-            //mbDryRun = prefs.getBoolean(PREF_DRY_RUN, false);
-            boolean bBackupCopy = prefs.getBoolean(PREF_BACKUP_COPY, false);
-            //mFolderScheme = prefs.getString(PREF_FOLDER_SCHEME, "ymd");
-
-            return (bBackupCopy) ? "FLATTEN" : "REVERT";
+            return (StatusAndPrefs.mbBackupCopy) ? "FLATTEN" : "REVERT";
         }
     }
 
-    public LiveData<String> getStartButtonText(Context context)
+    public LiveData<String> getStartButtonText()
     {
-        mStartButtonText.setValue(getStartButtonRawText(context));
+        mStartButtonText.setValue(getStartButtonRawText());
         return mStartButtonText;
     }
 
-    public LiveData<String> getRevertButtonText(Context context)
+    public LiveData<String> getRevertButtonText()
     {
-        mRevertButtonText.setValue(getRevertButtonRawText(context));
+        mRevertButtonText.setValue(getRevertButtonRawText());
         return mRevertButtonText;
     }
 
@@ -115,9 +88,9 @@ public class HomeViewModel extends ViewModel
         mText.setValue(text);
     }
 
-    public void setButtonText(Context context)
+    public void setButtonText()
     {
-        mStartButtonText.setValue(getStartButtonRawText(context));
-        mRevertButtonText.setValue(getRevertButtonRawText(context));
+        mStartButtonText.setValue(getStartButtonRawText());
+        mRevertButtonText.setValue(getRevertButtonRawText());
     }
 }
