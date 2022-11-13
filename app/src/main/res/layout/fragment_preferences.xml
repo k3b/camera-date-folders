@@ -109,6 +109,7 @@
             <Button
                 android:id="@+id/resetPreferences"
                 style="@android:style/Widget.Holo.Light.Button.Borderless.Small"
+                android:textColor="#a0a0a0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
