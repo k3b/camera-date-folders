@@ -35,7 +35,7 @@ public class PathsViewModel extends ViewModel
                 {
                     if (bWrite && !f.canWrite())
                     {
-                        text += "\n(NOT WRITABLE!)";
+                        text += "\n(NOT WRITEABLE!)";
                     }
                 }
                 else
