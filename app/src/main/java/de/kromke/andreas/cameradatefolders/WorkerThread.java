@@ -234,14 +234,21 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
 
                 if (!mMustStop)
                 {
-                    tellProgress("Tidy up ...");
-                    mUtils.removeUnusedDateFolders(this);
-                    if (!mMustStop)
+                    if (StatusAndPrefs.mbSkipTidy)
                     {
-                        tellProgress("... done\n");
-                    } else
+                        tellProgress("Skipping tidy up ...");
+                    }
+                    else
                     {
-                        tellProgress("stopped on demand.");
+                        tellProgress("Tidy up ...");
+                        mUtils.removeUnusedDateFolders(this);
+                        if (!mMustStop)
+                        {
+                            tellProgress("... done\n");
+                        } else
+                        {
+                            tellProgress("stopped on demand.");
+                        }
                     }
                 }
             }
