@@ -514,7 +514,7 @@ public class Utils
 
         if (ms < 3000)
         {
-            stime = "" + ms + "ms";
+            stime = "" + ms + " ms";
         }
         else
         {

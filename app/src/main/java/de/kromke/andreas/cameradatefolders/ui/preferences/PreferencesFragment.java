@@ -1,5 +1,6 @@
 package de.kromke.andreas.cameradatefolders.ui.preferences;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,9 +14,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 //import androidx.lifecycle.ViewModelProvider;
+import de.kromke.andreas.cameradatefolders.MainActivity;
 import de.kromke.andreas.cameradatefolders.R;
 import de.kromke.andreas.cameradatefolders.StatusAndPrefs;
 import de.kromke.andreas.cameradatefolders.databinding.FragmentPreferencesBinding;
+import de.kromke.andreas.cameradatefolders.BuildConfig;
 
 @SuppressWarnings("Convert2Lambda")
 public class PreferencesFragment extends Fragment
@@ -113,6 +116,43 @@ public class PreferencesFragment extends Fragment
         });
 
         //
+        // "full file access" switch
+        //
+
+        final SwitchCompat swFullFileAccess = binding.switchFullFileAccess;
+        swFullFileAccess.setChecked(StatusAndPrefs.mbFullFileAccess);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+        {
+            swFullFileAccess.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener()
+            {
+                @Override
+                public void onCheckedChanged(CompoundButton view, boolean b)
+                {
+                    Log.d(LOG_TAG, "Full File Access switch = " + b);
+                    MainActivity mainActivity = (MainActivity) getActivity();
+                    if (mainActivity != null)
+                    {
+                        //noinspection ConstantConditions
+                        if ((BuildConfig.BUILD_TYPE.equals("release_play")) || (BuildConfig.BUILD_TYPE.equals("debug_play")))
+                        {
+                            mainActivity.dialogNotAvailableInPlayStoreVersion();
+                            swFullFileAccess.setChecked(StatusAndPrefs.mbFullFileAccess);
+                        } else
+                        {
+                            mainActivity.requestForPermission30();
+                            // (switch update is done asynchronously)
+                        }
+                    }
+                }
+            });
+        }
+        else
+        {
+            // not available in Android before 11
+            swFullFileAccess.setEnabled(false);
+        }
+
+        //
         // dry run switch
         //
 
@@ -125,6 +165,22 @@ public class PreferencesFragment extends Fragment
             {
                 Log.d(LOG_TAG, "Dry Run switch = " + b);
                 StatusAndPrefs.writeValue(StatusAndPrefs.PREF_DRY_RUN, b);
+            }
+        });
+
+        //
+        // "skip tidy" switch
+        //
+
+        final SwitchCompat swSkipTidy = binding.switchSkipTidy;
+        swSkipTidy.setChecked(StatusAndPrefs.mbDryRun);
+        swSkipTidy.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton view, boolean b)
+            {
+                Log.d(LOG_TAG, "Skip Tidy switch = " + b);
+                StatusAndPrefs.writeValue(StatusAndPrefs.PREF_SKIP_TIDY, b);
             }
         });
 
@@ -176,5 +232,12 @@ public class PreferencesFragment extends Fragment
     {
         super.onDestroyView();
         binding = null;
+    }
+
+    // called when Full File access was either granted or denied
+    public void updateFullFileAccessMode()
+    {
+        final SwitchCompat swFullFileAccess = binding.switchFullFileAccess;
+        swFullFileAccess.setChecked(StatusAndPrefs.mbFullFileAccess);
     }
 }

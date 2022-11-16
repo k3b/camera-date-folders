@@ -15,7 +15,9 @@
     <string name="str_scheme">Subfolder Scheme</string>
     <string name="str_force_file_mode">Force File Mode (Android 7, 8, 9):</string>
     <string name="str_dry_run">Dry Run (debug mode):</string>
+    <string name="str_skip_tidy">Skip Tidy Phase (debug mode):</string>
     <string name="str_backup_copy">Make Copies (Backup):</string>
+    <string name="str_fulle_file_access">Full File Access:</string>
     <string name="str_press_start">Press SORT to sort your photos or REVERT to move them back to base directory.</string>
     <string name="str_press_backup">Press BACKUP to copy and sort your photos or FLATTEN to backup and flatten them.</string>
     <string name="str_no_cam_path">No camera folder selected. Go to Paths view!</string>
@@ -23,8 +25,11 @@
     <string name="str_must_select_dcim_path">First select camera folder!</string>
     <string name="str_paths_overlap">ERROR: Destination must not overlap source path!</string>
     <string name="str_paths_same">Destination same as source. Removing.</string>
-    <string name="str_permission_denied">External storage write access denied. Hence, it cannot function properly. Please consider granting this permission!</string>
+    <string name="str_file_manage_permission_denied">Manage all Files permission denied. Hence, the application is forced to use the slooooow SAF.</string>
     <string name="str_no_file_write">Directory write access denied in File mode. Switch to SAF mode or choose different directory!</string>
     <string name="str_ask_dest_folder">The destination folder is optional. Select one, if you want to move the photos outside of the camera folder or if you want to manage a backup copy.</string>
     <string name="str_reset_preferences">Reset Preferences</string>
+    <string name="str_NeedManageFilesPermission">Full file access is needed to avoid slooooow SAF.</string>
+    <string name="str_NotAvailableInPlayStoreVersion">This functionality is not available in the Play Store version of this program, because Google denies it for security reasons. You can either use SAF mode or install the F-Droid program version.</string>
+    <string name="str_cancel">"Cancel"</string>
 </resources>

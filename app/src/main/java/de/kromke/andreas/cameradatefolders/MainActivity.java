@@ -53,6 +53,7 @@ import androidx.navigation.ui.NavigationUI;
 import de.kromke.andreas.cameradatefolders.databinding.ActivityMainBinding;
 import de.kromke.andreas.cameradatefolders.ui.paths.PathsFragment;
 import de.kromke.andreas.cameradatefolders.ui.home.HomeFragment;
+import de.kromke.andreas.cameradatefolders.ui.preferences.PreferencesFragment;
 
 import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION;
 
@@ -346,14 +347,16 @@ public class MainActivity extends AppCompatActivity
      *
      *************************************************************************/
     @RequiresApi(api = Build.VERSION_CODES.R)
-    private void requestForPermission30()
+    public void requestForPermission30()
     {
+        /*
         if (Environment.isExternalStorageManager())
         {
             Log.d(LOG_TAG, "permission immediately granted");
             onPermissionGranted();
         }
         else
+        */
         {
             Intent intent = new Intent(ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
             Uri uri = Uri.fromParts("package", this.getPackageName(), null);
@@ -379,7 +382,17 @@ public class MainActivity extends AppCompatActivity
                 public void onActivityResult(ActivityResult result)
                 {
                     // Note that the resultCode is not helpful here, fwr
-                    if (Environment.isExternalStorageManager())
+                    StatusAndPrefs.mbFullFileAccess = Environment.isExternalStorageManager();
+
+                    // tell preferences fragment
+                    Fragment f = getCurrFragment();
+                    if (f instanceof PreferencesFragment)
+                    {
+                        PreferencesFragment fd = (PreferencesFragment) f;
+                        fd.updateFullFileAccessMode();
+                    }
+
+                    if (StatusAndPrefs.mbFullFileAccess)
                     {
                         Log.d(LOG_TAG, "registerStorageAccessPermissionCallback(): permission granted");
                         onPermissionGranted();
@@ -387,7 +400,7 @@ public class MainActivity extends AppCompatActivity
                     else
                     {
                         Log.d(LOG_TAG, "registerStorageAccessPermissionCallback(): permission denied");
-                        Toast.makeText(getApplicationContext(), R.string.str_permission_denied, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), R.string.str_file_manage_permission_denied, Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -601,6 +614,29 @@ public class MainActivity extends AppCompatActivity
         }
 
         AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+
+    /**************************************************************************
+     *
+     * "Not Available in Play Store Version" dialogue
+     *
+     *************************************************************************/
+    public void dialogNotAvailableInPlayStoreVersion()
+    {
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle(getString(R.string.str_NeedManageFilesPermission));
+        alertDialog.setMessage(getString(R.string.str_NotAvailableInPlayStoreVersion));
+        alertDialog.setCancelable(true);
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getString(R.string.str_cancel),
+                new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        dialog.dismiss();
+                    }
+                });
         alertDialog.show();
     }
 

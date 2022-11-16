@@ -20,6 +20,8 @@ package de.kromke.andreas.cameradatefolders;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -31,8 +33,9 @@ public class StatusAndPrefs
     public static final String PREF_DEST_FOLDER_URI = "prefDestFolderUri";
     public static final String PREF_FOLDER_SCHEME = "prefFolderScheme";
     public static final String PREF_BACKUP_COPY = "prefBackupCopy";
-    public static final String PREF_DRY_RUN = "prefDryRun";
     public static final String PREF_FORCE_FILE_MODE = "prefForceFileMode";
+    public static final String PREF_DRY_RUN = "prefDryRun";
+    public static final String PREF_SKIP_TIDY = "prefSkipTidy";
     // status
     public static boolean bSortRunning = false;
     public static boolean bRevertRunning = false;
@@ -42,8 +45,10 @@ public class StatusAndPrefs
     public static String mDestFolder = null;
     public static String mFolderScheme = null;
     public static boolean mbBackupCopy = false;
-    public static boolean mbDryRun = false;
+    public static boolean mbFullFileAccess = false;
     public static boolean mbForceFileMode = false;
+    public static boolean mbDryRun = false;
+    public static boolean mbSkipTidy = false;
 
 
     /**************************************************************************
@@ -69,8 +74,13 @@ public class StatusAndPrefs
         mDestFolder = mPrefs.getString(PREF_DEST_FOLDER_URI, null);
         mFolderScheme = mPrefs.getString(PREF_FOLDER_SCHEME, "ymd");
         mbBackupCopy = mPrefs.getBoolean(PREF_BACKUP_COPY, false);
-        mbDryRun = mPrefs.getBoolean(PREF_DRY_RUN, false);
         mbForceFileMode = mPrefs.getBoolean(PREF_FORCE_FILE_MODE, false);
+        mbDryRun = mPrefs.getBoolean(PREF_DRY_RUN, false);
+        mbSkipTidy = mPrefs.getBoolean(PREF_SKIP_TIDY, false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+        {
+            mbFullFileAccess = Environment.isExternalStorageManager();
+        }
     }
 
 
@@ -89,8 +99,9 @@ public class StatusAndPrefs
             prefEditor.remove(PREF_DEST_FOLDER_URI);
             prefEditor.remove(PREF_FOLDER_SCHEME);
             prefEditor.remove(PREF_BACKUP_COPY);
-            prefEditor.remove(PREF_DRY_RUN);
             prefEditor.remove(PREF_FORCE_FILE_MODE);
+            prefEditor.remove(PREF_DRY_RUN);
+            prefEditor.remove(PREF_SKIP_TIDY);
             prefEditor.apply();
         }
         else
@@ -144,13 +155,18 @@ public class StatusAndPrefs
                 isBool = true;
                 break;
 
+            case PREF_FORCE_FILE_MODE:
+                mbForceFileMode = (boolean) val;
+                isBool = true;
+                break;
+
             case PREF_DRY_RUN:
                 mbDryRun = (boolean) val;
                 isBool = true;
                 break;
 
-            case PREF_FORCE_FILE_MODE:
-                mbForceFileMode = (boolean) val;
+            case PREF_SKIP_TIDY:
+                mbSkipTidy = (boolean) val;
                 isBool = true;
                 break;
         }

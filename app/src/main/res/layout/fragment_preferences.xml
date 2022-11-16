@@ -93,6 +93,13 @@
                 android:text="@string/str_backup_copy" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchFullFileAccess"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:text="@string/str_fulle_file_access" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switchForceFileMode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -105,6 +112,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:text="@string/str_dry_run" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchSkipTidy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:text="@string/str_skip_tidy" />
 
             <Button
                 android:id="@+id/resetPreferences"
