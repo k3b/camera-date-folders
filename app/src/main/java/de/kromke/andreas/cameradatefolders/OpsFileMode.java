@@ -210,6 +210,7 @@ public class OpsFileMode extends Utils
                     // Directory does not exist, yet. Create one.
                     if (nextDirectory.mkdir())
                     {
+                        Log.d(LOG_TAG, "mvFile() -- created directory: " + frag);
                         dstDirectory = nextDirectory;
                         newDirectory = true;
                     }
@@ -355,9 +356,9 @@ public class OpsFileMode extends Utils
 
     /**************************************************************************
      *
-     * recursively walk through tree and remove unused date  directories
+     * recursively walk through tree and remove unused date directories
      *
-     * return number of remaining directory entries in
+     * return number of remaining directory entries
      *
      *************************************************************************/
     private int tidyDirectory(File dd, String path, ProgressCallBack callback)
