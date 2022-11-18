@@ -211,12 +211,14 @@ public class OpsFileMode extends Utils
                     if (nextDirectory.mkdir())
                     {
                         Log.d(LOG_TAG, "mvFile() -- created directory: " + frag);
+                        mMkdirSuccesses++;
                         dstDirectory = nextDirectory;
                         newDirectory = true;
                     }
                     else
                     {
                         Log.e(LOG_TAG, "mvFile() -- cannot create directory: " + frag);
+                        mMkdirFailures++;
                         return false;
                     }
                 }
@@ -237,6 +239,7 @@ public class OpsFileMode extends Utils
                     return true;
                 }
                 Log.e(LOG_TAG, "cannot move file to " + ((newDirectory) ? "new" : "existing") + " directory");
+                mMoveFileFailures++;
                 return false;
             } catch (Exception e)
             {
@@ -250,7 +253,15 @@ public class OpsFileMode extends Utils
         // Finally do copy-delete operation manually
         //
 
-        return copyFile(op.srcFile, dstDirectory, !op.bCopy);
+        if (copyFile(op.srcFile, dstDirectory, !op.bCopy))
+        {
+            return true;
+        }
+        else
+        {
+            mCopyFileFailures++;
+            return false;
+        }
     }
 
 
@@ -403,7 +414,11 @@ public class OpsFileMode extends Utils
                         callback.tellProgress("removing empty " + path + "/" + name);
                         if (!mbDryRun)
                         {
-                            if (!df.delete())
+                            if (df.delete())
+                            {
+                                mRmdirSuccesses++;
+                            }
+                            else
                             {
                                 Log.e(LOG_TAG, "cannot delete empty directory " + df);
                             }

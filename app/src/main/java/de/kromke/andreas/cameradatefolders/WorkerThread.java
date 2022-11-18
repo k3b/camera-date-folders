@@ -42,6 +42,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
     private boolean mbFileMode = false;
     private Utils mUtils = null;
     // result
+    private static final int nMaxFailures = 10;
     private int nSuccess = 0;
     private int nFailure = 0;
     private int nUnchanged = 0;
@@ -226,10 +227,32 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
                         }
                         i++;
                         tellProgress(fileName + " (" + i + "/" + mUtils.mOps.size() + ")");
+                        if (nFailure > nMaxFailures)
+                        {
+                            break;
+                        }
                     }
 
-                    tellProgress(" ... file operations done.\n");
                     Log.d(LOG_TAG, "files moved: " + nSuccess + ", failures: " + nFailure);
+                    Log.d(LOG_TAG, "folders created: " + mUtils.mMkdirSuccesses + ", failures: " + mUtils.mMkdirFailures);
+
+                    if (mUtils.mMkdirSuccesses > 0)
+                    {
+                        tellProgress("-> folders created: " + mUtils.mMkdirSuccesses + "\n");
+                    }
+                    if (mUtils.mMkdirFailures > 0)
+                    {
+                        tellProgress("-> folder create failures: " + mUtils.mMkdirFailures + "\n");
+                    }
+
+                    if (nFailure > nMaxFailures)
+                    {
+                        tellProgress("* STOP *: maximum number of failures exceeded.\n");
+                    }
+                    else
+                    {
+                        tellProgress(" ... file operations done.\n");
+                    }
                 }
 
                 if (!mMustStop)
@@ -242,6 +265,16 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
                     {
                         tellProgress("Tidy up ...");
                         mUtils.removeUnusedDateFolders(this);
+                        Log.d(LOG_TAG, "folders removed: " + mUtils.mRmdirSuccesses + ", failures: " + mUtils.mRmdirFailures);
+                        if (mUtils.mRmdirSuccesses > 0)
+                        {
+                            tellProgress("-> folders removed: " + mUtils.mRmdirSuccesses + "\n");
+                        }
+                        if (mUtils.mRmdirFailures > 0)
+                        {
+                            tellProgress("-> folder remove failures: " + mUtils.mRmdirFailures + "\n");
+                        }
+
                         if (!mMustStop)
                         {
                             tellProgress("... done\n");
@@ -253,6 +286,10 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
                 }
             }
 
+            if ((mUtils.mMkdirFailures == 0) && (mUtils.mMkdirSuccesses > 0) &&(mUtils.mMoveFileFailures > 0))
+            {
+                tellProgress("ANDROID BUG: Could create directories, but could not move files. Either grant full file access or use slooooow SAF.\n");
+            }
             final String timeSpent = Utils.getTimeStr(currentTimeMillis() - startTime);
             tellProgress(timeSpent + " spent.");
         }

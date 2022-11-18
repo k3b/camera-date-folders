@@ -61,6 +61,13 @@ public class Utils
     protected int mFiles;    // TODO: remove debug code
     protected FindFileCache mFfCache = new FindFileCache();
 
+    protected int mMoveFileFailures = 0;
+    protected int mCopyFileFailures = 0;
+    protected int mMkdirSuccesses = 0;
+    protected int mMkdirFailures = 0;
+    protected int mRmdirSuccesses = 0;
+    protected int mRmdirFailures = 0;
+
     // file name holds year, month and day
     public static class camFileDate
     {
@@ -119,6 +126,14 @@ public class Utils
         mUnchangedFiles = 0;
         mFiles = 0;     // TODO: remove debug code
         directoryLevel = 0;
+
+        mMoveFileFailures = 0;
+        mCopyFileFailures = 0;
+        mMkdirSuccesses = 0;
+        mMkdirFailures = 0;
+        mRmdirSuccesses = 0;
+        mRmdirFailures = 0;
+
         return 0;
     }
 
