@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity
     private final static int sMaxLogLen = 10000;
     private boolean mbPermissionGranted = false;
     private boolean mbSafModeIsDestFolder = false;  // hack, because cannot pass parameters
+    private boolean mbFileAccessPermissionPending = false;
 
 
     // update text and enab-ility for both action buttons
@@ -357,10 +358,12 @@ public class MainActivity extends AppCompatActivity
         }
         else
         */
+        if (!mbFileAccessPermissionPending)
         {
             Intent intent = new Intent(ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
             Uri uri = Uri.fromParts("package", this.getPackageName(), null);
             intent.setData(uri);
+            mbFileAccessPermissionPending = true;
             mStorageAccessPermissionActivityLauncher.launch(intent);
         }
     }
@@ -392,6 +395,7 @@ public class MainActivity extends AppCompatActivity
                         fd.updateFullFileAccessMode();
                     }
 
+                    mbFileAccessPermissionPending = false;
                     if (StatusAndPrefs.mbFullFileAccess)
                     {
                         Log.d(LOG_TAG, "registerStorageAccessPermissionCallback(): permission granted");
