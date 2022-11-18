@@ -173,7 +173,7 @@ public class PreferencesFragment extends Fragment
         //
 
         final SwitchCompat swSkipTidy = binding.switchSkipTidy;
-        swSkipTidy.setChecked(StatusAndPrefs.mbDryRun);
+        swSkipTidy.setChecked(StatusAndPrefs.mbSkipTidy);
         swSkipTidy.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener()
         {
             @Override
