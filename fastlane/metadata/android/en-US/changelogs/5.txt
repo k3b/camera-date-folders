@@ -5,5 +5,5 @@
 - File name extensions ".heif", ".heic" and ".dng" added.
 - Dynamically change text in action buttons, "enable" status and explanations.
 - Added option to reset preferences.
-- "Manage all Files" option for the F-Droid version.
+- "Manage all Files" option (for F-Droid version only, not for Play Store version).
 - (v1.3)

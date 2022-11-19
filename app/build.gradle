@@ -14,12 +14,31 @@ android {
         versionName "1.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders = [managePermission:"android.permission.MANAGE_EXTERNAL_STORAGE"]
     }
 
     buildTypes {
+        release_dbg {
+            minifyEnabled true /* use proguard... */
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        release_play {
+            minifyEnabled true
+            // with proguard-android.txt the Log calls will NOT BE REMOVED
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules-remove-log.pro'
+            manifestPlaceholders = [managePermission:"android.permission.WRITE_EXTERNAL_STORAGE"]
+        }
+
+        debug_play {
+            debuggable true
+            signingConfig signingConfigs.debug
+            manifestPlaceholders = [managePermission:"android.permission.WRITE_EXTERNAL_STORAGE"]
         }
     }
     compileOptions {

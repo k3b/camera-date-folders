@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import de.kromke.andreas.cameradatefolders.BuildConfig;
 import de.kromke.andreas.cameradatefolders.Utils;
 import de.kromke.andreas.cameradatefolders.databinding.FragmentInfoBinding;
 
@@ -26,8 +27,10 @@ public class InfoFragment extends Fragment
         if (context != null)
         {
             Utils.AppVersionInfo info = Utils.getVersionInfo(context);
+            @SuppressWarnings("ConstantConditions") boolean bIsPlayStoreVersion = ((BuildConfig.BUILD_TYPE.equals("release_play")) || (BuildConfig.BUILD_TYPE.equals("debug_play")));
+            @SuppressWarnings("ConstantConditions") final String tStore = (bIsPlayStoreVersion) ? "   [Play Store]" : "   [free]";
             final String strVersion = "Version " + info.versionName + ((info.isDebug) ? " DEBUG" : "") +
-                                      "\n" + "(" + info.strCreationTime + ")";
+                                      "\n" + "(" + info.strCreationTime + ")" + tStore;
             final TextView versionInfo = binding.versionInfo;
             versionInfo.setText(strVersion);
         }

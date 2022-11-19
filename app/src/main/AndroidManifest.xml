@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <!-- F-Droid version may also claim: MANAGE_EXTERNAL_STORAGE -->
     <!-- remove this line for Play Store version: -->
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="${managePermission}" />
     <!-- -->
 
     <application
