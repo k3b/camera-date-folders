@@ -30,17 +30,18 @@ Even more: Given a Document Provider (like the "CIFS Documents Provider" or some
 * Already sorted photos will be re-sorted when subfolder scheme was changed, also in destination folder (if any).
 * File names beginning with "yyyymmdd\_".
 * File names beginning with "PXL\_yyyymmdd_" or "IMG\_yyyymmdd\_".
-* File name extensions ".jpg", ".jpeg" and ".mp4".
+* File name extensions ".jpg", ".jpeg", "heif", "heic" and ".mp4".
 * Storage Access Framework used for Android 7 and newer.
 * Traditional File mode used for Android 4.4, 5 and 6, as SAF does not support file move operations.
 * Fixed camera path "DCIM/Camera" for Android 4.4 due to lack of file selector.
 * Traditional File mode can be forced for Android 7 to 10 for higher speed, but due to Android without write permission to SD card.
+* Version 1.3: "Manage all Files" option for Android 11 and newer. Not available in Play Store version (denied by Google).
 
 # Current Limitations (Yet)
 
 * Currently no EXIF metadata are extracted, instead the photo's date must be encoded in the file name.
 * Only one photo directory is currently supported.
-* Due to Google's policy, the program is forced to use Google's Storage Access Framework, which is extremely slow (measured factor 1/60). A faster version is technically trivial, but that one would not be allowed to be published in Play Store.
+* Due to Google's policy, the program is forced to use Google's Storage Access Framework, which is extremely slow (factor 1/20 or worse). A solution for local photos needs the "Manage all files" permission, which is not allowed in Play Store.
 
 # Permissions Needed
 
