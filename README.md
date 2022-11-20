@@ -33,20 +33,34 @@ Even more: Given a Document Provider (like the "CIFS Documents Provider" or some
 * File name extensions ".jpg", ".jpeg", "heif", "heic" and ".mp4".
 * Storage Access Framework used for Android 7 and newer.
 * Traditional File mode used for Android 4.4, 5 and 6, as SAF does not support file move operations.
-* Fixed camera path "DCIM/Camera" for Android 4.4 due to lack of file selector.
 * Traditional File mode can be forced for Android 7 to 10 for higher speed, but due to Android without write permission to SD card.
 * Version 1.3: "Manage all Files" option for Android 11 and newer. Not available in Play Store version (denied by Google).
+
+# Android Related Limitations due to Google Policy
+
+* Android 4.4 has no file selector and therefore is limited to the fixed path "DCIM/Camera".
+* Android 4.4, 5 and 6 have insufficient SAF support (missing file move operation) and must use standard File mode.
+* Android 7 to 10 do not allow write access to SD card in traditional File mode.
+* Without "Manage all Files" permission, Android 11 and newer do not allow any write access in File mode.
+* Due to Google's security policy, the "Manage all Files" option is not allowed in the Play Store version of the program.
+* Network shares can only be accessed in SAF mode.
 
 # Current Limitations (Yet)
 
 * Currently no EXIF metadata are extracted, instead the photo's date must be encoded in the file name.
 * Only one photo directory is currently supported.
-* Due to Google's policy, the program is forced to use Google's Storage Access Framework, which is extremely slow (factor 1/20 or worse). A solution for local photos needs the "Manage all files" permission, which is not allowed in Play Store.
+* The file name pattern for photos is not configurable or extendable.
+* The "write protected" warning ("Paths" view) in File mode is often missing, because Android 11 is lying and lets file move operations fail.
+* The file operation protocol is lost whenever the view has been changed, e.g. from "Action" to "Preferences" and back.
 
 # Permissions Needed
 
 * For Android 4.4, 5 and 6: Storage write access
-* For Android 7 and newer: Storage write access only needed on demand, if File mode is forced
+
+# Permissions Requested on Demand
+
+* For Android 7 and newer: Storage write access, if File mode is forced
+* For Android 11 and newer, but not for the Play Store version: Manage all files
 
 # Technical Procedere
 
