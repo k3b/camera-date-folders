@@ -253,6 +253,7 @@ public class Utils
                 name.endsWith(".heif") ||
                 name.endsWith(".heic") ||
                 name.endsWith(".dng") ||
+                name.endsWith(".png") ||
                 name.endsWith(".jpg") ||
                 name.endsWith(".jpeg"));
     }
