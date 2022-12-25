@@ -9,7 +9,7 @@ android {
         applicationId "de.kromke.andreas.cameradatefolders"
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
         minSdk 19
-        targetSdk 32
+        targetSdk 33
         versionCode 5
         versionName "1.3"
 
