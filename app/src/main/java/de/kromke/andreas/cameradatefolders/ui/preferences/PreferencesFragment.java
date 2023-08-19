@@ -157,6 +157,27 @@ public class PreferencesFragment extends Fragment
         }
 
         //
+        // "force file mode" switch
+        //
+
+        final SwitchCompat swForceFileMode = binding.switchForceFileMode;
+        swForceFileMode.setChecked(StatusAndPrefs.mbForceFileMode);
+        if (StatusAndPrefs.mbFullFileAccess)
+        {
+            swForceFileMode.setText(R.string.str_force_file_mode_full_access);
+        }
+        swForceFileMode.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton view, boolean b)
+            {
+                Log.d(LOG_TAG, "Force File Mode switch = " + b);
+                StatusAndPrefs.writeValue(StatusAndPrefs.PREF_FORCE_FILE_MODE, b);
+            }
+        });
+
+
+        //
         // dry run switch
         //
 
@@ -185,22 +206,6 @@ public class PreferencesFragment extends Fragment
             {
                 Log.d(LOG_TAG, "Skip Tidy switch = " + b);
                 StatusAndPrefs.writeValue(StatusAndPrefs.PREF_SKIP_TIDY, b);
-            }
-        });
-
-        //
-        // force file mode switch
-        //
-
-        final SwitchCompat swForceFileMode = binding.switchForceFileMode;
-        swForceFileMode.setChecked(StatusAndPrefs.mbForceFileMode);
-        swForceFileMode.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener()
-        {
-            @Override
-            public void onCheckedChanged(CompoundButton view, boolean b)
-            {
-                Log.d(LOG_TAG, "Force File Mode switch = " + b);
-                StatusAndPrefs.writeValue(StatusAndPrefs.PREF_FORCE_FILE_MODE, b);
             }
         });
 
@@ -243,5 +248,15 @@ public class PreferencesFragment extends Fragment
     {
         final SwitchCompat swFullFileAccess = binding.switchFullFileAccess;
         swFullFileAccess.setChecked(StatusAndPrefs.mbFullFileAccess);
+
+        final SwitchCompat swForceFileMode = binding.switchForceFileMode;
+        if (StatusAndPrefs.mbFullFileAccess)
+        {
+            swForceFileMode.setText(R.string.str_force_file_mode_full_access);
+        }
+        else
+        {
+            swForceFileMode.setText(R.string.str_force_file_mode);
+        }
     }
 }

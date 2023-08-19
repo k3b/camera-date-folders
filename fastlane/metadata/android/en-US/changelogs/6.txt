@@ -1,2 +1,3 @@
+- "Force File Mode" setting changes to "Use File Mode" when Full File Access has been granted.
 - New SDK, Gradle and libraries
 - (v1.3.1)

@@ -13,11 +13,12 @@
     <string name="str_sel_path">Select Camera Folder</string>
     <string name="str_sel_dest_path">(Optional) Select Destination Folder</string>
     <string name="str_scheme">Subfolder Scheme</string>
+    <string name="str_fulle_file_access">Allow Full File Access:</string>
     <string name="str_force_file_mode">Force File Mode (Android 7, 8, 9):</string>
+    <string name="str_force_file_mode_full_access">Use File Mode (~100 times faster):</string>
     <string name="str_dry_run">Dry Run (debug mode):</string>
     <string name="str_skip_tidy">Skip Tidy Phase (debug mode):</string>
     <string name="str_backup_copy">Make Copies (Backup):</string>
-    <string name="str_fulle_file_access">Full File Access:</string>
     <string name="str_press_start">Press SORT to sort your photos or REVERT to move them back to base directory.</string>
     <string name="str_press_backup">Press BACKUP to copy and sort your photos or FLATTEN to backup and flatten them.</string>
     <string name="str_no_cam_path">No camera folder selected. Go to Paths view!</string>
