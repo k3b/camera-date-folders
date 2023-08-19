@@ -268,7 +268,7 @@ public class Utils
     protected camFileDate isCameraFile(final String name)
     {
         //
-        // skip prefix containing of non-digit characters
+        // skip prefix consisting of non-digit characters
         //
 
         int i;

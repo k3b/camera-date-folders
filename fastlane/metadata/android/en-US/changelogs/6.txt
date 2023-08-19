@@ -1,0 +1,2 @@
+- New SDK, Gradle and libraries
+- (v1.3.1)

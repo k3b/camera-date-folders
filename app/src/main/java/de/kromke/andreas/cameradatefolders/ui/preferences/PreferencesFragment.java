@@ -30,24 +30,28 @@ public class PreferencesFragment extends Fragment
     // convert radio button id to scheme in text form
     private static String schemeId2Val(int id)
     {
-        switch (id)
-        {
-            case R.id.button_scheme_y_m_d:
-                return "ymd";
-            case R.id.button_scheme_m_d:
-                return "md";
-            case R.id.button_scheme_y_d:
-                return "yd";
-            case R.id.button_scheme_y_m:
-                return "ym";
-            case R.id.button_scheme_d:
-                return "d";
-            case R.id.button_scheme_m:
-                return "m";
-            case R.id.button_scheme_y:
-                return "y";
-        }
-        return "ymd";
+        if (id == R.id.button_scheme_y_m_d)
+            return "ymd";
+        else
+        if (id == R.id.button_scheme_m_d)
+           return "md";
+        else
+        if (id == R.id.button_scheme_y_d)
+           return "yd";
+        else
+        if (id == R.id.button_scheme_y_m)
+            return "ym";
+        else
+        if (id == R.id.button_scheme_d)
+            return "d";
+        else
+        if (id == R.id.button_scheme_m)
+            return "m";
+        else
+        if (id == R.id.button_scheme_y)
+            return "y";
+        else
+            return "ymd";
     }
 
     // convert scheme in text form to radio button id
