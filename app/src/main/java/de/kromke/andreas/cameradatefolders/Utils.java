@@ -283,6 +283,7 @@ public class Utils
 
         //
         // prefix must be followed by 8 digits
+        //  yyyymmdd
         //
 
         if (i >= name.length() - 8)
@@ -302,12 +303,21 @@ public class Utils
 
         //
         // 8 digits must be followed by non-digit
+        //  or another 6 digits (hhmmss). The latter
+        //  scheme is used by OnePlus Nord2 5g.
         //
 
         char c = name.charAt(i + 8);
         if (Character.isDigit(c))
         {
-            return null;
+            for (int j = 1; j < 6; j++)
+            {
+                c = name.charAt(i + 8 + j);
+                if (!Character.isDigit(c))
+                {
+                    return null;
+                }
+            }
         }
 
         //
