@@ -38,7 +38,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-// the actual work is done here
+/** @noinspection JavadocBlankLines*/ // the actual work is done here
 public class Utils
 {
     private static final String LOG_TAG = "CDF : Utils";
@@ -207,7 +207,19 @@ public class Utils
         if ((uri1 != null) && (uri2 != null))
         {
             final String path1 = uri1.getPath();
+            if (path1 == null)
+            {
+                Log.e(LOG_TAG, "pathsOverlap() -- invalid Uri: " + uri1);
+                return false;
+            }
+
             final String path2 = uri2.getPath();
+            if (path2 == null)
+            {
+                Log.e(LOG_TAG, "pathsOverlap() -- invalid Uri: " + uri2);
+                return false;
+            }
+
             if (path2.startsWith(path1) || path1.startsWith(path2))
             {
                 Log.e(LOG_TAG, "pathsOverlap() -- paths may not overlap: " + path1 + " and " + path2);
@@ -284,6 +296,7 @@ public class Utils
         //
         // prefix must be followed by 8 digits
         //  yyyymmdd
+        // at positions i..i+7
         //
 
         if (i >= name.length() - 8)
@@ -310,6 +323,12 @@ public class Utils
         char c = name.charAt(i + 8);
         if (Character.isDigit(c))
         {
+            if (i + 8 + 5 >= name.length())
+            {
+                // name is not long enough to contain another 5 digits
+                return null;
+            }
+
             for (int j = 1; j < 6; j++)
             {
                 c = name.charAt(i + 8 + j);
