@@ -28,7 +28,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 
 
-// the actual work is done here
+/** @noinspection JavadocBlankLines, RedundantSuppression */ // the actual work is done here
 public class OpsFileMode extends Utils
 {
     private static final String LOG_TAG = "CDF : OpsFile";
@@ -480,8 +480,10 @@ public class OpsFileMode extends Utils
         final String name = sourceDocument.getName();
 
         InputStream is;
+        //noinspection RedundantSuppression
         try
         {
+            //noinspection IOStreamConstructor (suggested replacement needs API 26, we have 19)
             is = new FileInputStream(sourceDocument);
         } catch (Exception e)
         {

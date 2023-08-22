@@ -38,6 +38,7 @@ import androidx.annotation.NonNull;
  *  ->
  *          final String genericPath = "/storage/9C33-6BBD";
  *
+ * @noinspection JavadocBlankLines, JavadocLinkAsPlainText
  */
 
 public class UriToPath

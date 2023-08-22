@@ -61,6 +61,7 @@ import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMI
 // https://stackoverflow.com/questions/6091194/how-to-handle-button-clicks-using-the-xml-onclick-within-fragments
 // activityViewModel ???
 
+/** @noinspection JavadocBlankLines, JavadocLinkAsPlainText */
 @SuppressWarnings("Convert2Lambda")
 public class MainActivity extends AppCompatActivity
 {
@@ -867,9 +868,12 @@ public class MainActivity extends AppCompatActivity
                         if ((resultCode == RESULT_OK) && (data != null))
                         {
                             treeUri = data.getData();
-                            // These two commands guarantee that the permission is still valid the next time the app is started.
-                            grantUriPermission(getPackageName(), treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                            getContentResolver().takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                            if (treeUri != null)
+                            {
+                                // These two commands guarantee that the permission is still valid the next time the app is started.
+                                grantUriPermission(getPackageName(), treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                getContentResolver().takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                            }
                         }
 
                         pathSelectedByUser(treeUri, mbSafModeIsDestFolder);

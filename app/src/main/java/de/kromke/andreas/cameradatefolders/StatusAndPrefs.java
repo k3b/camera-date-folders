@@ -26,6 +26,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 
+/** @noinspection JavadocBlankLines*/
 public class StatusAndPrefs
 {
     private static final String LOG_TAG = "CDF : StatusAndPrefs";

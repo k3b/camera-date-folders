@@ -32,7 +32,7 @@ import java.io.OutputStream;
 import androidx.annotation.RequiresApi;
 import androidx.documentfile.provider.DocumentFile;
 
-// the actual work is done here
+/** @noinspection JavadocBlankLines*/ // the actual work is done here
 public class OpsSafMode extends Utils
 {
     private static final String LOG_TAG = "CDF : OpsSaf";
@@ -548,12 +548,23 @@ public class OpsSafMode extends Utils
             Log.e(LOG_TAG, "I/O exception: " + e);
             return false;
         }
+        if (is == null)
+        {
+            // cannot open source for reading: fatal failure
+            Log.e(LOG_TAG, "cannot open: " + sourceDocument.getUri());
+            return false;
+        }
 
         //
         // create a new destination file
         //
 
         String type = mResolver.getType(sourceDocument.getUri());
+        if (type == null)
+        {
+            Log.w(LOG_TAG, "no mime type for source file " + name + " in: " + sourceDocument.getUri());
+            type = "application/octet-stream";      // used generic type instead
+        }
         DocumentFile df = targetParentDocument.createFile(type, name);
         if (df == null)
         {

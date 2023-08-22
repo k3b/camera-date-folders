@@ -22,7 +22,7 @@ import java.util.LinkedList;
 
 import androidx.documentfile.provider.DocumentFile;
 
-// the actual work is done here
+/** @noinspection JavadocBlankLines*/ // the actual work is done here
 public class FindFileCache
 {
     private static final int cacheMaxLen = 8;
