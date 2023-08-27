@@ -59,6 +59,7 @@ public class Utils
     public int mUnchangedFiles;
     public int mRemovedDirectories;
     protected int mFiles;    // TODO: remove debug code
+    protected int mEmptyDateDirs;
     protected FindFileCache mFfCache = new FindFileCache();
 
     protected int mMoveFileFailures = 0;
@@ -127,6 +128,7 @@ public class Utils
         mFiles = 0;     // TODO: remove debug code
         directoryLevel = 0;
 
+        mEmptyDateDirs = 0;
         mMoveFileFailures = 0;
         mCopyFileFailures = 0;
         mMkdirSuccesses = 0;
@@ -146,6 +148,7 @@ public class Utils
     public int gatherFilesSrc(ProgressCallBack callback)
     {
         directoryLevel = 0;
+        mEmptyDateDirs = 0;
         return 0;
     }
 

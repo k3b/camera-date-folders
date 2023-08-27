@@ -324,26 +324,31 @@ public class OpsSafMode extends Utils
      *
      * recursively walk through tree and gather mv operations to mOps
      *
+     * return number of entries in that directory
+     *
      *************************************************************************/
-    private void gatherDirectory(DocumentFile dd, String path, boolean bProcessingDestination, ProgressCallBack callback)
+    private int gatherDirectory(DocumentFile dd, String path, boolean bProcessingDestination, ProgressCallBack callback)
     {
         Log.d(LOG_TAG, "gatherDirectory() -- ENTER DIRECTORY " + dd.getName());
+        int nEntries;
 
         if (mustStop)
         {
             Log.d(LOG_TAG, "gatherDirectory() -- stopped");
-            return;
+            return 1;   // dummy
         }
 
         boolean bComparePaths = bProcessingDestination || (mDestDir == null);
 
+        // note that listFiles() does not find "." and ".."
         DocumentFile[] entries = dd.listFiles();
+        nEntries = entries.length;
         Log.d(LOG_TAG, "gatherDirectory() -- number of files found: " + entries.length);
         for (DocumentFile df: entries)
         {
             if (mustStop)
             {
-                return;
+                return 1;   // dummy
             }
 
             final String name = df.getName();
@@ -362,8 +367,13 @@ public class OpsSafMode extends Utils
                 if (directoryLevel < maxDirectoryLevel)
                 {
                     directoryLevel++;
-                    gatherDirectory(df, path + "/" + name, bProcessingDestination, callback);
+                    int nSubEntries = gatherDirectory(df, path + "/" + name, bProcessingDestination, callback);
                     directoryLevel--;
+                    if (isDateDirectory(name) && nSubEntries == 0)
+                    {
+                        Log.w(LOG_TAG, "gatherDirectoryFileMode() -- empty directory found: " + name);
+                        mEmptyDateDirs++;
+                    }
                 }
                 else
                 {
@@ -377,7 +387,7 @@ public class OpsSafMode extends Utils
                 if (mFiles > maxFiles)
                 {
                     Log.w(LOG_TAG, "gatherDirectory() -- DEBUG LIMIT: max number " + maxFiles + " of files exceeded");
-                    return;
+                    return nEntries;
                 }
 
                 if (isCameraFileType(name))
@@ -419,6 +429,7 @@ public class OpsSafMode extends Utils
         }
 
         Log.d(LOG_TAG, "gatherDirectory() -- LEAVE DIRECTORY " + dd.getName());
+        return nEntries;
     }
 
 

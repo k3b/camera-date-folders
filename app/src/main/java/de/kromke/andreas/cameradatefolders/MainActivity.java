@@ -449,7 +449,14 @@ public class MainActivity extends AppCompatActivity
 
         if (bFileMode)
         {
-            requestForPermissionOld();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+            {
+                mbPermissionGranted = Environment.isExternalStorageManager();
+            }
+            else
+            {
+                requestForPermissionOld();
+            }
             if (!mbPermissionGranted)
             {
                 Toast.makeText(this, "No permission, yet. Grant and retry!", Toast.LENGTH_LONG).show();

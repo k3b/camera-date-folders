@@ -270,29 +270,35 @@ public class OpsFileMode extends Utils
      * recursively walk through tree and gather mv operations to mOps
      * (similar to gatherDirectory(), but in File instead of SAF mode)
      *
+     * return number of entries in that directory
+     *
      *************************************************************************/
-    private void gatherDirectory(File dd, String path,  boolean bProcessingDestination, ProgressCallBack callback)
+    private int gatherDirectory(File dd, String path,  boolean bProcessingDestination, ProgressCallBack callback)
     {
         Log.d(LOG_TAG, "gatherDirectoryFileMode() -- ENTER DIRECTORY " + dd.getName());
+        int nEntries; // dummy
 
         if (mustStop)
         {
             Log.d(LOG_TAG, "gatherDirectoryFileMode() -- stopped");
-            return;
+            return 1;
         }
         boolean bComparePaths = bProcessingDestination || (mDestDir == null);
 
+        // note that listFiles() does not find "." and ".."
         File[] entries = dd.listFiles();
         if (entries == null)
         {
             entries = new File[0];  // replace null ptr with empty array
         }
+        nEntries = entries.length;
         Log.d(LOG_TAG, "gatherDirectoryFileMode() -- number of files found: " + entries.length);
+
         for (File df: entries)
         {
             if (mustStop)
             {
-                return;
+                return 1;   // dummy
             }
 
             final String name = df.getName();
@@ -306,8 +312,13 @@ public class OpsFileMode extends Utils
                 if (directoryLevel < maxDirectoryLevel)
                 {
                     directoryLevel++;
-                    gatherDirectory(df, path + "/" + name, bProcessingDestination, callback);
+                    int nSubEntries = gatherDirectory(df, path + "/" + name, bProcessingDestination, callback);
                     directoryLevel--;
+                    if (isDateDirectory(name) && nSubEntries == 0)
+                    {
+                        Log.w(LOG_TAG, "gatherDirectoryFileMode() -- empty directory found: " + name);
+                        mEmptyDateDirs++;
+                    }
                 }
                 else
                 {
@@ -320,7 +331,7 @@ public class OpsFileMode extends Utils
                 if (mFiles > maxFiles)
                 {
                     Log.w(LOG_TAG, "gatherDirectoryFileMode() -- DEBUG LIMIT: max number " + maxFiles + " of files exceeded");
-                    return;
+                    return nEntries;
                 }
 
                 if (isCameraFileType(name))
@@ -362,6 +373,7 @@ public class OpsFileMode extends Utils
         }
 
         Log.d(LOG_TAG, "gatherDirectoryFileMode() -- LEAVE DIRECTORY " + dd.getName());
+        return nEntries;
     }
 
 
@@ -383,6 +395,7 @@ public class OpsFileMode extends Utils
             return 1;
         }
 
+        // note that listFiles() does not find "." and ".."
         File[] entries = dd.listFiles();
         if (entries == null)
         {
@@ -403,14 +416,17 @@ public class OpsFileMode extends Utils
                 if (directoryLevel < maxDirectoryLevel)
                 {
                     directoryLevel++;
+                    // recursion, i.e. check if directory is empty
                     int remain = tidyDirectory(df, path + "/" + name, callback);
                     directoryLevel--;
                     if (remain > 0)
                     {
+                        // directory is not empty
                         numOfRemainingFiles++;
                     }
                     else
                     {
+                        // directory is empty
                         callback.tellProgress("removing empty " + path + "/" + name);
                         if (!mbDryRun)
                         {

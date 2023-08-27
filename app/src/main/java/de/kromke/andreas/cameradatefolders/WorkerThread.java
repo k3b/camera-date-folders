@@ -152,6 +152,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         nSuccess = 0;
         nFailure = 0;
         nUnchanged = 0;
+        int nEmptyDateDirs = 0;
         int err = 0;
         if (mTreeUri != null)
         {
@@ -175,10 +176,12 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
             {
                 tellProgress("Collecting files ...");
                 err = mUtils.gatherFilesDst(this);
+                nEmptyDateDirs = mUtils.mEmptyDateDirs;
             }
             if (err == 0)
             {
                 err = mUtils.gatherFilesSrc(this);
+                nEmptyDateDirs += mUtils.mEmptyDateDirs;
             }
             if (err == 0)
             {
@@ -200,6 +203,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
                 if (ret > 0)
                 {
                     tellProgress("" + ret + " files collected.\n\nStart file operations ...");
+                    nEmptyDateDirs = -1; // ignore number of empty date directories, as we are going to move files
                     int i = 0;
                     for (Utils.mvOp op : mUtils.getOps())
                     {
@@ -257,6 +261,11 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
 
                 if (!mMustStop)
                 {
+                    if (nEmptyDateDirs == 0)
+                    {
+                        tellProgress("No tidy up needed ...");
+                    }
+                    else
                     if (StatusAndPrefs.mbSkipTidy)
                     {
                         tellProgress("Skipping tidy up ...");

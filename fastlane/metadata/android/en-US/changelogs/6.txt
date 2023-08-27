@@ -1,4 +1,5 @@
 - "Force File Mode" setting changes to "Use File Mode" when Full File Access has been granted.
 - Photo naming scheme added: "[...]yyyymmddhhmmss[...].jpg" for OnePlus camera app.
+- Tidy up phase (removing empty directories) is omitted if not necessary.
 - New SDK, Gradle and libraries
 - (v1.3.1)
