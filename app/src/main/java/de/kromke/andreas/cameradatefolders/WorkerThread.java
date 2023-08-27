@@ -153,6 +153,7 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
         nFailure = 0;
         nUnchanged = 0;
         int nEmptyDateDirs = 0;
+        int nIgnoredImageFiles = 0;
         int err = 0;
         if (mTreeUri != null)
         {
@@ -177,11 +178,13 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
                 tellProgress("Collecting files ...");
                 err = mUtils.gatherFilesDst(this);
                 nEmptyDateDirs = mUtils.mEmptyDateDirs;
+                nIgnoredImageFiles = mUtils.mIgnoredImageFiles;
             }
             if (err == 0)
             {
                 err = mUtils.gatherFilesSrc(this);
                 nEmptyDateDirs += mUtils.mEmptyDateDirs;
+                nIgnoredImageFiles += mUtils.mIgnoredImageFiles;
             }
             if (err == 0)
             {
@@ -189,6 +192,10 @@ class WorkerThread implements Runnable, Utils.ProgressCallBack
                 if (mMustStop && (ret == 0))
                 {
                     tellProgress("stopped on demand");
+                }
+                if (nIgnoredImageFiles > 0)
+                {
+                    tellProgress("Warning: " + nIgnoredImageFiles + " image files ignored.\n");
                 }
 
                 /*
