@@ -6,4 +6,4 @@ Es sind bis zu drei Ebenen möglich: Jahr, Monat und Tag. Die Sortierung kann r�
 
 Das Programm liest keine Metadaten (EXIF), sondern verläßt sich auf die Datumangaben im Dateinamen.
 
-Um Googles restriktive Play-Store-Richtlinien zu erfüllen, mußte Googles proprietäres "Storage Access Framework" für alle Dateizugriffe verwendet werden. Das Programm ist deshalb beim Sortieren sehr langsam. Vielleicht wird später eine Version nachgereicht, die mit den üblichen Dateizugriffen und damit sehr viel schneller läuft; die wäre dann aber nur in F-Droid erhältlich.
+Um Googles restriktive Richtlinien zu erfüllen, muß die Play-Store-Version dieses Programms auf Geräten mit Android 11 oder neuer Googles proprietäres "Storage Access Framework" für alle Dateizugriffe verwenden. Das Programm ist deshalb beim Sortieren extrem langsam. Diese Einschränkung gilt nur teilweise, wenn das Programm auf älteren Android-Versionen läuft, und gar nicht für die F-Droid-Version. In diesem Fall kann man herkömmliche Dateizugriffe aktivieren und sich über einen Geschwindigkeitszuwachs von Faktor 90 (!) freuen.

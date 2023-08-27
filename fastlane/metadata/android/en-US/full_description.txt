@@ -6,4 +6,4 @@ Up to three levels are supported: year, month and day. The sorting can be revert
 
 The program does not read metadata (EXIF) from the photo files, instead it uses the data information encoded in the filenames.
 
-To meet Google's restrictive Play Store policy, the program must use Google's proprietary Storage Access Framework. As a consequence, file operations are very slow. Maybe later a version will be published that uses standard file access calls, but that one would only be available in F-Droid.
+To meet Google's restrictive policy, the Play Store variant of the program must use Google's proprietary Storage Access Framework when running on Android 11 or newer. As a consequence, file operations are extremely slow. This restriction partially exists also for older Android versions and not at all for the F-Droid version of the program. In this case standard file access calls can be activated alternatively, which accelerate the file operations with a factor of approximately 90 (!).

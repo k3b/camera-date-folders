@@ -36,6 +36,8 @@ Even more: Given a Document Provider (like the "CIFS Documents Provider" or some
 * Traditional File mode can be forced for Android 7 to 10 for higher speed, but due to Android without write permission to SD card.
 * Version 1.3: "Manage all Files" option for Android 11 and newer. Not available in Play Store version (denied by Google).
 
+Note that Google's proprietary Storage Access Framework reduces the speed of file operations by a factor of approximately 1/90 (!). A three minute job in SAF mode thus will take ridiculous two seconds in standard file mode.
+
 # Android Related Limitations due to Google Policy
 
 * Android 4.4 has no file selector and therefore is limited to the fixed path "DCIM/Camera".
@@ -43,7 +45,7 @@ Even more: Given a Document Provider (like the "CIFS Documents Provider" or some
 * Android 7 to 10 do not allow write access to SD card in traditional File mode.
 * Without "Manage all Files" permission, Android 11 and newer do not allow any write access in File mode.
 * Due to Google's security policy, the "Manage all Files" option is not allowed in the Play Store version of the program.
-* Network shares can only be accessed in SAF mode.
+* Network shares can only be accessed in SAF mode, because in Android they are Document Providers.
 
 # Current Limitations (Yet)
 
@@ -80,6 +82,8 @@ With destination path:
 5. Process all remembered move operations in destination path.
 6. Process all remembered move or copy operations from source to destination path.
 7. Scan destination directory to remove empty date related subfolders.
+
+The tidy up phases 4. resp. 7. are skipped in case they are not necessary (no empty directories and no moved files).
 
 # License
 
