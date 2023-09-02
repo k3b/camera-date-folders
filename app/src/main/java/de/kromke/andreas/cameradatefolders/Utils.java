@@ -282,6 +282,9 @@ public class Utils
      * heuristic method to decide if a file is a photo or a movie taken with
      * the camera
      *
+     * Scheme:    [non-digits][yyyymmdd][non-digit][*]
+     *         or [non-digits][yyyymmdd][hhmmss][*]
+     *
      *************************************************************************/
     protected camFileDate isCameraFile(final String name)
     {
