@@ -48,9 +48,9 @@ Note that Google's proprietary Storage Access Framework reduces the speed of fil
 
 # Current Limitations (Yet)
 
-* Currently no EXIF metadata are extracted, instead the photo's date must be encoded in the file name.
+* Currently no EXIF metadata are extracted, instead the photo's date must be encoded in the filename.
 * Only one photo directory is currently supported.
-* The file name pattern for photos is not configurable or extendable.
+* The filename pattern for photos is not configurable or extendable.
 * The "write protected" warning ("Paths" view) in File mode is often missing, because Android 11 is lying and lets file move operations fail.
 * The file operation protocol is lost whenever the view has been changed, e.g. from "Action" to "Preferences" and back.
 

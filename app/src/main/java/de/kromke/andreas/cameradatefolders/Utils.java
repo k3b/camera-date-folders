@@ -70,7 +70,7 @@ public class Utils
     protected int mRmdirSuccesses = 0;
     protected int mRmdirFailures = 0;
 
-    // file name holds year, month and day
+    // filename holds year, month and day
     public static class camFileDate
     {
         public String year;        // 1999 .. 2999
@@ -263,7 +263,7 @@ public class Utils
     protected boolean isCameraFileType(final String name)
     {
         //
-        // check file name extension
+        // check filename extension
         //
 
         return (name.endsWith(".mp4") ||
