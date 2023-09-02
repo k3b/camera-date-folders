@@ -28,9 +28,8 @@ Even more: Given a Document Provider (like the "CIFS Documents Provider" or some
 * Either move or copy (incremental backup) photos to separate destination directory.
 * In SAF mode the destination could also be a shared folder on a computer (needs a Document Provider app on the device).
 * Already sorted photos will be re-sorted when subfolder scheme was changed, also in destination folder (if any).
-* File names beginning with "yyyymmdd\_".
-* File names beginning with "PXL\_yyyymmdd_" or "IMG\_yyyymmdd\_".
-* File name extensions ".jpg", ".jpeg", "heif", "heic" and ".mp4".
+* Filenames containing "yyyymmdd\_" or "yyyymmddhhmmss".
+* Filename extensions ".jpg", ".jpeg", "heif", "heic" and ".mp4".
 * Storage Access Framework used for Android 7 and newer.
 * Traditional File mode used for Android 4.4, 5 and 6, as SAF does not support file move operations.
 * Traditional File mode can be forced for Android 7 to 10 for higher speed, but due to Android without write permission to SD card.
