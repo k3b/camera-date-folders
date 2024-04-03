@@ -2,6 +2,8 @@
 
 Android application to automatically sort photos from camera folder to respective date related subfolders
 
+Note: this is a git clone of https://gitlab.com/AndreasK/camera-date-folders
+
 ***
 
 <a href='https://play.google.com/store/apps/details?id=de.kromke.andreas.cameradatefolders'><img src='public/google-play.png' alt='Get it on Google Play' height=45/></a>
